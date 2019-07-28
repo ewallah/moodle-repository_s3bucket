@@ -38,10 +38,6 @@
                 <directory suffix=".php">.</directory>
                 <exclude>
                     <directory suffix="_test.php">.</directory>
-                    <directory>tests</directory>
-                    <file>db/access.php</file>
-                    <file>manage.php</file>
-                    <file>manage_form.php</file>
                     <file>version.php</file>
                 </exclude>
             </whitelist>

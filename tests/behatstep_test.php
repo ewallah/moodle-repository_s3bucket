@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Amazon S3bucket repository data generator
+ * Amazon S3bucket behat step test
  *
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
@@ -25,23 +25,28 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Amazon S3bucket repository data generator
+ * Amazon S3bucket behat step tests
  *
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass behat_repository_s3bucket
  */
-class repository_s3bucket_generator extends testing_repository_generator {
+class repository_s3bucket_behat_step_testcase extends advanced_testcase {
 
     /**
-     * Fill in record defaults.
+     * Basic test of step.
      *
-     * @param array $record
-     * @return array
+     * @return void
      */
-    protected function prepare_record(array $record) {
-        $arr = ['access_key' => 'access', 'secret_key' => 'secret', 'endpoint' => 's3.amazonaws.com', 'bucket_name' => 'testrepo',
-                'cfkey' => 'key', 'cfpem' => 'pem', 'cookies' => 'cookie', 'cloudfront' => 'https://cf.example.com'];
-        return array_merge($arr, parent::prepare_record($record));
+    public function test_do_step() {
+        global $CFG, $DB;
+        $this->resetAfterTest(true);
+        require_once($CFG->dirroot . '/repository/s3bucket/tests/behat/behat_repository_s3bucket.php');
+        $type = 's3bucket';
+        $this->assertFalse($DB->record_exists('repository', ['type' => $type]));
+        $beha = new behat_repository_s3bucket();
+        $beha->i_enable_repository($type);
+        $this->assertTrue($DB->record_exists('repository', ['type' => $type]));
     }
 }

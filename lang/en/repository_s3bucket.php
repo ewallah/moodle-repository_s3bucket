@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'repository_s3bucket', language 'en', branch 'MOODLE_29_STABLE'
+ * Strings for component 'repository_s3bucket', language 'en', branch 'MOODLE_35_STABLE'
  *
  * @package   repository_s3bucket
  * @copyright 2015 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
@@ -23,11 +23,19 @@
  */
 
 $string['bucketname'] = 'Bucket name';
-$string['configplugin'] = 'Amazon S3 bucket settings';
+$string['cfkey'] = 'AWS CloudFront key';
+$string['cfkey_help'] = 'The AWS CloudFront distribution key.';
+$string['cfpem'] = 'AWS CloudFront ssl file';
+$string['cfpem_help'] = 'The AWS CloudFront ssl file.';
+$string['cloudfront'] = 'AWS CloudFront url';
+$string['cloudfront_help'] = 'The complete AWS CloudFront url where this bucket is served.';
+$string['configplugin'] = 'AWS S3 bucket settings';
+$string['cookies'] = 'AWS CloudFront cookies';
+$string['cookies_help'] = 'The AWS CloudFront cookies or signed url.';
 $string['pluginname'] = 'Amazon S3 bucket';
-$string['pluginname_help'] = 'Amazon s3 bucket repository';
-$string['privacy:metadata'] = 'The rotated course backup plugin does not store any personal data.';
-$string['privacy:metadata'] = 'The Amazon S3 bucket repository plugin does not store any personal data, but does transmit user data from Moodle to the remote system.';
-$string['s3bucket:addinstance'] = 'Add a new Amazon s3 bucket instance';
-$string['s3bucket:view'] = 'View Amazon s3 bucket repository';
+$string['pluginname_help'] = 'AWS S3 bucket repository';
+$string['privacy:metadata'] = 'The AWS S3 repository does not store any personal data.';
+$string['privacy:metadata'] = 'The AWS S3 bucket repository plugin does not store any personal data, but can transmit files from Moodle to AWS.';
+$string['s3bucket:addinstance'] = 'Add a new AWS S3 bucket instance';
+$string['s3bucket:view'] = 'View AWS S3 bucket repository';
 $string['storageclass'] = 'Storage class';

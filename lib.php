@@ -50,28 +50,22 @@ class repository_s3bucket extends repository {
         global $OUTPUT;
         $s = $this->create_s3();
         $bucket = $this->get_option('bucket_name');
-        $list = ['list' => [], 'path' => [['name' => $bucket, 'path' => $path]], 'manage' => false,
-                 'dynload' => true, 'nologin' => true, 'nosearch' => true];
+        $place = [['name' => $bucket, 'path' => $path]];
         $files = [];
-        $folders = [];
 
         try {
             $results = $s->getPaginator('ListObjects', ['Bucket' => $bucket, 'Prefix' => $path]);
         } catch (S3Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
+        $path = ($path === '') ? '.' : $path . '/';
 
-        if ($path === '') {
-            $path = '.';
-        } else {
-            $path .= '/';
-        }
         foreach ($results as $result) {
             foreach ($result['Contents'] as $object) {
                 $pathinfo = pathinfo($object['Key']);
                 if ($object['Size'] == 0) {
                     if ($pathinfo['dirname'] == $path) {
-                        $folders[] = [
+                        $files[] = [
                             'title' => $pathinfo['basename'],
                             'children' => [],
                             'thumbnail' => $OUTPUT->image_url(file_folder_icon(90))->out(false),
@@ -94,8 +88,72 @@ class repository_s3bucket extends repository {
                 }
             }
         }
-        $list['list'] = array_merge($folders, $files);
-        return $list;
+        return ['list' => $files, 'path' => $place, 'manage' => false, 'dynload' => true, 'nologin' => true, 'nosearch' => true];
+    }
+
+    /**
+     * Repository method to serve the referenced file
+     *
+     * @param stored_file $storedfile the file that contains the reference
+     * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
+     * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
+     * @param bool $forcedownload If true (default false), forces download of file rather than view in browser/plugin
+     * @param array $options additional options affecting the file serving
+     */
+    public function send_file($storedfile, $lifetime = 6, $filter = 0, $forcedownload = false, array $options = null) {
+        $reference  = $storedfile->get_reference();
+        $cloudfront = $this->get_option('cloudfront');
+        $life = time() + $lifetime;
+        if ($cloudfront) {
+            $cfkey = $this->get_option('cfkey');
+            $tmp = tempnam('/tmp', 'cf');
+            $handle = fopen($tmp, "w");
+            fwrite($handle, $this->get_option('cfpem'));
+            fclose($handle);
+
+            $cf = new \Aws\CloudFront\CloudFrontClient(
+                ['profile' => 'default', 'version' => '2014-11-06', 'region' => 'us-east-1']);
+            if ($this->get_option('cookie') === 1) {
+                $cookie = $cf->getSignedCookie([
+                    'url' => 'https://' . $cloudfront . '/' . $reference,
+                    'expires' => $life,
+                    'private_key' => $tmp,
+                    'key_pair_id' => $cfkey
+                ]);
+                foreach ($cookie as $name => $value) {
+                    setcookie($name, $value, 0, '', $cloudfront, true, true);
+                }
+            }
+            $policy = $cf->getSignedUrl([
+                'url' => 'https://' . $cloudfront . '/' . $reference,
+                'expires' => $life,
+                'private_key' => $tmp,
+                'key_pair_id' => $cfkey
+            ]);
+            unlink($tmp);
+            header('Location: ' . (string)$policy);
+        } else {
+            $s3 = $this->create_s3();
+            $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
+            $req = $s3->createPresignedRequest($cmd, "+1 minutes");
+            header('Location: ' . (string)$req->getUri());
+        }
+    }
+
+    /**
+     * Get human readable file info from a the reference.
+     *
+     * @param string $reference
+     * @param int $filestatus 0 - ok, 666 - source missing
+     */
+    public function get_reference_details($reference, $filestatus = 0) {
+        if ($this->disabled) {
+            throw new repository_exception('cannotdownload', 'repository');
+        }
+        if ($filestatus == 666) {
+            $reference = '';
+        }
+        return $this->get_file_source_info($reference);
     }
 
     /**
@@ -124,7 +182,11 @@ class repository_s3bucket extends repository {
      * @return string
      */
     public function get_file_source_info($filepath) {
-        return 'Amazon S3: ' . $this->get_option('bucket_name') . '/' . $filepath;
+        if (empty($filepath) or $filepath == '') {
+            return get_string('unknownsource', 'repository');
+        }
+        $protocol = ($this->get_option('cloudfront') == '') ? 's3' : 'cf';
+        return $protocol . '://' . $this->get_option('bucket_name') . '/' . $filepath;
     }
 
     /**
@@ -152,7 +214,7 @@ class repository_s3bucket extends repository {
      * @return array
      */
     public static function get_instance_option_names() {
-        return ['access_key', 'secret_key', 'endpoint', 'bucket_name', 'storageclass'];
+        return ['access_key', 'secret_key', 'endpoint', 'bucket_name', 'cloudfront', 'cfkey', 'cfpem', 'cookies'];
     }
 
     /**
@@ -164,6 +226,7 @@ class repository_s3bucket extends repository {
         global $CFG;
         parent::instance_config_form($mform);
         $strrequired = get_string('required');
+        $textops = ['maxlength' => 255, 'size' => 50];
         $endpointselect = [];
         $endpointselect['s3.amazonaws.com'] = 's3.amazonaws.com';
         $all = require($CFG->dirroot . '/local/aws/sdk/Aws/data/endpoints.json.php');
@@ -172,33 +235,32 @@ class repository_s3bucket extends repository {
             $endpointselect[$key] = $value['description'];
         }
 
-        $all = require($CFG->dirroot . '/local/aws/sdk/Aws/data/s3/2006-03-01/api-2.json.php');
-        $stors = $all['shapes']['ObjectStorageClass']['enum'];
-        $storages = [];
-        if ($stors) {
-            foreach ($stors as $stor) {
-                $storages[$stor] = $stor;
-            }
-        }
-        $mform->addElement('passwordunmask', 'access_key', get_string('access_key', 'repository_s3'));
+        $mform->addElement('passwordunmask', 'access_key', get_string('access_key', 'repository_s3'), $textops);
         $mform->setType('access_key', PARAM_RAW_TRIMMED);
-        $mform->addElement('passwordunmask', 'secret_key', get_string('secret_key', 'repository_s3'));
+        $mform->addElement('passwordunmask', 'secret_key', get_string('secret_key', 'repository_s3'), $textops);
         $mform->setType('secret_key', PARAM_RAW_TRIMMED);
-        $mform->addElement('text', 'bucket_name', get_string('bucketname', 'repository_s3bucket'));
+        $mform->addElement('text', 'bucket_name', get_string('bucketname', 'repository_s3bucket'), $textops);
         $mform->setType('bucket_name', PARAM_RAW_TRIMMED);
         $mform->addElement('select', 'endpoint', get_string('endpoint', 'repository_s3'), $endpointselect);
         $mform->setDefault('endpoint', 's3.amazonaws.com');
-        $mform->addElement('select', 'storageclass', get_string('storageclass', 'repository_s3bucket'), $storages);
-        $mform->setDefault('storageclass', 'STANDARD');
+
+        $mform->addElement('text', 'cloudfront', get_string('cloudfront', 'repository_s3bucket'), $textops);
+        $mform->addHelpButton('cloudfront', 'cloudfront', 'repository_s3bucket');
+        $mform->setType('cloudfront', PARAM_URL);
+        $mform->addRule('cloudfront', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+        $mform->addElement('passwordunmask', 'cfkey', get_string('cfkey', 'repository_s3bucket'), $textops);
+        $mform->addHelpButton('cfkey', 'cfkey', 'repository_s3bucket');
+        $mform->setType('cfkey', PARAM_RAW_TRIMMED);
+        $mform->addElement('checkbox', 'cookies', get_string('cookies', 'repository_s3bucket'));
+        $mform->addHelpButton('cookies', 'cookies', 'repository_s3bucket');
+        $mform->addElement('textarea', 'cfpem', get_string('cfpem', 'repository_s3bucket'), ['cols' => 60, 'rows' => 30]);
+        $mform->setType('type', PARAM_ALPHANUM);
+        $mform->addHelpButton('cfpem', 'cfpem', 'repository_s3bucket');
+        $mform->setType('cfpem', PARAM_RAW_TRIMMED);
+
         $mform->addRule('access_key', $strrequired, 'required', null, 'client');
         $mform->addRule('secret_key', $strrequired, 'required', null, 'client');
         $mform->addRule('bucket_name', $strrequired, 'required', null, 'client');
-
-        $options = ['subdirs' => 1, 'maxfiles' => -1, 'accepted_types' => '*', 'return_types' => FILE_INTERNAL];
-        $mform->addElement('filemanager', 'attachments', get_string('browse', 'editor'), null, $options);
-        $mform->disabledif('attachments', 'access_key', 'eq', '');
-        $mform->disabledif('attachments', 'secret_key', 'eq', '');
-        $mform->disabledif('attachments', 'bucket_name', 'eq', '');
     }
 
     /**
@@ -210,36 +272,20 @@ class repository_s3bucket extends repository {
      * @return array errors
      */
     public static function instance_form_validation($mform, $data, $errors) {
-        // TODO: check if user has read access.
-        global $DB, $USER;
-        $endpoint = self::fixendpoint($data['endpoint']);
-        $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
-        $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
-        $s3 = \Aws\S3\S3Client::factory($arr);
-        $s3->registerStreamWrapper();
-        $cont = context_user::instance($USER->id);
-        if (isset($data['attachments'])) {
-            $params = ['contextid' => $cont->id, 'component' => 'user', 'filearea' => 'draft', 'itemid' => $data['attachments']];
-            if ($files = $DB->get_records('files', $params)) {
-                $fs = get_file_storage();
-                foreach ($files as $file) {
-                    if ($file->filesize > 0) {
-                        $src = $fs->get_file_by_hash($file->pathnamehash);
-                        $object = [
-                            'ACL' => 'private',
-                            'Body' => $src->get_content(),
-                            'Bucket' => $data['bucket_name'],
-                            'Key' => substr($file->filepath, 1) . $file->filename,
-                            'StorageClass' => $data['storageclass']
-                        ];
-                        try {
-                            $s3->putObject($object);
-                        } catch (S3Exception $e) {
-                            $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
-                        }
-                    }
-                }
+        if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
+            $endpoint = self::fixendpoint($data['endpoint']);
+            $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
+            $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
+            $s3 = \Aws\S3\S3Client::factory($arr);
+            try {
+                $s3->getPaginator('ListObjects', ['Bucket' => $data['bucket_name'], 'Prefix' => '']);
+            } catch (S3Exception $e) {
+                $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
+        }
+        if (isset($data['cloudfront'])) {
+            // TODO: check cloudfront access.
+            return $errors;
         }
         return $errors;
     }
@@ -250,7 +296,11 @@ class repository_s3bucket extends repository {
      * @return int
      */
     public function supported_returntypes() {
-        return FILE_INTERNAL;
+        if ($this->get_option('cloudfront') == '') {
+            return FILE_INTERNAL | FILE_REFERENCE;
+        } else {
+            return FILE_EXTERNAL;
+        }
     }
 
     /**
@@ -276,9 +326,7 @@ class repository_s3bucket extends repository {
             $credentials = ['key' => $accesskey, 'secret' => $this->get_option('secret_key')];
             $endpoint = self::fixendpoint($this->get_option('endpoint'));
             $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
-            $s = \Aws\S3\S3Client::factory($arr);
-            $s->registerStreamWrapper();
-            $this->_s3client = $s;
+            $this->_s3client = \Aws\S3\S3Client::factory($arr);
         }
         return $this->_s3client;
     }

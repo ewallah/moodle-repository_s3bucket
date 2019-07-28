@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass repository_s3bucket
+ * @coversDefaultClass repository_s3bucket_generator
  */
 class repository_s3bucket_generator_testcase extends advanced_testcase {
 
@@ -59,14 +59,26 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
     }
 
     /**
+     * Basic test of creation of repository instance.
+     *
+     * @return void
+     */
+    public function test_create_instance() {
+        $this->resetAfterTest(true);
+        $type = 's3bucket';
+        $this->getDataGenerator()->create_repository_type($type);
+        $repo = $this->getDataGenerator()->create_repository($type);
+        $this->assertEquals($repo->userid, 0);
+    }
+
+    /**
      * Installing repository tests
      *
      * @return void
      */
     public function test_install_repository() {
         $this->resetAfterTest(true);
-        $repo = 's3bucket';
-        $plugintype = new repository_type($repo);
+        $plugintype = new repository_type('s3bucket');
         $pluginid = $plugintype->create(false);
         $this->assertInternalType('int', $pluginid);
     }

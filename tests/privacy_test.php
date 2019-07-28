@@ -15,20 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin capabilities.
+ * Privacy test.
  *
  * @package    repository_s3bucket
- * @copyright  2015 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
- * @author     Renaat Debleu (www.eWallah.net)
+ * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = [
-    'repository/s3bucket:view' => ['captype' => 'write', 'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW]],
-    'repository/s3bucket:addinstance' => ['captype' => 'write', 'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => ['manager' => CAP_ALLOW]],
-    'repository/s3bucket:addinstance' => ['captype' => 'write', 'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW]]];
+global $CFG;
+require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
+
+/**
+ * Other tests.
+ *
+ * @package    repository_s3bucket
+ * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @coversDefaultClass repository_s3bucket
+ */
+class repository_s3bucket_privacy_tests extends \core_privacy\tests\provider_testcase {
+
+    /**
+     * Test privacy.
+     */
+    public function test_privacy() {
+        $privacy = new repository_s3bucket\privacy\provider();
+        $this->assertEquals('privacy:metadata', $privacy->get_reason());
+    }
+}
