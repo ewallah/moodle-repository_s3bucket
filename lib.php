@@ -301,7 +301,7 @@ class repository_s3bucket extends repository {
  * @param array $options additional options affecting the file serving
  * @return bool false if the file not found, just send the file otherwise and do not return
  */
-function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     if ($filearea !== 's3') {
         return false;
     }
