@@ -69,8 +69,8 @@ class repository_s3bucket extends repository {
                             'title' => $pathinfo['basename'],
                             'children' => [],
                             'thumbnail' => $OUTPUT->image_url(file_folder_icon(90))->out(false),
-                            'thumbnail_height' => 64,
-                            'thumbnail_width' => 64,
+                            'thumbnail_height' => 24,
+                            'thumbnail_width' => 24,
                             'path' => $object['Key']];
                     }
                 } else {
@@ -80,8 +80,8 @@ class repository_s3bucket extends repository {
                             'size' => $object['Size'],
                             'path' => $object['Key'],
                             'datemodified' => date_timestamp_get($object['LastModified']),
-                            'thumbnail_height' => 64,
-                            'thumbnail_width' => 64,
+                            'thumbnail_height' => 24,
+                            'thumbnail_width' => 24,
                             'source' => $object['Key'],
                             'thumbnail' => $OUTPUT->image_url(file_extension_icon($object['Key'], 90))->out(false)];
                     }
@@ -100,44 +100,33 @@ class repository_s3bucket extends repository {
      * @param bool $forcedownload If true (default false), forces download of file rather than view in browser/plugin
      * @param array $options additional options affecting the file serving
      */
-    public function send_file($storedfile, $lifetime = 6, $filter = 0, $forcedownload = false, array $options = null) {
-        $reference  = $storedfile->get_reference();
-        $cloudfront = $this->get_option('cloudfront');
-        $life = time() + $lifetime;
-        if ($cloudfront) {
-            $cfkey = $this->get_option('cfkey');
-            $tmp = tempnam('/tmp', 'cf');
-            $handle = fopen($tmp, "w");
-            fwrite($handle, $this->get_option('cfpem'));
-            fclose($handle);
+    public function send_file($storedfile, $lifetime = 6000, $filter = 0, $forcedownload = false, array $options = null) {
+        $this->send_otherfile($storedfile->get_reference(), "+60 minutes");
+    }
 
-            $cf = new \Aws\CloudFront\CloudFrontClient(
-                ['profile' => 'default', 'version' => '2014-11-06', 'region' => 'us-east-1']);
-            if ($this->get_option('cookie') === 1) {
-                $cookie = $cf->getSignedCookie([
-                    'url' => 'https://' . $cloudfront . '/' . $reference,
-                    'expires' => $life,
-                    'private_key' => $tmp,
-                    'key_pair_id' => $cfkey
-                ]);
-                foreach ($cookie as $name => $value) {
-                    setcookie($name, $value, 0, '', $cloudfront, true, true);
-                }
-            }
-            $policy = $cf->getSignedUrl([
-                'url' => 'https://' . $cloudfront . '/' . $reference,
-                'expires' => $life,
-                'private_key' => $tmp,
-                'key_pair_id' => $cfkey
-            ]);
-            unlink($tmp);
-            header('Location: ' . (string)$policy);
-        } else {
-            $s3 = $this->create_s3();
-            $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
-            $req = $s3->createPresignedRequest($cmd, "+1 minutes");
-            header('Location: ' . (string)$req->getUri());
-        }
+    /**
+     * Repository method to serve the out file
+     *
+     * @param string $reference the filereference
+     * @param string $lifetime Number of seconds before the file should expire from caches
+     */
+    public function send_otherfile($reference, $lifetime) {
+        $s3 = $this->create_s3();
+        $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
+        $req = $s3->createPresignedRequest($cmd, "+60 minutes");
+        header('Location: ' . (string)$req->getUri());
+        die;
+    }
+
+    /**
+     * This method derives a download link from the public share URL.
+     *
+     * @param string $url relative path to the chosen file
+     * @return string the generated download link.
+     */
+    public function get_link($url) {
+        $cid = context_system::instance()->id;
+        return moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, '/', $url)->out();
     }
 
     /**
@@ -161,7 +150,9 @@ class repository_s3bucket extends repository {
      *
      * @param string $filepath
      * @param string $file The file path in moodle
-     * @return array The local stored path
+     * @return array with elements:
+     *   path: internal location of the file
+     *   url: URL to the source (from parameters)
      */
     public function get_file($filepath, $file = '') {
         $path = $this->prepare_file($file);
@@ -172,7 +163,7 @@ class repository_s3bucket extends repository {
         } catch (S3Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
-        return ['path' => $path];
+        return ['path' => $path, $url => $url];
     }
 
     /**
@@ -185,26 +176,7 @@ class repository_s3bucket extends repository {
         if (empty($filepath) or $filepath == '') {
             return get_string('unknownsource', 'repository');
         }
-        $protocol = ($this->get_option('cloudfront') == '') ? 's3' : 'cf';
-        return $protocol . '://' . $this->get_option('bucket_name') . '/' . $filepath;
-    }
-
-    /**
-     * S3 doesn't require login
-     *
-     * @return bool
-     */
-    public function check_login() {
-        return true;
-    }
-
-    /**
-     * S3 doesn't provide search
-     *
-     * @return bool
-     */
-    public function global_search() {
-        return false;
+        return 's3://' . $this->get_option('bucket_name') . '/' . $filepath;
     }
 
     /**
@@ -214,7 +186,7 @@ class repository_s3bucket extends repository {
      * @return array
      */
     public static function get_instance_option_names() {
-        return ['access_key', 'secret_key', 'endpoint', 'bucket_name', 'cloudfront', 'cfkey', 'cfpem', 'cookies'];
+        return ['access_key', 'secret_key', 'endpoint', 'bucket_name'];
     }
 
     /**
@@ -244,20 +216,6 @@ class repository_s3bucket extends repository {
         $mform->addElement('select', 'endpoint', get_string('endpoint', 'repository_s3'), $endpointselect);
         $mform->setDefault('endpoint', 's3.amazonaws.com');
 
-        $mform->addElement('text', 'cloudfront', get_string('cloudfront', 'repository_s3bucket'), $textops);
-        $mform->addHelpButton('cloudfront', 'cloudfront', 'repository_s3bucket');
-        $mform->setType('cloudfront', PARAM_URL);
-        $mform->addRule('cloudfront', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $mform->addElement('passwordunmask', 'cfkey', get_string('cfkey', 'repository_s3bucket'), $textops);
-        $mform->addHelpButton('cfkey', 'cfkey', 'repository_s3bucket');
-        $mform->setType('cfkey', PARAM_RAW_TRIMMED);
-        $mform->addElement('checkbox', 'cookies', get_string('cookies', 'repository_s3bucket'));
-        $mform->addHelpButton('cookies', 'cookies', 'repository_s3bucket');
-        $mform->addElement('textarea', 'cfpem', get_string('cfpem', 'repository_s3bucket'), ['cols' => 60, 'rows' => 30]);
-        $mform->setType('type', PARAM_ALPHANUM);
-        $mform->addHelpButton('cfpem', 'cfpem', 'repository_s3bucket');
-        $mform->setType('cfpem', PARAM_RAW_TRIMMED);
-
         $mform->addRule('access_key', $strrequired, 'required', null, 'client');
         $mform->addRule('secret_key', $strrequired, 'required', null, 'client');
         $mform->addRule('bucket_name', $strrequired, 'required', null, 'client');
@@ -278,38 +236,21 @@ class repository_s3bucket extends repository {
             $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
-                $s3->getPaginator('ListObjects', ['Bucket' => $data['bucket_name'], 'Prefix' => '']);
+                $s3->getPaginator('ListObjects', ['Bucket' => $data['bucket_name'], 'Prefix' => '.']);
             } catch (S3Exception $e) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
-        }
-        if (isset($data['cloudfront'])) {
-            // TODO: check cloudfront access.
-            return $errors;
         }
         return $errors;
     }
 
     /**
-     * S3 plugins doesn't support return links of files
+     * S3 plugins does support return links of files
      *
      * @return int
      */
     public function supported_returntypes() {
-        if ($this->get_option('cloudfront') == '') {
-            return FILE_INTERNAL | FILE_REFERENCE;
-        } else {
-            return FILE_EXTERNAL;
-        }
-    }
-
-    /**
-     * Is this repository accessing private data?
-     *
-     * @return bool
-     */
-    public function contains_private_data() {
-        return false;
+        return FILE_EXTERNAL | FILE_REFERENCE | FILE_EXTERNAL;
     }
 
     /**
@@ -345,4 +286,28 @@ class repository_s3bucket extends repository {
             return str_replace('s3-', '', $endpoint);
         }
     }
+}
+
+
+/**
+ * Serve the files from the repository_s3bucket file areas
+ *
+ * @param stdClass $course the course object
+ * @param stdClass $cm the course module object
+ * @param context $context the context
+ * @param string $filearea the name of the file area
+ * @param array $args extra arguments (itemid, path)
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if the file not found, just send the file otherwise and do not return
+ */
+function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    if ($filearea !== 's3') {
+        return false;
+    }
+    $itemid = array_shift($args);
+    $reference = array_pop($args); // The last item in the $args array.
+    $repo = repository::get_repository_by_id($itemid, $context);
+    $repo->check_capability();
+    $repo->send_otherfile($reference, "+60 minutes");
 }

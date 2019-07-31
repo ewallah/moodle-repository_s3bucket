@@ -54,26 +54,11 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     }
 
     /**
-     * Test sendfile cf.
-     */
-    public function test_sendfilecf() {
-        global $USER;
-        $fs = get_file_storage();
-        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
-                       'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/'];
-        $file = $fs->create_file_from_string($filerecord, 'test content');
-        $repo = new \repository_s3bucket($this->repo);
-        $this->expectException('InvalidArgumentException');
-        $repo->send_file($file);
-    }
-
-    /**
      * Test sendfile s3.
      */
     public function test_sendfiles3() {
         global $USER;
         $repo = new \repository_s3bucket($this->repo);
-        $repo->set_option(['cloudfront' => '']);
         $fs = get_file_storage();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/'];
@@ -89,25 +74,15 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $repo = new \repository_s3bucket($this->repo);
         $this->assertEquals('s3bucket 1', $repo->get_name());
         $this->assertTrue($repo->check_login());
-        $this->assertFalse($repo->contains_private_data());
-        $this->assertCount(8, $repo->get_instance_option_names());
+        $this->assertTrue($repo->contains_private_data());
+        $this->assertCount(4, $repo->get_instance_option_names());
         $this->assertEquals('Unknown source', $repo->get_reference_details(''));
-        $this->assertEquals('cf://testrepo/filename.txt', $repo->get_file_source_info('filename.txt'));
-        $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
-        $this->assertEquals('cf://testrepo/filename.txt', $repo->get_reference_details('filename.txt'));
-        $this->assertFalse($repo->global_search());
-        $this->assertEquals(1, $repo->supported_returntypes());
-        $this->SetAdminUser();
-        $this->assertEquals(2, $repo->check_capability());
-        $repo->set_option(['cloudfront' => '', 'cfpem' => '', 'cfkey' => '']);
-        $this->assertEquals('s3bucket 1', $repo->get_name());
-        $this->assertTrue($repo->check_login());
-        $this->assertFalse($repo->contains_private_data());
-        $this->assertCount(8, $repo->get_instance_option_names());
         $this->assertEquals('s3://testrepo/filename.txt', $repo->get_file_source_info('filename.txt'));
         $this->assertEquals('s3://testrepo/filename.txt', $repo->get_reference_details('filename.txt'));
+        $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $this->assertFalse($repo->global_search());
-        $this->assertEquals(6, $repo->supported_returntypes());
+        $this->assertEquals(5, $repo->supported_returntypes());
+        $this->SetAdminUser();
         $this->assertEquals(2, $repo->check_capability());
         $this->expectException('Aws\S3\Exception\S3Exception');
         $repo->get_listing();
@@ -119,8 +94,22 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     public function test_empty() {
         $course = $this->getDataGenerator()->create_course();
         $context = context_course::instance($course->id);
-        $repo = new \repository_s3bucket($this->repo, $context);
+        $data = ['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
+                 'access_key' => 'abc'];
+        $repo = new \repository_s3bucket($this->repo, $context, $data);
         $this->expectException('Aws\S3\Exception\S3Exception');
+        $repo->get_listing();
+    }
+
+    /**
+     * Test no access_key.
+     */
+    public function test_noaccess_key() {
+        $course = $this->getDataGenerator()->create_course();
+        $context = context_course::instance($course->id);
+        $repo = new \repository_s3bucket($this->repo, $context);
+        $repo->set_option(['access_key' => null]);
+        $this->expectException('moodle_exception');
         $repo->get_listing();
     }
 
@@ -139,6 +128,34 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         get_file_storage()->create_file_from_string($filerecord, 'test content');
         $this->expectException('Aws\S3\Exception\S3Exception');
         $repo->get_file('/filename.txt');
+    }
+
+    /**
+     * Test get url in user context.
+     */
+    public function test_getlink() {
+        global $USER;
+        $context = context_user::instance($USER->id);
+        $repo = new \repository_s3bucket($USER->id, $context);
+        $url = $repo->get_link('tst.jpg');
+        $this->assertContains('/s3/', $url);
+    }
+
+    /**
+     * Test get url in course context.
+     */
+    public function test_pluginfile() {
+        $course = $this->getDataGenerator()->create_course();
+        $url = $this->getDataGenerator()->create_module('url', ['course' => $course->id]);
+        $context = context_module::instance($url->cmid);
+        $repo = new \repository_s3bucket($this->repo, $context);
+        $cm = get_coursemodule_from_instance('url', $url->id);
+        $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $context, 'h3', [$repo->id, 'tst.jpg'], true));
+        try {
+            repository_s3bucket_pluginfile($course, $cm, $context, 's3', [$repo->id, 'tst.jpg'], true);
+        } catch (Exception $e) {
+            $this->assertContains('Cannot modify header information - headers already sent', $e->getMessage());
+        }
     }
 
     /**
@@ -164,6 +181,8 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     public function test_form() {
         global $USER;
         $context = context_user::instance($USER->id);
+        $data = ['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
+                 'access_key' => 'abc'];
         $page = new moodle_page();
         $page->set_context($context);
         $page->set_pagelayout('standard');
@@ -175,12 +194,12 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $mform->display();
         $out = ob_get_clean();
         $this->assertContains('There are required fields', $out);
-        $data = ['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
-                 'access_key' => 'abc'];
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
         ob_start();
         $mform->display();
+        $fromform = $mform->get_data();
         $out = ob_get_clean();
+        $this->assertEquals('', $fromform);
         $this->assertContains('value="s3.amazonaws.com" selected', $out);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
     }
