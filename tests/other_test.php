@@ -80,6 +80,14 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $this->assertEquals('s3://testrepo/filename.txt', $repo->get_file_source_info('filename.txt'));
         $this->assertEquals('s3://testrepo/filename.txt', $repo->get_reference_details('filename.txt'));
         $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
+        $repo->disabled = true;
+        try {
+            $repo->get_reference_details('filename.txt');
+        } catch (Exception $e) {
+            $this->assertEquals('Cannot download this file', $e->getMessage());
+        }
+        $repo->disabled = false;
+        $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $this->assertFalse($repo->global_search());
         $this->assertEquals(5, $repo->supported_returntypes());
         $this->SetAdminUser();
@@ -192,7 +200,9 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $mform = new repository_instance_form('', $para);
         ob_start();
         $mform->display();
+        $fromform = $mform->get_data();
         $out = ob_get_clean();
+        $this->assertEquals('', $fromform);
         $this->assertContains('There are required fields', $out);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
         ob_start();

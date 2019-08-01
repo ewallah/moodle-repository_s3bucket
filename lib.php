@@ -50,6 +50,8 @@ class repository_s3bucket extends repository {
         global $OUTPUT;
         $s = $this->create_s3();
         $bucket = $this->get_option('bucket_name');
+        $diricon = $OUTPUT->image_url(file_folder_icon(24))->out(false);
+        $fileicon = $OUTPUT->image_url(file_extension_icon('', 24))->out(false);
         $place = [['name' => $bucket, 'path' => $path]];
         $files = [];
 
@@ -59,31 +61,19 @@ class repository_s3bucket extends repository {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         $path = ($path === '') ? '.' : $path . '/';
-
         foreach ($results as $result) {
             foreach ($result['Contents'] as $object) {
                 $pathinfo = pathinfo($object['Key']);
                 if ($object['Size'] == 0) {
                     if ($pathinfo['dirname'] == $path) {
-                        $files[] = [
-                            'title' => $pathinfo['basename'],
-                            'children' => [],
-                            'thumbnail' => $OUTPUT->image_url(file_folder_icon(90))->out(false),
-                            'thumbnail_height' => 24,
-                            'thumbnail_width' => 24,
-                            'path' => $object['Key']];
+                        $files[] = ['title' => $pathinfo['basename'], 'children' => [], 'thumbnail' => $diricon,
+                                    'thumbnail_height' => 24, 'thumbnail_width' => 24, 'path' => $object['Key']];
                     }
                 } else {
                     if ($pathinfo['dirname'] == $path or $pathinfo['dirname'] . '//' == $path) {
-                        $files[] = [
-                            'title' => $pathinfo['basename'],
-                            'size' => $object['Size'],
-                            'path' => $object['Key'],
-                            'datemodified' => date_timestamp_get($object['LastModified']),
-                            'thumbnail_height' => 24,
-                            'thumbnail_width' => 24,
-                            'source' => $object['Key'],
-                            'thumbnail' => $OUTPUT->image_url(file_extension_icon($object['Key'], 90))->out(false)];
+                        $files[] = ['title' => $pathinfo['basename'], 'size' => $object['Size'], 'path' => $object['Key'],
+                                    'datemodified' => date_timestamp_get($object['LastModified']), 'thumbnail_height' => 24,
+                                    'thumbnail_width' => 24, 'source' => $object['Key'], 'thumbnail' => $fileicon];
                     }
                 }
             }
@@ -115,7 +105,6 @@ class repository_s3bucket extends repository {
         $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
         $req = $s3->createPresignedRequest($cmd, "+60 minutes");
         header('Location: ' . (string)$req->getUri());
-        die;
     }
 
     /**
@@ -163,7 +152,7 @@ class repository_s3bucket extends repository {
         } catch (S3Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
-        return ['path' => $path, $url => $url];
+        return ['path' => $path, 'url' => $filepath];
     }
 
     /**
@@ -236,7 +225,7 @@ class repository_s3bucket extends repository {
             $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
-                $s3->getPaginator('ListObjects', ['Bucket' => $data['bucket_name'], 'Prefix' => '.']);
+                $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
             } catch (S3Exception $e) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
@@ -281,10 +270,9 @@ class repository_s3bucket extends repository {
     private static function fixendpoint($endpoint) {
         if ($endpoint == 's3.amazonaws.com') {
             return 'us-east-1';
-        } else {
-            $endpoint = str_replace('.amazonaws.com', '', $endpoint);
-            return str_replace('s3-', '', $endpoint);
         }
+        $endpoint = str_replace('.amazonaws.com', '', $endpoint);
+        return str_replace('s3-', '', $endpoint);
     }
 }
 
