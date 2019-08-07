@@ -219,10 +219,21 @@ class repository_s3bucket extends repository {
      * @return array errors
      */
     public static function instance_form_validation($mform, $data, $errors) {
+        global $CFG;
         if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
             $endpoint = self::fixendpoint($data['endpoint']);
             $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
-            $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
+            if (!empty($CFG->proxyhost)) {
+                $proxyhost = $CFG->proxyhost . (empty($CFG->proxyport)) ? : ':' . $CFG->proxyport;
+                if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
+                    $proxyhost = $CFG->proxyuser . ':' . $CFG->proxypassword . $proxyhost;
+                }
+                $proxytype = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
+                $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint,
+                       'request.options' => ['proxy' => $proxytype . $proxyhost]];
+            } else {
+                $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
+            }
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
