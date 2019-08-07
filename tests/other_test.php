@@ -184,6 +184,27 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     }
 
     /**
+     * Test instance form with proxy.
+     */
+    public function test_instance_formproxy() {
+        global $USER;
+        set_config('proxyhost', '192.168.192.168');
+        set_config('proxyport', 66);
+        set_config('proxyuser', 'user');
+        set_config('proxypassword', 'pass');
+        $context = context_user::instance($USER->id);
+        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
+        $mform = new repository_instance_form('', $para);
+        $data = ['endpoint' => 's3.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
+                 'access_key' => 'abc'];
+        $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
+        ob_start();
+        $mform->display();
+        $out = ob_get_clean();
+        $this->assertContains('There are required fields in this form marked', $out);
+    }
+
+    /**
      * Test form.
      */
     public function test_form() {
@@ -219,6 +240,8 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      */
     public function test_access() {
         global $CFG;
+        $capabilities = [];
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');
+        $this->assertCount(2, $capabilities);
     }
 }
