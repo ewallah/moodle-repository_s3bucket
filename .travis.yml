@@ -10,11 +10,7 @@ services:
 
 addons:
   postgresql: "9.6"
-  chrome: stable
   firefox: "47.0.1"
-  apt:
-    packages:
-      - chromium-chromedriver
 
 cache:
   directories:
@@ -30,6 +26,8 @@ env:
 
 jobs:
   include:
+    - php: 7.1
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
     - php: 7.2
       env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
     - env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
@@ -42,7 +40,6 @@ before_install:
   - cd ../..
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-  - google-chrome-stable --headless --disable-extensions --no-sandbox --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 &>/dev/null &
 
 install:
   - moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git
@@ -52,8 +49,7 @@ script:
 script:
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - moodle-plugin-ci behat
-  - moodle-plugin-ci behat --profile chrome
-  - moodle-plugin-ci behat --profile chrome --dump /home/travis/build/moodle/blocks/admin_bookmarks
+  - moodle-plugin-ci behat --dump /home/travis/build/moodle/blocks/admin_bookmarks
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
