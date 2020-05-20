@@ -46,12 +46,12 @@ class repository_s3bucket_delete_tests extends \advanced_testcase {
         $this->resetAfterTest(true);
         $type = 's3bucket';
         $reference = 'filename.jpg';
-        $this->assertEquals(7, $DB->count_records('repository_instances'));
+        $cnt = $DB->count_records('repository_instances');
         $this->getDataGenerator()->create_repository_type($type);
         $repoid = $this->getDataGenerator()->create_repository($type)->id;
         $this->SetAdminUser();
         $repo = new \repository_s3bucket($repoid);
-        $this->assertGreaterThanOrEqual(7, $DB->count_records('repository_instances'));
+        $this->assertEquals($cnt + 1, $DB->count_records('repository_instances'));
         $fs = get_file_storage();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => $reference, 'filepath' => '/'];
