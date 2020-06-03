@@ -30,13 +30,13 @@ Feature: S3 bucket repository should be seen by admins
   Scenario: An admin can see the repository
     When I log in as "admin"
     And I follow "Manage private files..."
-    And I click on "//label[contains(., 'Files')]/ancestor::div[contains(concat(' ', @class, ' '), ' fitem ')]//*[contains(@title, 'Add...')]" "xpath_element"
+    And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Testrepo"
 
   Scenario: A teacher cannot see the repository in private area
     When I log in as "teacher"
     And I follow "Manage private files..."
-    And I click on "//label[contains(., 'Files')]/ancestor::div[contains(concat(' ', @class, ' '), ' fitem ')]//*[contains(@title, 'Add...')]" "xpath_element"
+    And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Testrepo"
 
   Scenario: A teacher can see the repository in a course module
@@ -46,11 +46,11 @@ Feature: S3 bucket repository should be seen by admins
     And I set the following fields to these values:
       | Name | Folder name |
       | Description | Folder description |
-    And I click on "//label[contains(., 'Files')]/ancestor::div[contains(concat(' ', @class, ' '), ' fitem ')]//*[contains(@title, 'Add...')]" "xpath_element"
+    And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Testrepo"
 
   Scenario: A student cannot see the repository
     When I log in as "student"
     And I follow "Manage private files..."
-    And I click on "//label[contains(., 'Files')]/ancestor::div[contains(concat(' ', @class, ' '), ' fitem ')]//*[contains(@title, 'Add...')]" "xpath_element"
+    And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Testrepo"
