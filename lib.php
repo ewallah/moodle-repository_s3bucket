@@ -50,8 +50,7 @@ class repository_s3bucket extends repository {
         global $OUTPUT;
         $s = $this->create_s3();
         $bucket = $this->get_option('bucket_name');
-        $diricon = $OUTPUT->image_url(file_folder_icon(24))->out(false);
-        $fileicon = $OUTPUT->image_url(file_extension_icon('', 24))->out(false);
+        $diricon = $OUTPUT->image_url(file_folder_icon(90))->out(false);
         $place = [['name' => $bucket, 'path' => $path]];
         $files = [];
 
@@ -66,14 +65,27 @@ class repository_s3bucket extends repository {
                 $pathinfo = pathinfo($object['Key']);
                 if ($object['Size'] == 0) {
                     if ($pathinfo['dirname'] == $path) {
-                        $files[] = ['title' => $pathinfo['basename'], 'children' => [], 'thumbnail' => $diricon,
-                                    'thumbnail_height' => 24, 'thumbnail_width' => 24, 'path' => $object['Key']];
+                        $files[] = [
+                          'title' => $pathinfo['basename'],
+                          'children' => [],
+                          'thumbnail' => $diricon,
+                          'thumbnail_height' => 64,
+                          'thumbnail_width' => 64,
+                          'path' => $object['Key']];
                     }
                 } else {
                     if ($pathinfo['dirname'] == $path or $pathinfo['dirname'] . '//' == $path) {
-                        $files[] = ['title' => $pathinfo['basename'], 'size' => $object['Size'], 'path' => $object['Key'],
-                                    'datemodified' => date_timestamp_get($object['LastModified']), 'thumbnail_height' => 24,
-                                    'thumbnail_width' => 24, 'source' => $object['Key'], 'thumbnail' => $fileicon];
+                        if ($object['StorageClass'] != 'DEEP_ARCHIVE') {
+                            $files[] = [
+                               'title' => $pathinfo['basename'],
+                               'size' => $object['Size'],
+                               'path' => $object['Key'],
+                               'datemodified' => date_timestamp_get($object['LastModified']),
+                               'thumbnail_height' => 64,
+                               'thumbnail_width' => 64,
+                               'source' => $object['Key'],
+                               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 90))->out(false)];
+                        }
                     }
                 }
             }
@@ -87,11 +99,12 @@ class repository_s3bucket extends repository {
      * @param stored_file $storedfile the file that contains the reference
      * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
      * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
-     * @param bool $forcedownload If true (default false), forces download of file rather than view in browser/plugin
+     * @param bool $forcedownload If true (default true), forces download of file rather than view in browser/plugin
      * @param array $options additional options affecting the file serving
      */
-    public function send_file($storedfile, $lifetime = 6000, $filter = 0, $forcedownload = false, array $options = null) {
-        $this->send_otherfile($storedfile->get_reference(), "+60 minutes");
+    public function send_file($storedfile, $lifetime = 3600, $filter = 0, $forcedownload = true, array $options = null) {
+        $duration = $lifetime > 0 ? $lifetime / 60 : 60;
+        $this->send_otherfile($storedfile->get_reference(), "+$duration minutes");
     }
 
     /**
@@ -103,7 +116,7 @@ class repository_s3bucket extends repository {
     public function send_otherfile($reference, $lifetime) {
         $s3 = $this->create_s3();
         $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
-        $req = $s3->createPresignedRequest($cmd, "+60 minutes");
+        $req = $s3->createPresignedRequest($cmd, $lifetime);
         header('Location: ' . (string)$req->getUri());
     }
 
