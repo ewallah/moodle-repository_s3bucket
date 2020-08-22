@@ -296,7 +296,9 @@ class repository_s3bucket extends repository {
             return 'us-east-1';
         }
         $endpoint = str_replace('.amazonaws.com', '', $endpoint);
-        return str_replace('s3-', '', $endpoint);
+        $endpoint = str_replace('s3-', '', $endpoint);
+        $endpoint = str_replace('s3.', '', $endpoint);
+        return $endpoint;
     }
 }
 
