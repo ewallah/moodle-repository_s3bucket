@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace repository_s3bucket;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -34,9 +36,9 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass repository_s3bucket
+ * @coversDefaultClass \repository_s3bucket
  */
-class repository_s3bucket_delete_tests extends \advanced_testcase {
+class delete_tests extends \advanced_testcase {
 
     /**
      * Test deleting a s3 bucket.
@@ -53,7 +55,7 @@ class repository_s3bucket_delete_tests extends \advanced_testcase {
         $repo = new \repository_s3bucket($repoid);
         $this->assertEquals($cnt + 1, $DB->count_records('repository_instances'));
         $fs = get_file_storage();
-        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
+        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => \context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => $reference, 'filepath' => '/'];
         $this->assertEquals(0, $DB->count_records('files_reference'));
         $fs->create_file_from_reference($filerecord, $repoid, $reference);

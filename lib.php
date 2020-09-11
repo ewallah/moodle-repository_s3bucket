@@ -56,7 +56,7 @@ class repository_s3bucket extends repository {
 
         try {
             $results = $s->getPaginator('ListObjects', ['Bucket' => $bucket, 'Prefix' => $path]);
-        } catch (S3Exception $e) {
+        } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         $path = ($path === '') ? '.' : $path . '/';
@@ -162,7 +162,7 @@ class repository_s3bucket extends repository {
         $bucket = $this->get_option('bucket_name');
         try {
             $s->getObject(['Bucket' => $bucket, 'Key' => $filepath, 'SaveAs' => $path]);
-        } catch (S3Exception $e) {
+        } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         return ['path' => $path, 'url' => $filepath];
@@ -250,7 +250,7 @@ class repository_s3bucket extends repository {
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
-            } catch (S3Exception $e) {
+            } catch (Exception $e) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
         }

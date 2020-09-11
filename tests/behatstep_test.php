@@ -21,6 +21,7 @@
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace repository_s3bucket;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass behat_repository_s3bucket
  */
-class repository_s3bucket_behat_step_testcase extends advanced_testcase {
+class behat_step_testcase extends \advanced_testcase {
 
     /**
      * Basic test of step.
@@ -45,7 +46,7 @@ class repository_s3bucket_behat_step_testcase extends advanced_testcase {
         require_once($CFG->dirroot . '/repository/s3bucket/tests/behat/behat_repository_s3bucket.php');
         $type = 's3bucket';
         $this->assertFalse($DB->record_exists('repository', ['type' => $type]));
-        $beha = new behat_repository_s3bucket();
+        $beha = new \behat_repository_s3bucket();
         $beha->i_enable_repository($type);
         $this->assertTrue($DB->record_exists('repository', ['type' => $type]));
     }
