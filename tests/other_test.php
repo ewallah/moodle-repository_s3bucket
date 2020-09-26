@@ -128,7 +128,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         global $USER;
         $context = context_user::instance($USER->id);
         $repo = new \repository_s3bucket($USER->id, $context);
-        $repo->set_option(['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
+        $repo->set_option(['endpoint' => 'ap-south-1', 'secret_key' => 'secret', 'bucket_name' => 'test',
                            'access_key' => 'abc']);
         $draft = file_get_unused_draft_itemid();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => $context->id,
