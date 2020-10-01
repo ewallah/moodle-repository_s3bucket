@@ -89,7 +89,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $repo->disabled = false;
         $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $this->assertFalse($repo->global_search());
-        $this->assertEquals(5, $repo->supported_returntypes());
+        $this->assertEquals(7, $repo->supported_returntypes());
         $this->SetAdminUser();
         $this->assertEquals(2, $repo->check_capability());
         $this->expectException('Aws\S3\Exception\S3Exception');

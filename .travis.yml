@@ -44,9 +44,9 @@ before_install:
 install:
   - moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git
   - moodle-plugin-ci install
+  - cd moodle
 
 script:
-  - cd moodle
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
@@ -55,7 +55,7 @@ script:
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
   - moodle-plugin-ci mustache 
-  - moodle-plugin-ci grunt || true
+  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - moodle-plugin-ci behat
   - moodle-plugin-ci behat --profile chrome

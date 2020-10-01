@@ -263,7 +263,7 @@ class repository_s3bucket extends repository {
      * @return int
      */
     public function supported_returntypes() {
-        return FILE_EXTERNAL | FILE_REFERENCE | FILE_EXTERNAL;
+        return FILE_INTERNAL | FILE_REFERENCE | FILE_EXTERNAL;
     }
 
     /**
