@@ -50,47 +50,92 @@ class repository_s3bucket extends repository {
         global $OUTPUT;
         $s = $this->create_s3();
         $bucket = $this->get_option('bucket_name');
-        $diricon = $OUTPUT->image_url(file_folder_icon(90))->out(false);
         $place = [['name' => $bucket, 'path' => $path]];
+        $epath = ($path === '') ? '.' : $path . '/';
         $files = [];
 
         try {
-            $results = $s->getPaginator('ListObjects', ['Bucket' => $bucket, 'Prefix' => $path]);
+            $results = $s->getPaginator('ListObjects', ['Bucket' => $bucket, 'Prefix' => $path, 'Delimiter' => '/']);
         } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
-        $path = ($path === '') ? '.' : $path . '/';
-        foreach ($results as $result) {
-            foreach ($result['Contents'] as $object) {
-                $pathinfo = pathinfo($object['Key']);
-                if ($object['Size'] == 0) {
-                    if ($pathinfo['dirname'] == $path) {
-                        $files[] = [
-                          'title' => $pathinfo['basename'],
-                          'children' => [],
-                          'thumbnail' => $diricon,
-                          'thumbnail_height' => 64,
-                          'thumbnail_width' => 64,
-                          'path' => $object['Key']];
-                    }
-                } else {
-                    if ($pathinfo['dirname'] == $path or $pathinfo['dirname'] . '//' == $path) {
-                        if ($object['StorageClass'] != 'DEEP_ARCHIVE') {
-                            $files[] = [
-                               'title' => $pathinfo['basename'],
-                               'size' => $object['Size'],
-                               'path' => $object['Key'],
-                               'datemodified' => date_timestamp_get($object['LastModified']),
-                               'thumbnail_height' => 64,
-                               'thumbnail_width' => 64,
-                               'source' => $object['Key'],
-                               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 90))->out(false)];
-                        }
-                    }
-                }
+
+        $diricon = $OUTPUT->image_url(file_folder_icon(64))->out(false);
+        foreach ($results->search('CommonPrefixes[].{Prefix: Prefix}') as $item) {
+             $files[] = [
+                  'title' => basename($item['Prefix']),
+                  'children' => [],
+                  'thumbnail' => $diricon,
+                  'thumbnail_height' => 64,
+                  'thumbnail_width' => 64,
+                  'path' => $item['Prefix']];
+        }
+
+        $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\' && starts_with(Key, \'' . $path . '\')]';
+        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
+        foreach ($results->search($filesearch) as $item) {
+            $pathinfo = pathinfo($item['Key']);
+            if ($pathinfo['dirname'] == $epath or $pathinfo['dirname'] . '//' == $epath) {
+                $files[] = [
+                   'title' => $pathinfo['basename'],
+                   'size' => $item['Size'],
+                   'path' => $item['Key'],
+                   'datemodified' => date_timestamp_get($item['LastModified']),
+                   'thumbnail_height' => 64,
+                   'thumbnail_width' => 64,
+                   'source' => $item['Key'],
+                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false)];
             }
         }
-        return ['list' => $files, 'path' => $place, 'manage' => false, 'dynload' => true, 'nologin' => true, 'nosearch' => true];
+        return ['list' => $files, 'path' => $place, 'manage' => false, 'dynload' => true, 'nologin' => true, 'nosearch' => false];
+    }
+
+    /**
+     * Search through all the files.
+     *
+     * @param  String  $q    The query string.
+     * @param  integer $page The page number.
+     * @return array of results.
+     */
+    public function search($q, $page = 1) {
+        global $OUTPUT;
+        $s = $this->create_s3();
+        $bucket = $this->get_option('bucket_name');
+        $files = [];
+
+        try {
+            $results = $s->getPaginator('ListObjects', ['Bucket' => $bucket, 'Delimiter' => '/']);
+        } catch (Exception $e) {
+            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+        }
+
+        $diricon = $OUTPUT->image_url(file_folder_icon(64))->out(false);
+        $dirsearch = 'CommonPrefixes[?contains(Prefix, \'' . $q . '\')].{Prefix: Prefix}';
+        foreach ($results->search($dirsearch) as $item) {
+             $files[] = [
+                  'title' => basename($item['Prefix']),
+                  'children' => [],
+                  'thumbnail' => $diricon,
+                  'thumbnail_height' => 64,
+                  'thumbnail_width' => 64,
+                  'path' => $item['Prefix']];
+        }
+
+        $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\' && contains(Key, \'' . $q . '\')]';
+        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
+        foreach ($results->search($filesearch) as $item) {
+            $pathinfo = pathinfo($item['Key']);
+            $files[] = [
+               'title' => $pathinfo['basename'],
+               'size' => $item['Size'],
+               'path' => $item['Key'],
+               'datemodified' => date_timestamp_get($item['LastModified']),
+               'thumbnail_height' => 64,
+               'thumbnail_width' => 64,
+               'source' => $item['Key'],
+               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false)];
+        }
+        return ['list' => $files, 'dynload' => true, 'pages' => 0, 'page' => $page];
     }
 
     /**
@@ -272,6 +317,7 @@ class repository_s3bucket extends repository {
      * @return s3
      */
     private function create_s3() {
+        global $CFG;
         if ($this->_s3client == null) {
             $accesskey = $this->get_option('access_key');
             if (empty($accesskey)) {
@@ -280,6 +326,26 @@ class repository_s3bucket extends repository {
             $credentials = ['key' => $accesskey, 'secret' => $this->get_option('secret_key')];
             $endpoint = self::fixendpoint($this->get_option('endpoint'));
             $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
+
+            // TODO proxy protocol.
+            if (!empty($CFG->proxyhost)) {
+                $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
+                $cond = (!empty($CFG->proxyuser) and !empty($CFG->proxypassword));
+                $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
+                $arr['request.options'] = ['proxy' => "$user$host"];
+            }
+            if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
+                $mock = new \Aws\MockHandler();
+                $day = new DateTime();
+                $result = new \Aws\Result([
+                    'CommonPrefixes' => [['Prefix' => '2020_dir']],
+                    'Contents' => [['Key' => '2020_f.jpg', 'Size' => 15, 'StorageClass' => 'STANDARD', 'LastModified' => $day]]]);
+                $mock->append($result);
+                $mock->append($result);
+                $mock->append($result);
+                $mock->append($result);
+                $arr['handler'] = $mock;
+            }
             $this->_s3client = \Aws\S3\S3Client::factory($arr);
         }
         return $this->_s3client;

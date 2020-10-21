@@ -42,7 +42,8 @@ before_install:
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 
 install:
-  - moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git
+  #- moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git
+  - moodle-plugin-ci add-plugin --clone https://github.com/catalyst/moodle-local_aws.git
   - moodle-plugin-ci install
   - cd moodle
 

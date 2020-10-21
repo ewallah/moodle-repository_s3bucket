@@ -46,11 +46,24 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      * Create type and instance.
      */
     public function setUp() {
+        global $CFG;
         $this->resetAfterTest(true);
+        $oriproxy = $CFG->proxyhost;
+        $CFG->proxyhost = 'xxxxxxxxxxxxxxx.moodle.org';
+        $oriport = $CFG->proxyport;
+        $CFG->proxyport = '123';
+        $oriuser = $CFG->proxyuser;
+        $CFG->proxyuser = 'fakeproxy';
+        $oripass = $CFG->proxypassword;;
+        $CFG->proxypass = 'fakepass';
         $type = 's3bucket';
         $this->getDataGenerator()->create_repository_type($type);
         $this->repo = $this->getDataGenerator()->create_repository($type)->id;
         $this->SetAdminUser();
+        $CFG->proxyhost = $oriproxy;
+        $CFG->proxyport = $oriport;
+        $CFG->proxyport = $oriuser;
+        $CFG->proxyuser = $oripass;
     }
 
     /**
@@ -92,8 +105,8 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $this->assertEquals(7, $repo->supported_returntypes());
         $this->SetAdminUser();
         $this->assertEquals(2, $repo->check_capability());
-        $this->expectException('Aws\S3\Exception\S3Exception');
-        $repo->get_listing();
+        $result = $repo->get_listing('', 1);
+        $this->assertCount(2, $result['list']);
     }
 
     /**
@@ -105,8 +118,23 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $data = ['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
                  'access_key' => 'abc'];
         $repo = new \repository_s3bucket($this->repo, $context, $data);
-        $this->expectException('Aws\S3\Exception\S3Exception');
-        $repo->get_listing();
+        $result = $repo->get_listing('.');
+        $this->assertCount(1, $result['path']);
+    }
+
+    /**
+     * Test search.
+     */
+    public function test_search() {
+        $user = $this->getDataGenerator()->create_user();
+        $context = context_user::instance($user->id);
+        $data = ['endpoint' => 's3.eu-central-1.amazonaws.com', 'secret_key' => 'secret', 'bucket_name' => 'test',
+                 'access_key' => 'abc'];
+        $repo = new \repository_s3bucket($this->repo, $context, $data);
+        $result = $repo->search('filesearch');
+        $this->assertCount(0, $result['list']);
+        $result = $repo->search('2020');
+        $this->assertCount(2, $result['list']);
     }
 
     /**
@@ -134,8 +162,8 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => $context->id,
                        'itemid' => $draft, 'filename' => 'filename.txt', 'filepath' => '/'];
         get_file_storage()->create_file_from_string($filerecord, 'test content');
-        $this->expectException('exception');
-        $repo->get_file('/filename.txt');
+        $result = $repo->get_file('/filename.txt');
+        $this->assertEquals('/filename.txt', $result['url']);
     }
 
     /**
