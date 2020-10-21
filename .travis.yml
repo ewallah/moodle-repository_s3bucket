@@ -59,8 +59,9 @@ script:
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
+  - moodle-plugin-ci behat --profile chrome blocks/admin_bookmarks
   - >
-    if [MOODLE_BRANCH NOT IN (MOODLE_37_STABLE, MOODLE_38_STABLE)];
+    if [ "$MOODLE_BRANCH" = 'master' ];
     then
         moodle-plugin-ci behat
         moodle-plugin-ci behat --profile chrome
@@ -68,7 +69,6 @@ script:
         moodle-plugin-ci behat --suite="classic"
         moodle-plugin-ci behat --suite="classic" --profile chrome
     fi
-  - moodle-plugin-ci behat --suite="classic" --profile chrome blocks/admin_bookmarks
 
 after_success:
   - moodle-plugin-ci coveralls-upload
