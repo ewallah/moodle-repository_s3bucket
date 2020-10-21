@@ -60,15 +60,11 @@ script:
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
   - moodle-plugin-ci behat --profile chrome blocks/admin_bookmarks
-  - >
-    if [ "$MOODLE_BRANCH" = 'master' ];
-    then
-        moodle-plugin-ci behat
-        moodle-plugin-ci behat --profile chrome
-        php admin/tool/behat/cli/init.php -a="classic"
-        moodle-plugin-ci behat --suite="classic"
-        moodle-plugin-ci behat --suite="classic" --profile chrome
-    fi
+  - moodle-plugin-ci behat
+  - moodle-plugin-ci behat --profile chrome
+  - php admin/tool/behat/cli/init.php -a="classic"
+  - moodle-plugin-ci behat --suite="classic"
+  - moodle-plugin-ci behat --suite="classic" --profile chrome
 
 after_success:
   - moodle-plugin-ci coveralls-upload

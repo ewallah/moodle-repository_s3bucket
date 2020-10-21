@@ -277,21 +277,14 @@ class repository_s3bucket extends repository {
      * @return array errors
      */
     public static function instance_form_validation($mform, $data, $errors) {
-        global $CFG;
         if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
             $endpoint = self::fixendpoint($data['endpoint']);
             $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
-            if (!empty($CFG->proxyhost)) {
-                $proxyhost = $CFG->proxyhost . (empty($CFG->proxyport)) ? : ':' . $CFG->proxyport;
-                if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
-                    $proxyhost = $CFG->proxyuser . ':' . $CFG->proxypassword . $proxyhost;
-                }
-                $proxytype = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
-                $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint,
-                       'request.options' => ['proxy' => $proxytype . $proxyhost]];
-            } else {
-                $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
-            }
+            $arr = self::addproxy([
+                'version' => 'latest',
+                'signature_version' => 'v4',
+                'credentials' => $credentials,
+                'region' => $endpoint]);
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
@@ -317,7 +310,6 @@ class repository_s3bucket extends repository {
      * @return s3
      */
     private function create_s3() {
-        global $CFG;
         if ($this->_s3client == null) {
             $accesskey = $this->get_option('access_key');
             if (empty($accesskey)) {
@@ -325,15 +317,11 @@ class repository_s3bucket extends repository {
             }
             $credentials = ['key' => $accesskey, 'secret' => $this->get_option('secret_key')];
             $endpoint = self::fixendpoint($this->get_option('endpoint'));
-            $arr = ['version' => 'latest', 'signature_version' => 'v4', 'credentials' => $credentials, 'region' => $endpoint];
-
-            // TODO proxy protocol.
-            if (!empty($CFG->proxyhost)) {
-                $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
-                $cond = (!empty($CFG->proxyuser) and !empty($CFG->proxypassword));
-                $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
-                $arr['request.options'] = ['proxy' => "$user$host"];
-            }
+            $arr = self::addproxy([
+                'version' => 'latest',
+                'signature_version' => 'v4',
+                'credentials' => $credentials,
+                'region' => $endpoint]);
             if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
                 $mock = new \Aws\MockHandler();
                 $day = new DateTime();
@@ -349,6 +337,24 @@ class repository_s3bucket extends repository {
             $this->_s3client = \Aws\S3\S3Client::factory($arr);
         }
         return $this->_s3client;
+    }
+
+    /**
+     * Add proxy
+     *
+     * @param array $settings
+     * @return array
+     */
+    private static function addproxy($settings) {
+        global $CFG;
+        if (!empty($CFG->proxyhost)) {
+            $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
+            $type = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
+            $cond = (!empty($CFG->proxyuser) and !empty($CFG->proxypassword));
+            $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
+            $settings['request.options'] = ['proxy' => "$type$user$host"];
+        }
+        return $settings;
     }
 
     /**

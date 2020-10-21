@@ -46,24 +46,15 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      * Create type and instance.
      */
     public function setUp() {
-        global $CFG;
         $this->resetAfterTest(true);
-        $oriproxy = $CFG->proxyhost;
-        $CFG->proxyhost = 'xxxxxxxxxxxxxxx.moodle.org';
-        $oriport = $CFG->proxyport;
-        $CFG->proxyport = '123';
-        $oriuser = $CFG->proxyuser;
-        $CFG->proxyuser = 'fakeproxy';
-        $oripass = $CFG->proxypassword;;
-        $CFG->proxypass = 'fakepass';
+        set_config('proxyhost', '192.168.192.168');
+        set_config('proxyport', 66);
+        set_config('proxyuser', 'user');
+        set_config('proxypassword', 'pass');
         $type = 's3bucket';
         $this->getDataGenerator()->create_repository_type($type);
         $this->repo = $this->getDataGenerator()->create_repository($type)->id;
         $this->SetAdminUser();
-        $CFG->proxyhost = $oriproxy;
-        $CFG->proxyport = $oriport;
-        $CFG->proxyport = $oriuser;
-        $CFG->proxyuser = $oripass;
     }
 
     /**
@@ -216,10 +207,6 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      */
     public function test_instance_formproxy() {
         global $USER;
-        set_config('proxyhost', '192.168.192.168');
-        set_config('proxyport', 66);
-        set_config('proxyuser', 'user');
-        set_config('proxypassword', 'pass');
         $context = context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
         $mform = new repository_instance_form('', $para);
