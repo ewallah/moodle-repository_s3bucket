@@ -58,13 +58,17 @@ script:
   - moodle-plugin-ci mustache 
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
-  - moodle-plugin-ci behat
-  - moodle-plugin-ci behat --profile chrome
-  - php admin/tool/behat/cli/init.php -a="classic"
-  - moodle-plugin-ci behat --suite="classic"
-  - moodle-plugin-ci behat --suite="classic" --profile chrome
-  - moodle-plugin-ci behat --suite="classic" --profile chrome blocks/admin_bookmarks
   - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
+  - >
+    if [MOODLE_BRANCH NOT IN (MOODLE_37_STABLE, MOODLE_38_STABLE)];
+    then
+        moodle-plugin-ci behat
+        moodle-plugin-ci behat --profile chrome
+        php admin/tool/behat/cli/init.php -a="classic"
+        moodle-plugin-ci behat --suite="classic"
+        moodle-plugin-ci behat --suite="classic" --profile chrome
+    fi
+  - moodle-plugin-ci behat --suite="classic" --profile chrome blocks/admin_bookmarks
 
 after_success:
   - moodle-plugin-ci coveralls-upload
