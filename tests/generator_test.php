@@ -68,7 +68,7 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
         $type = 's3bucket';
         $this->getDataGenerator()->create_repository_type($type);
         $repo = $this->getDataGenerator()->create_repository($type);
-        $this->assertEquals($repo->userid, 0);
+        $this->assertEquals(0, $repo->userid);
     }
 
     /**
@@ -80,6 +80,6 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $plugintype = new repository_type('s3bucket');
         $pluginid = $plugintype->create(false);
-        $this->assertInternalType('int', $pluginid);
+        $this->assertIsInt($pluginid);
     }
 }

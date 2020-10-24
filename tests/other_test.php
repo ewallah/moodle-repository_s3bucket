@@ -45,7 +45,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     /**
      * Create type and instance.
      */
-    public function setUp() {
+    public function setUp():void {
         $this->resetAfterTest(true);
         set_config('proxyhost', '192.168.192.168');
         set_config('proxyport', 66);
@@ -165,7 +165,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $context = context_user::instance($USER->id);
         $repo = new \repository_s3bucket($USER->id, $context);
         $url = $repo->get_link('tst.jpg');
-        $this->assertContains('/s3/', $url);
+        $this->assertStringContainsString('/s3/', $url);
     }
 
     /**
@@ -181,7 +181,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         try {
             repository_s3bucket_pluginfile($course, $cm, $context, 's3', [$repo->id, 'tst.jpg'], true);
         } catch (Exception $e) {
-            $this->assertContains('Cannot modify header information - headers already sent', $e->getMessage());
+            $this->assertStringContainsString('Cannot modify header information - headers already sent', $e->getMessage());
         }
     }
 
@@ -199,7 +199,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         ob_start();
         $mform->display();
         $out = ob_get_clean();
-        $this->assertContains('There are required fields in this form marked', $out);
+        $this->assertStringContainsString('There are required fields in this form marked', $out);
     }
 
     /**
@@ -216,7 +216,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         ob_start();
         $mform->display();
         $out = ob_get_clean();
-        $this->assertContains('There are required fields in this form marked', $out);
+        $this->assertStringContainsString('There are required fields in this form marked', $out);
     }
 
     /**
@@ -239,14 +239,14 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $fromform = $mform->get_data();
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
-        $this->assertContains('There are required fields', $out);
+        $this->assertStringContainsString('There are required fields', $out);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
         ob_start();
         $mform->display();
         $fromform = $mform->get_data();
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
-        $this->assertContains('value="s3.amazonaws.com" selected', $out);
+        $this->assertStringContainsString('value="s3.amazonaws.com" selected', $out);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $data, []));
     }
 }

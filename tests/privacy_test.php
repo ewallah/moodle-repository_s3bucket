@@ -22,10 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace repository_s3bucket\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-global $CFG;
-require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
+use \core_privacy\tests\provider_testcase;
+
 
 /**
  * Privacy tests.
@@ -35,13 +37,15 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass repository_s3bucket\privacy\provider
  */
-class repository_s3bucket_privacy_tests extends \core_privacy\tests\provider_testcase {
+class privacy_test extends provider_testcase {
 
     /**
      * Test privacy.
      */
     public function test_privacy() {
-        $privacy = new repository_s3bucket\privacy\provider();
-        $this->assertEquals('privacy:metadata', $privacy->get_reason());
+        $collection = new \core_privacy\local\metadata\collection('repository_s3bucket');
+        $reason = \repository_s3bucket\privacy\provider::get_reason($collection);
+        $this->assertEquals($reason, 'privacy:metadata');
+        $this->assertStringContainsString('does not store', get_string($reason, 'repository_s3bucket'));
     }
 }

@@ -19,7 +19,7 @@ cache:
     - $HOME/.nvm
 
 php:
- - 7.3
+ - 7.4
 
 env:
   - DB=pgsql MOODLE_BRANCH=master
@@ -27,13 +27,10 @@ env:
 
 jobs:
   include:
-    - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-    - env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.3
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
-    - php: 7.4
-      env: DB=mysqli MOODLE_BRANCH=master
 
 before_install:
   - phpenv config-rm xdebug.ini
@@ -58,13 +55,13 @@ script:
   - moodle-plugin-ci mustache 
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
-  - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
   - moodle-plugin-ci behat --profile chrome blocks/admin_bookmarks
   - moodle-plugin-ci behat
   - moodle-plugin-ci behat --profile chrome
   - php admin/tool/behat/cli/init.php -a="classic"
   - moodle-plugin-ci behat --suite="classic"
   - moodle-plugin-ci behat --suite="classic" --profile chrome
+  - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite > /dev/null
 
 after_success:
   - moodle-plugin-ci coveralls-upload
