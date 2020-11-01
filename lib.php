@@ -162,7 +162,9 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
         $req = $s3->createPresignedRequest($cmd, $lifetime);
-        header('Location: ' . (string)$req->getUri());
+        $uri = $req->getUri()->__toString();
+        header("Location: $uri");
+        die;
     }
 
     /**
@@ -291,6 +293,15 @@ class repository_s3bucket extends repository {
             }
         }
         return $errors;
+    }
+
+    /**
+     * Which return type should be selected by default.
+     *
+     * @return int
+     */
+    public function default_returntype() {
+        return FILE_REFERENCE;
     }
 
     /**

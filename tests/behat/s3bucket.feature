@@ -1,4 +1,4 @@
-@repository @repository_s3bucket
+@repository @repository_s3bucket @javascript
 Feature: S3 bucket repository should throw no errors
   An admin should be able to configure the plugin
 
@@ -31,7 +31,6 @@ Feature: S3 bucket repository should throw no errors
     And I click on "Save" "button"
     And I log out
 
-  @javascript
   Scenario: An admin can add a user and course instances
     When I log in as "admin"
     And I navigate to "Plugins > Repositories > Manage repositories" in site administration
@@ -47,7 +46,6 @@ Feature: S3 bucket repository should throw no errors
     Then I should see "Amazon S3 bucket"
     And I should see "Create"
 
-  @javascript
   Scenario: A teacher cannot add a user or course instance
     When I log in as "teacher"
     And I follow "Preferences" in the user menu
@@ -59,7 +57,6 @@ Feature: S3 bucket repository should throw no errors
     Then I should see "Amazon S3 bucket"
     And I should see "Create"
 
-  @javascript
   Scenario: A student cannot add an instance
     When I log in as "student"
     And I follow "Preferences" in the user menu
