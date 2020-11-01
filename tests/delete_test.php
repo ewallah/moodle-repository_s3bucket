@@ -46,11 +46,10 @@ class delete_tests extends \advanced_testcase {
     public function test_deletebucket() {
         global $DB, $USER;
         $this->resetAfterTest(true);
-        $type = 's3bucket';
         $reference = 'filename.jpg';
         $cnt = $DB->count_records('repository_instances');
-        $this->getDataGenerator()->create_repository_type($type);
-        $repoid = $this->getDataGenerator()->create_repository($type)->id;
+        $this->getDataGenerator()->create_repository_type('s3bucket');
+        $repoid = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();
         $repo = new \repository_s3bucket($repoid);
         $this->assertEquals($cnt + 1, $DB->count_records('repository_instances'));

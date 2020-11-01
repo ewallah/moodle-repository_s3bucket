@@ -40,7 +40,7 @@ class repository_s3bucket_generator extends testing_repository_generator {
      * @return array
      */
     protected function prepare_record(array $record) {
-        $arr = ['access_key' => 'access', 'secret_key' => 'secret', 'endpoint' => 's3.amazonaws.com', 'bucket_name' => 'testrepo'];
+        $arr = ['access_key' => 'access', 'secret_key' => 'secret', 'endpoint' => 'us-east-1', 'bucket_name' => 'testrepo'];
         return array_merge($arr, parent::prepare_record($record));
     }
 }

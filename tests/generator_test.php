@@ -42,20 +42,19 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
     public function test_create_type() {
         global $DB;
         $this->resetAfterTest(true);
-        $type = 's3bucket';
-        $repotype = $this->getDataGenerator()->create_repository_type($type);
-        $this->assertEquals($repotype->type, $type, 'Unexpected name after creating repository type ' . $type);
-        $this->assertTrue($DB->record_exists('repository', ['type' => $type, 'visible' => 1]));
+        $repotype = $this->getDataGenerator()->create_repository_type('s3bucket');
+        $this->assertEquals($repotype->type, 's3bucket', 'Unexpected name after creating repository type s3bucket');
+        $this->assertTrue($DB->record_exists('repository', ['type' => 's3bucket', 'visible' => 1]));
 
         $caughtexception = false;
         try {
-            $this->getDataGenerator()->create_repository_type($type);
+            $this->getDataGenerator()->create_repository_type('s3bucket');
         } catch (repository_exception $e) {
             if ($e->getMessage() === 'This repository already exists') {
                 $caughtexception = true;
             }
         }
-        $this->assertTrue($caughtexception, "Repository type '$type' should have already been enabled");
+        $this->assertTrue($caughtexception, "Repository type 's3bucket' should have already been enabled");
     }
 
     /**
@@ -65,9 +64,8 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
      */
     public function test_create_instance() {
         $this->resetAfterTest(true);
-        $type = 's3bucket';
-        $this->getDataGenerator()->create_repository_type($type);
-        $repo = $this->getDataGenerator()->create_repository($type);
+        $this->getDataGenerator()->create_repository_type('s3bucket');
+        $repo = $this->getDataGenerator()->create_repository('s3bucket');
         $this->assertEquals(0, $repo->userid);
     }
 

@@ -247,7 +247,6 @@ class repository_s3bucket extends repository {
         $strrequired = get_string('required');
         $textops = ['maxlength' => 255, 'size' => 50];
         $endpointselect = [];
-        $endpointselect['s3.amazonaws.com'] = 's3.amazonaws.com';
         $all = require($CFG->dirroot . '/local/aws/sdk/Aws/data/endpoints.json.php');
         $endpoints = $all['partitions'][0]['regions'];
         foreach ($endpoints as $key => $value) {
@@ -261,7 +260,7 @@ class repository_s3bucket extends repository {
         $mform->addElement('text', 'bucket_name', get_string('bucketname', 'repository_s3bucket'), $textops);
         $mform->setType('bucket_name', PARAM_RAW_TRIMMED);
         $mform->addElement('select', 'endpoint', get_string('endpoint', 'repository_s3'), $endpointselect);
-        $mform->setDefault('endpoint', 's3.amazonaws.com');
+        $mform->setDefault('endpoint', 'us-east-1');
 
         $mform->addRule('access_key', $strrequired, 'required', null, 'client');
         $mform->addRule('secret_key', $strrequired, 'required', null, 'client');
@@ -278,13 +277,12 @@ class repository_s3bucket extends repository {
      */
     public static function instance_form_validation($mform, $data, $errors) {
         if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
-            $endpoint = self::fixendpoint($data['endpoint']);
             $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
             $arr = self::addproxy([
                 'version' => 'latest',
                 'signature_version' => 'v4',
                 'credentials' => $credentials,
-                'region' => $endpoint]);
+                'region' => $data['endpoint']]);
             $s3 = \Aws\S3\S3Client::factory($arr);
             try {
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
@@ -316,12 +314,11 @@ class repository_s3bucket extends repository {
                 throw new moodle_exception('needaccesskey', 'repository_s3');
             }
             $credentials = ['key' => $accesskey, 'secret' => $this->get_option('secret_key')];
-            $endpoint = self::fixendpoint($this->get_option('endpoint'));
             $arr = self::addproxy([
                 'version' => 'latest',
                 'signature_version' => 'v4',
                 'credentials' => $credentials,
-                'region' => $endpoint]);
+                'region' => $this->get_option('endpoint')]);
             if (defined('BEHAT_SITE_RUNNING') || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
                 $mock = new \Aws\MockHandler();
                 $day = new DateTime();
@@ -355,22 +352,6 @@ class repository_s3bucket extends repository {
             $settings['request.options'] = ['proxy' => "$type$user$host"];
         }
         return $settings;
-    }
-
-    /**
-     * Fix endpoint string
-     *
-     * @param string $endpoint point of entry
-     * @return string fixedendpoint
-     */
-    private static function fixendpoint($endpoint) {
-        if ($endpoint == 's3.amazonaws.com') {
-            return 'us-east-1';
-        }
-        $endpoint = str_replace('.amazonaws.com', '', $endpoint);
-        $endpoint = str_replace('s3-', '', $endpoint);
-        $endpoint = str_replace('s3.', '', $endpoint);
-        return $endpoint;
     }
 }
 

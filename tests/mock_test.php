@@ -94,9 +94,8 @@ class repository_s3bucket_mock_tests extends \advanced_testcase {
      */
     public function test_mockexception() {
         $this->resetAfterTest(true);
-        $type = 's3bucket';
-        $this->getDataGenerator()->create_repository_type($type);
-        $repo = $this->getDataGenerator()->create_repository($type)->id;
+        $this->getDataGenerator()->create_repository_type('s3bucket');
+        $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();
         $s3bucket = new repository_s3bucket($repo);
         $reflection = new ReflectionClass($s3bucket);
