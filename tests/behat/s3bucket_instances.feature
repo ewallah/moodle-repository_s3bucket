@@ -39,58 +39,12 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
     Then I should see "Make a copy of the file"
-    # And I click on "Make a copy of the file" "radio"
-    And I click on "Select this file" "button"
-    Then I should see "2020_f.jpg"
-    And I click on "Save changes" "button"
-    Then I should not see "No files available" in the "Private files" "block"
-    And I should see "2020_f.jpg" in the "Private files" "block"
-
-  @javascript
-  Scenario: An admin can search the s3 bucket repository
-    When I log in as "admin"
-    And I follow "Manage private files..."
-    And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
-    Then I should see "2" elements in repository content area
-    And I click on "Display folder with file details" "link" in the ".file-picker" "css_element"
-    And I click on "Display folder as file tree" "link" in the ".file-picker" "css_element"
-    And I click on "Display folder with file icons" "link" in the ".file-picker" "css_element"
-    And "Search repository" "field" should be visible
-    And I set the field "Search repository" to "2020"
-    When I press enter
-    Then I should see "2" elements in repository content area
-    And I set the field "Search repository" to "2021"
-    When I press enter
-    Then I should see "0" elements in repository content area
 
   Scenario: A teacher cannot see the s3 bucket repository in private area
     When I log in as "teacher"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Testrepo"
-
-  @javascript
-  Scenario: A teacher can see the s3 bucket repository in a course module
-    When I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "Folder" to section "1"
-    And I set the following fields to these values:
-      | Name | Folder name |
-      | Description | Folder description |
-    And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
-    Then I should see "2020_dir"
-    And I should see "2020_f.jpg"
-    And I follow "2020_f.jpg"
-    Then I should see "Make a copy of the file"
-    And I click on "Select this file" "button"
-    Then I should see "2020_f.jpg"
-    And I click on "Save and display" "button"
-    Then I should see "Folder description"
-    And I should see "2020_f.jpg"
 
   Scenario: A student cannot see the s3 bucket repository
     When I log in as "student"
