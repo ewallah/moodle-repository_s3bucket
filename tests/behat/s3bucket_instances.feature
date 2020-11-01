@@ -39,7 +39,7 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
     Then I should see "Make a copy of the file"
-    And I click on "Make a copy of the file" "radio"
+    # And I click on "Make a copy of the file" "radio"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save changes" "button"
