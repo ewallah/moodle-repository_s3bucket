@@ -92,6 +92,22 @@ Feature: S3 bucket repository should be seen by admins
     Then I should see "Folder description"
     And I should see "2020_f.jpg"
 
+  @javascript
+  Scenario: A teacher can add a s3 bucket link in a url module
+    When I log in as "teacher"
+    And I am on "Course 1" course homepage with editing mode on
+    When I add a "URL" to section "1" and I fill the form with:
+      | Name | Url name |
+    And I click on "Choose a link..." "button"
+    Then I should see "Testrepo"
+    And I follow "Testrepo"
+    Then I should see "2020_dir"
+    And I should see "2020_f.jpg"
+    And I follow "2020_f.jpg"
+    And I click on "Select this file" "button"
+    And I click on "Save and return to course" "button"
+    Then I should see "Url name"
+
   Scenario: A student cannot see the s3 bucket repository
     When I log in as "student"
     And I follow "Manage private files..."

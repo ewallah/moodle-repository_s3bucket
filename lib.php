@@ -160,7 +160,10 @@ class repository_s3bucket extends repository {
      */
     public function send_otherfile($reference, $lifetime) {
         $s3 = $this->create_s3();
-        $cmd = $s3->getCommand('GetObject', ['Bucket' => $this->get_option('bucket_name'), 'Key' => $reference]);
+        $arr = ['Bucket' => $this->get_option('bucket_name'),
+                'Key' => $reference,
+                'ResponseContentDisposition' => 'attachment'];
+        $cmd = $s3->getCommand('GetObject', $arr);
         $req = $s3->createPresignedRequest($cmd, $lifetime);
         $uri = $req->getUri()->__toString();
         header("Location: $uri");
@@ -175,7 +178,11 @@ class repository_s3bucket extends repository {
      */
     public function get_link($url) {
         $cid = context_system::instance()->id;
-        return moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, '/', $url)->out();
+        $path = pathinfo($url);
+        $file = $path['basename'];
+        $directory = $path['dirname'];
+        $directory = $directory == '.' ? '/' : '/' . $directory . '/';
+        return moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, $directory, $file)->out();
     }
 
     /**
@@ -383,8 +390,8 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
     if ($filearea !== 's3') {
         return false;
     }
-    $itemid = array_shift($args);
-    $reference = array_pop($args); // The last item in the $args array.
+    $itemid = array_shift($args); // The first item in the $args array.
+    $reference = join('/', $args);
     $repo = repository::get_repository_by_id($itemid, $context);
     $repo->check_capability();
     $repo->send_otherfile($reference, "+60 minutes");
