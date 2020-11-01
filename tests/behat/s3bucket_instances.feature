@@ -1,4 +1,4 @@
-@repository @repository_s3bucket
+@repository @repository_s3bucket @_file_upload
 Feature: S3 bucket repository should be seen by admins
 
   Background:
@@ -39,8 +39,7 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
     Then I should see "Make a copy of the file"
-    And I should see "Create an alias"
-    And I click on "Create an alias/shortcut to the file" "radio"
+    And I click on "Make a copy of the file" "radio"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save changes" "button"
@@ -54,17 +53,17 @@ Feature: S3 bucket repository should be seen by admins
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Testrepo"
     And I follow "Testrepo"
-    # Then I should see "2" elements in repository content area
+    Then I should see "2" elements in repository content area
     And I click on "Display folder with file details" "link" in the ".file-picker" "css_element"
     And I click on "Display folder as file tree" "link" in the ".file-picker" "css_element"
     And I click on "Display folder with file icons" "link" in the ".file-picker" "css_element"
-    # And "Search repository" "field" should be visible
-    # And I set the field "Search repository" to "2020"
-    # When I press enter
-    # Then I should see "2" elements in repository content area
-    # And I set the field "Search repository" to "2021"
-    # When I press enter
-    # Then I should see "0" elements in repository content area
+    And "Search repository" "field" should be visible
+    And I set the field "Search repository" to "2020"
+    When I press enter
+    Then I should see "2" elements in repository content area
+    And I set the field "Search repository" to "2021"
+    When I press enter
+    Then I should see "0" elements in repository content area
 
   Scenario: A teacher cannot see the s3 bucket repository in private area
     When I log in as "teacher"
@@ -87,8 +86,6 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
     Then I should see "Make a copy of the file"
-    And I should see "Create an alias"
-    And I click on "Create an alias/shortcut to the file" "radio"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save and display" "button"
