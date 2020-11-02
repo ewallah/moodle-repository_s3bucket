@@ -391,7 +391,7 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
         return false;
     }
     $itemid = array_shift($args); // The first item in the $args array.
-    $reference = join('/', $args);
+    $reference = implode('/', $args);
     $repo = repository::get_repository_by_id($itemid, $context);
     $repo->check_capability();
     $repo->send_otherfile($reference, "+60 minutes");
