@@ -1,5 +1,5 @@
 @repository @repository_s3bucket @_file_upload
-Feature: S3 bucket repository should be seen by admins
+Feature: S3 bucket global repositories should be seen by admins and teachers
 
   Background:
     Given the following "courses" exist:
@@ -17,24 +17,21 @@ Feature: S3 bucket repository should be seen by admins
     And I log in as "admin"
     And I navigate to "Plugins > Repositories > Amazon S3 bucket" in site administration
     And I click on "Create a repository instance" "button"
-    And I set the following fields to these values:
-        | name        | Testrepo      |
-        | bucket_name | Testbucket    |
-    And I click on "Save" "button"
-    Then I should see "Required"
+    And I set the field "Name" to "Global bucket"
+    And I set the field "Bucket name" to "globalbucket"
     And I set the field "Access key" to "anoTherfake@1"
     And I set the field "Secret key" to "anotherFake_$2"
     And I click on "Save" "button"
     And I log out
 
   @javascript
-  Scenario: An admin can see the s3 bucket repository
+  Scenario: An admin can see the global s3 bucket repository
     When I log in as "admin"
     Then I should see "No files available" in the "Private files" "block"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
+    Then I should see "Global bucket"
+    And I follow "Global bucket"
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
@@ -47,12 +44,12 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg" in the "Private files" "block"
 
   @javascript
-  Scenario: An admin can search the s3 bucket repository
+  Scenario: An admin can search the global s3 bucket repository
     When I log in as "admin"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
+    Then I should see "Global bucket"
+    And I follow "Global bucket"
     Then I should see "2" elements in repository content area
     And I click on "Display folder with file details" "link" in the ".file-picker" "css_element"
     And I click on "Display folder as file tree" "link" in the ".file-picker" "css_element"
@@ -65,14 +62,14 @@ Feature: S3 bucket repository should be seen by admins
     When I press enter
     Then I should see "0" elements in repository content area
 
-  Scenario: A teacher cannot see the s3 bucket repository in private area
+  Scenario: A teacher cannot see the global s3 bucket repository in private area
     When I log in as "teacher"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should not see "Testrepo"
+    Then I should not see "Global bucket"
 
   @javascript
-  Scenario: A teacher can see the s3 bucket repository in a course module
+  Scenario: A teacher can see the global s3 bucket repository in a course module
     When I log in as "teacher"
     And I am on "Course 1" course homepage with editing mode on
     When I add a "Folder" to section "1"
@@ -80,8 +77,8 @@ Feature: S3 bucket repository should be seen by admins
       | Name | Folder name |
       | Description | Folder description |
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
+    Then I should see "Global bucket"
+    And I follow "Global bucket"
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
@@ -93,14 +90,14 @@ Feature: S3 bucket repository should be seen by admins
     And I should see "2020_f.jpg"
 
   @javascript
-  Scenario: A teacher can add a s3 bucket link in a url module
+  Scenario: A teacher can add a global s3 bucket link in a url module
     When I log in as "teacher"
     And I am on "Course 1" course homepage with editing mode on
     When I add a "URL" to section "1" and I fill the form with:
       | Name | Url name |
     And I click on "Choose a link..." "button"
-    Then I should see "Testrepo"
-    And I follow "Testrepo"
+    Then I should see "Global bucket"
+    And I follow "Global bucket"
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
@@ -108,8 +105,8 @@ Feature: S3 bucket repository should be seen by admins
     And I click on "Save and return to course" "button"
     Then I should see "Url name"
 
-  Scenario: A student cannot see the s3 bucket repository
+  Scenario: A student cannot see the global s3 bucket repository
     When I log in as "student"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should not see "Testrepo"
+    Then I should not see "Global bucket"
