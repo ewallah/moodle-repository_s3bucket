@@ -27,6 +27,7 @@ env:
 
 jobs:
   include:
+    #- env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
 
@@ -53,7 +54,8 @@ script:
   - moodle-plugin-ci mustache 
   - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
-  - moodle-plugin-ci behat --profile chrome blocks/admin_bookmarks
+  - moodle-plugin-ci behat -q --profile chrome blocks/admin_bookmarks
+  - moodle-plugin-ci behat -q --profile firefox blocks/admin_bookmarks
   - moodle-plugin-ci behat
   - moodle-plugin-ci behat --profile chrome
   - php admin/tool/behat/cli/init.php -a="classic"
