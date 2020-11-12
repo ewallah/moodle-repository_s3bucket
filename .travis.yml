@@ -51,17 +51,17 @@ install:
   - moodle-plugin-ci savepoints
   - moodle-plugin-ci mustache 
   - moodle-plugin-ci grunt
-  
-script:
-  - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - moodle-plugin-ci behat -q --profile chrome blocks/admin_bookmarks
   - moodle-plugin-ci behat -q --profile default blocks/admin_bookmarks
+  - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
+
+script:
+  - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - moodle-plugin-ci behat
   - moodle-plugin-ci behat --profile chrome
   - php admin/tool/behat/cli/init.php -a="classic" > /dev/null
   - moodle-plugin-ci behat --suite="classic"
   - moodle-plugin-ci behat --suite="classic" --profile chrome
-  - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite > /dev/null
 
 after_success:
   - moodle-plugin-ci coveralls-upload
