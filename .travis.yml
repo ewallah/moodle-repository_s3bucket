@@ -52,7 +52,7 @@ install:
   - moodle-plugin-ci mustache 
   - moodle-plugin-ci grunt
   - moodle-plugin-ci behat -q --profile default blocks/admin_bookmarks
-  - moodle-plugin-ci behat -q --profile chrome admin/tool/monitoring
+  - moodle-plugin-ci behat -q --profile chrome blocks/admin_bookmarks
   - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
 
 script:
