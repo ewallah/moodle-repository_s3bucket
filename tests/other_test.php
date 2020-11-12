@@ -118,8 +118,9 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      */
     public function test_search() {
         $userid = $this->getDataGenerator()->create_user()->id;
-        $this->data['endpoint'] = 'eu-central-1';
         $repo = new \repository_s3bucket($this->repo, \context_user::instance($userid), $this->data);
+        $this->data['endpoint'] = 'eu-central-1';
+        $repo->set_option($this->data);
         $result = $repo->search('filesearch');
         $this->assertCount(0, $result['list']);
         $result = $repo->search('2020');
