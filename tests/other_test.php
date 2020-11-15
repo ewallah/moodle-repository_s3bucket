@@ -48,16 +48,29 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
     /**
      * Create type and instance.
      */
-    public function setUp():void {
+    public function setUp(): void {
         $this->resetAfterTest(true);
+        set_config('s3mock', true);
         set_config('proxyhost', '192.168.192.168');
         set_config('proxyport', 66);
+        set_config('proxytype', 'http');
         set_config('proxyuser', 'user');
         set_config('proxypassword', 'pass');
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $this->repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
-        $this->data = ['endpoint' => 'eu-north-1', 'secret_key' => 'secret', 'bucket_name' => 'test', 'access_key' => 'abc'];
+        $this->data = [
+           'endpoint' => 'eu-north-1',
+           'secret_key' => 'secret',
+           'bucket_name' => 'test',
+           'access_key' => 'abc'];
         $this->SetAdminUser();
+    }
+
+    /**
+     * Test tearDown.
+     */
+    public function tearDown(): void {
+        set_config('s3mock', false);
     }
 
     /**
@@ -70,7 +83,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/'];
         $file = $fs->create_file_from_string($filerecord, 'test content');
-        $this->expectException('InvalidArgumentException');
+        $this->expectException('repository_exception');
         $repo->send_file($file);
     }
 
@@ -79,9 +92,10 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      */
     public function test_class() {
         $repo = new \repository_s3bucket($this->repo);
-        $this->assertEquals('s3bucket 1', $repo->get_name());
+        $this->assertEquals('S3 bucket', $repo->get_name());
         $this->assertTrue($repo->check_login());
-        $this->assertTrue($repo->contains_private_data());
+        $this->assertFalse($repo->contains_private_data());
+        $this->assertEquals(['duration'], $repo->get_type_option_names());
         $this->assertCount(4, $repo->get_instance_option_names());
         $this->assertEquals('Unknown source', $repo->get_reference_details(''));
         $this->assertEquals('s3://testrepo/filename.txt', $repo->get_file_source_info('filename.txt'));
@@ -97,10 +111,16 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $this->assertFalse($repo->global_search());
         $this->assertEquals(7, $repo->supported_returntypes());
+        $this->assertEquals(4, $repo->default_returntype());
         $this->SetAdminUser();
         $this->assertEquals(2, $repo->check_capability());
         $result = $repo->get_listing('', 1);
         $this->assertCount(2, $result['list']);
+
+        set_config('s3mock', false);
+        $repo = new \repository_s3bucket($this->repo);
+        $this->expectException('moodle_exception');
+        $repo->get_listing('testfile.jpg', 1);
     }
 
     /**
@@ -111,6 +131,10 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
         $result = $repo->get_listing('.');
         $this->assertCount(1, $result['path']);
+        set_config('s3mock', false);
+        $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
+        $this->expectException('moodle_exception');
+        $repo->get_listing('.');
     }
 
     /**
@@ -125,6 +149,10 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $this->assertCount(0, $result['list']);
         $result = $repo->search('2020');
         $this->assertCount(2, $result['list']);
+        set_config('s3mock', false);
+        $repo = new \repository_s3bucket($this->repo, \context_user::instance($userid), $this->data);
+        $this->expectException('moodle_exception');
+        $repo->search('filesearch');
     }
 
     /**
@@ -164,31 +192,56 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $repo = new \repository_s3bucket($USER->id, $context);
         $url = $repo->get_link('tst.jpg');
         $this->assertStringContainsString('/s3/', $url);
+        set_config('s3mock', false);
+        $repo = new \repository_s3bucket($this->repo);
+        $url = $repo->get_link('filename.txt');
     }
 
     /**
      * Test get url in course context.
      */
     public function test_pluginfile() {
+        $headerf = 'Cannot modify header information - headers already sent';
+        $systemcontext = \context_system::instance();
+        $systemrepo = new \repository_s3bucket($this->repo, $systemcontext);
         $course = $this->getDataGenerator()->create_course();
+        $coursecontext = \context_course::instance($course->id);
+        $courserepo = new \repository_s3bucket($this->repo, $coursecontext);
+        $user = $this->getDataGenerator()->create_user();
+        $usercontext = \context_user::instance($user->id);
+        $userrepo = new \repository_s3bucket($this->repo, $usercontext);
         $url = $this->getDataGenerator()->create_module('url', ['course' => $course->id]);
-        $context = \context_module::instance($url->cmid);
-        $repo = new \repository_s3bucket($this->repo, $context);
+        $modcontext = \context_module::instance($url->cmid);
+        $modrepo = new \repository_s3bucket($this->repo, $modcontext);
         $cm = get_coursemodule_from_instance('url', $url->id);
-        $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $context, 'h3', [$repo->id, 'tst.jpg'], true));
+        $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $coursecontext, 'hr', [], true));
         try {
-            repository_s3bucket_pluginfile($course, $cm, $context, 's3', [$repo->id, 'tst.jpg'], true);
+             repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
         } catch (Exception $e) {
-            $this->assertStringContainsString('Cannot modify header information - headers already sent', $e->getMessage());
+            $this->assertStringContainsString($headerf, $e->getMessage());
+        }
+        try {
+            repository_s3bucket_pluginfile($course, $cm, $coursecontext, 's3', [$courserepo->id, 'tst.jpg'], true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString($headerf, $e->getMessage());
+        }
+        try {
+            repository_s3bucket_pluginfile($course, $cm, $usercontext, 's3', [$userrepo->id, 'tst.jpg'], true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString($headerf, $e->getMessage());
+        }
+        try {
+            repository_s3bucket_pluginfile($course, $cm, $modcontext, 's3', [$modrepo->id, 'tst.jpg'], true);
+        } catch (Exception $e) {
+            $this->assertStringContainsString($headerf, $e->getMessage());
         }
     }
 
     /**
-     * Tests orhter files.
+     * Tests other files.
      */
     public function test_local_other() {
         global $CFG;
-        set_config('region', '', 'local_backupstos3');
         require_once($CFG->libdir . '/upgradelib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/upgrade.php');

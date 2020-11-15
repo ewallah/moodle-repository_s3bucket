@@ -34,13 +34,34 @@ defined('MOODLE_INTERNAL') || die();
 class repository_s3bucket_generator extends testing_repository_generator {
 
     /**
+     * Fill in type record defaults.
+     *
+     * @param array $record
+     * @return array
+     */
+    protected function prepare_type_record(array $record) {
+        $record = parent::prepare_type_record($record);
+        if (!isset($record['duration'])) {
+            $record['duration'] = 5;
+        }
+        return $record;
+    }
+
+    /**
      * Fill in record defaults.
      *
      * @param array $record
      * @return array
      */
     protected function prepare_record(array $record) {
-        $arr = ['access_key' => 'access', 'secret_key' => 'secret', 'endpoint' => 'us-east-1', 'bucket_name' => 'testrepo'];
-        return array_merge($arr, parent::prepare_record($record));
+        $record = parent::prepare_type_record($record);
+        $arr = [
+            'contextid' => \context_system::instance()->id,
+            'name' => 'S3 bucket',
+            'access_key' => 'access',
+            'secret_key' => 'secret',
+            'endpoint' => 'us-east-1',
+            'bucket_name' => 'testrepo'];
+        return array_merge($arr, $record);
     }
 }

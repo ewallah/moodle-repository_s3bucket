@@ -71,7 +71,8 @@ Feature: S3 bucket repository can be used in user context
     And I navigate to "Users > Accounts > Browse list of users" in site administration
     And I follow "Teacher 1"
     And I click on "Preferences" "link" in the ".profile_tree" "css_element"
-    # And I follow "Manage instances" throws an error: You can not view/edit repository instances of another user.
+    # Throws an error: You can not view/edit repository instances of another user.
+    # And I follow "Manage instances"
 
   Scenario: A manager does not have access to a private s3 bucket repository in user context
     When I log in as "teacher"

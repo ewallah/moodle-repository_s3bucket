@@ -36,6 +36,7 @@
         <filter>
             <whitelist processUncoveredFilesFromWhitelist="false">
                 <directory suffix=".php">.</directory>
+                <file>tests/generator/lib.php</file>
                 <exclude>
                     <directory suffix="_test.php">.</directory>
                     <file>version.php</file>

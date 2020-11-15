@@ -94,7 +94,7 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
     When I log in as "teacher"
     And I am on "Course 1" course homepage with editing mode on
     When I add a "URL" to section "1" and I fill the form with:
-      | Name | Url name |
+      | Name | Bucketurl |
     And I click on "Choose a link..." "button"
     Then I should see "Global bucket"
     And I follow "Global bucket"
@@ -103,7 +103,12 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
     And I follow "2020_f.jpg"
     And I click on "Select this file" "button"
     And I click on "Save and return to course" "button"
-    Then I should see "Url name"
+    Then I should see "Bucketurl"
+    And I log out
+    And I log in as "student"
+    And I am on "Course 1" course homepage
+    And I follow "Bucketurl"
+    Then I should not see "No permission to access this repository."
 
   Scenario: A student cannot see the global s3 bucket repository
     When I log in as "student"

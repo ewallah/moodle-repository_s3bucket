@@ -42,22 +42,43 @@ use Aws\S3\S3Client;
 class repository_s3bucket_mock_tests extends \advanced_testcase {
 
     /**
+     * Create type and instance.
+     */
+    public function setUp(): void {
+        $this->resetAfterTest(true);
+    }
+
+    /**
+     * Test tearDown.
+     */
+    public function tearDown(): void {
+        set_config('s3mock', false);
+    }
+
+    /**
      * Test listobjects s3.
      */
     public function test_listobjects() {
         $result = new Aws\Result(['key1' => 'object1', 'key2' => 'object2', 'key3' => 'object3']);
         $args = ['Bucket' => 'test', 'Key' => 'key', 'SaveAs' => 'path'];
+        $options = [
+            'Bucket' => 'test',
+            'FetchOwner' => false,
+            'Prefix' => '.',
+            'MaxKeys' => 1000,
+            'EncodingType' => 'url',
+            'Delimiter' => '/'];
         $client = $this->getMockBuilder('Aws\S3\S3Client')
             ->disableOriginalConstructor()
-            ->setMethods(['listObjects', 'getPaginator', 'getObject'])
-            ->setConstructorArgs([['Bucket' => 'test'], ['Bucket' => 'test'], $args])
+            ->setMethods(['listObjectsV2', 'getPaginator', 'getObject'])
+            ->setConstructorArgs([$options, ['Bucket' => 'test'], $args])
             ->getMock();
         $client->expects($this->once())
-            ->method('listObjects')
+            ->method('listObjectsV2')
             ->with(['Bucket' => 'test'])
             ->will($this->returnValue($result));
 
-        $list = $client->listObjects(['Bucket' => 'test']);
+        $list = $client->listObjectsV2(['Bucket' => 'test']);
         $this->assertTrue($list->hasKey('key1'));
         $this->assertFalse($list->hasKey('object2'));
 
@@ -97,10 +118,35 @@ class repository_s3bucket_mock_tests extends \advanced_testcase {
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();
+
+        set_config('s3mock', true);
         $s3bucket = new repository_s3bucket($repo);
+        $s3bucket->set_option(['endpoint' => 'us-east-1']);
         $reflection = new ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $method->setAccessible(true);
-        $this->assertInstanceOf('Aws\S3\S3Client', $method->invoke($s3bucket));
+        $client = $method->invoke($s3bucket);
+        $this->assertInstanceOf('Aws\S3\S3Client', $client);
+        $this->assertInstanceOf('Aws\Command', $client->getCommand('HeadBucket', ['Bucket' => 'testwallah']));
+        $this->assertInstanceOf('Aws\ResultPaginator', $client->getPaginator('ListObjects', []));
+        $arr = ['Bucket' => 'testwallah', 'Key' => 'testfile', 'ResponseContentDisposition' => 'attachment'];
+        $result = $client->getCommand('GetObject', $arr);
+        $this->assertInstanceOf('Aws\Command', $result);
+        $this->assertNotEmpty($client->createPresignedRequest($result, 2));
+
+        set_config('s3mock', false);
+        $s3bucket = new repository_s3bucket($repo);
+        $s3bucket->set_option(['endpoint' => 'us-west-1']);
+        $reflection = new ReflectionClass($s3bucket);
+        $method = $reflection->getMethod('create_s3');
+        $method->setAccessible(true);
+        $client = $method->invoke($s3bucket);
+        $this->assertInstanceOf('Aws\S3\S3Client', $client);
+        $this->assertInstanceOf('Aws\ResultPaginator', $client->getPaginator('ListObjects', []));
+        $this->assertInstanceOf('Aws\Command', $client->getCommand('HeadBucket', ['Bucket' => 'testwallah']));
+        $arr = ['Bucket' => 'testwallah', 'Key' => 'testfile', 'ResponseContentDisposition' => 'attachment'];
+        $result = $client->getCommand('GetObject', $arr);
+        $this->assertInstanceOf('Aws\Command', $result);
+        $this->assertNotEmpty($client->createPresignedRequest($result, 2));
     }
 }
