@@ -142,7 +142,8 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
      */
     public function test_search() {
         $userid = $this->getDataGenerator()->create_user()->id;
-        $repo = new \repository_s3bucket($this->repo, \context_user::instance($userid), $this->data);
+        $context = \context_user::instance($userid);
+        $repo = new \repository_s3bucket($this->repo, $context, $this->data);
         $this->data['endpoint'] = 'eu-central-1';
         $repo->set_option($this->data);
         $result = $repo->search('filesearch');
@@ -150,7 +151,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $result = $repo->search('2020');
         $this->assertCount(2, $result['list']);
         set_config('s3mock', false);
-        $repo = new \repository_s3bucket($this->repo, \context_user::instance($userid), $this->data);
+        $repo = new \repository_s3bucket($this->repo, $context, $this->data);
         $this->expectException('moodle_exception');
         $repo->search('filesearch');
     }
