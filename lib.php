@@ -430,7 +430,7 @@ class repository_s3bucket extends repository {
      * @return boolean True when the repository accesses private external data.
      */
     public function contains_private_data() {
-        return $this->context->contextlevel == CONTEXT_USER;
+        return ($this->context->contextlevel === CONTEXT_USER);
     }
 }
 
@@ -450,18 +450,15 @@ class repository_s3bucket extends repository {
 function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     $handled = false;
     if ($filearea == 's3') {
-        if ($context->contextlevel == CONTEXT_SYSTEM) {
-            // Old school entry.
-            if (has_capability('moodle/course:view', $context)) {
-                $handled = true;
-            }
-        } else if ($context->contextlevel == CONTEXT_COURSE) {
-            if ($course && has_capability('moodle/course:view', $context)) {
-                $handled = true;
-            }
+        if ($context->contextlevel === CONTEXT_SYSTEM) {
+            $handled = has_capability('moodle/course:view', $context);
+        } else if ($context->contextlevel === CONTEXT_COURSE) {
+            $handled = $course && has_capability('moodle/course:view', $context);
         } else if ($cm) {
             if (has_capability('mod/' . $cm->modname . ':view', $context)) {
-                $handled = true;
+                $modinfo = get_fast_modinfo($course);
+                $cmi = $modinfo->cms[$cm->id];
+                $handled = ($cmi->uservisible && $cmi->is_visible_on_course_page());
             }
         }
     }
@@ -471,7 +468,6 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
         $reference = implode('/', $args);
         $repo = repository::get_repository_by_id($itemid, $context);
         $repo->send_otherfile($reference, "+$duration minutes");
-    } else {
-        return false;
     }
+    return false;
 }

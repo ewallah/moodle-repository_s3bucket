@@ -38,7 +38,11 @@ Feature: S3 bucket repository can be used in user context
     Then I should see "Teacher user bucket"
     And I follow "Teacher user bucket"
     Then I should see "2020_dir"
-
+    And I follow "2020_f.jpg"
+    Then I should see "Make a copy of the file"
+    And I should not see "Link to the file directly"
+    And I should see "Create an alias"
+    
   Scenario: An admin does not have access to a private s3 bucket repository in user context
     When I log in as "teacher"
     And I follow "Preferences" in the user menu
@@ -55,19 +59,7 @@ Feature: S3 bucket repository can be used in user context
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Teacher user bucket"
-
-  Scenario: An admin cannot access a private s3 bucket repository in user context
-    When I log in as "teacher"
-    And I follow "Preferences" in the user menu
-    And I follow "Manage instances"
-    And I follow "Create \"Amazon S3 bucket\" instance"
-    And I set the field "Name" to "Teacher user bucket"
-    And I set the field "Bucket name" to "userbucket"
-    And I set the field "Access key" to "anoTherfake@1"
-    And I set the field "Secret key" to "anotherFake_$2"
-    And I click on "Save" "button"
-    And I log out
-    And I log in as "admin"
+    And I click on "Close" "button" in the "File picker" "dialogue"
     And I navigate to "Users > Accounts > Browse list of users" in site administration
     And I follow "Teacher 1"
     And I click on "Preferences" "link" in the ".profile_tree" "css_element"
@@ -115,6 +107,7 @@ Feature: S3 bucket repository can be used in user context
     And I follow "Manage instances"
     Then I should not see "Amazon S3 bucket"
 
+  @_file_upload
   Scenario: An manager can add files from the s3 bucket repository in user context
     When I log in as "manager"
     And I follow "Preferences" in the user menu
@@ -133,6 +126,17 @@ Feature: S3 bucket repository can be used in user context
     Then I should see "Manager user bucket"
     And I follow "Manager user bucket"
     Then I should see "2020_dir"
+    And I should see "2020_f.jpg"
+    And I follow "2020_f.jpg"
+    Then I should see "Make a copy of the file"
+    And I should see "Create an alias"
+    And I should not see "Link to the file directly"
+    # And I click on "Make a copy of the file" "radio"
+    And I click on "Select this file" "button"
+    Then I should see "2020_f.jpg"
+    And I click on "Save changes" "button"
+    Then I should not see "No files available" in the "Private files" "block"
+    And I should see "2020_f.jpg" in the "Private files" "block"
 
   Scenario: An admin can add files from the s3 bucket repository in user context
     When I log in as "admin"
@@ -146,3 +150,20 @@ Feature: S3 bucket repository can be used in user context
     And I set the field "Access key" to "anoTherfake@1"
     And I set the field "Secret key" to "anotherFake_$2"
     And I click on "Save" "button"
+    And I follow "Dashboard" in the user menu
+    And I follow "Manage private files..."
+    And I click on "Add..." "button" in the "Files" "form_row"
+    Then I should see "Admin user bucket"
+    And I follow "Admin user bucket"
+    Then I should see "2020_dir"
+    And I should see "2020_f.jpg"
+    And I follow "2020_f.jpg"
+    Then I should see "Make a copy of the file"
+    And I should see "Create an alias"
+    And I should not see "Link to the file directly"
+    # And I click on "Make a copy of the file" "radio"
+    And I click on "Select this file" "button"
+    Then I should see "2020_f.jpg"
+    And I click on "Save changes" "button"
+    Then I should not see "No files available" in the "Private files" "block"
+    And I should see "2020_f.jpg" in the "Private files" "block"

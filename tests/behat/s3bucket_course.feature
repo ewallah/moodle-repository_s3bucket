@@ -34,7 +34,8 @@ Feature: S3 bucket repository is private in user context
     And I click on "Save" "button"
     And I log out
 
-  Scenario: A teacher can add files from the s3 bucket repository in course context
+  @_file_upload
+  Scenario: A teacher can add files from the s3 bucket repository in module context
     When I log in as "teacher"
     And I am on "Course 1" course homepage with editing mode on
     When I add a "Folder" to section "1"
@@ -43,6 +44,45 @@ Feature: S3 bucket repository is private in user context
       | Description | Folder description |
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Course 1 Bucket"
+    And I follow "Course 1 Bucket"
+    Then I should see "2020_dir"
+    And I should see "2020_f.jpg"
+    And I follow "2020_f.jpg"
+    Then I should see "Make a copy of the file"
+    And I should see "Create an alias"
+    And I should not see "Create an access controled link to the file"
+    And I click on "Select this file" "button"
+    Then I should see "2020_f.jpg"
+    And I click on "Save and display" "button"
+    And I should see "2020_f.jpg"
+
+  @_file_upload @atto
+  Scenario: A teacher can add files from the s3 bucket repository in course context
+    When I log in as "teacher"
+    And I am on "Course 1" course homepage
+    And I navigate to "Edit settings" in current page administration
+    And I set the field with xpath "//select[@name='summary_editor[format]']" to "1"
+    And I click on "Save and display" "button"
+    And I navigate to "Edit settings" in current page administration
+    And I set the field "Course summary" to "<p>Image test</p>"
+    And I select the text in the "Course summary" Atto editor
+    And I click on "Insert or edit image" "button"
+    And I click on "Browse repositories..." "button"
+    Then I should see "Course 1 Bucket"
+    And I follow "Course 1 Bucket"
+    Then I should see "2020_dir"
+    And I should see "2020_f.jpg"
+    And I follow "2020_f.jpg"
+    Then I should see "Make a copy of the file"
+    And I should see "Create an alias"
+    And I should see "Link to the file directly"
+    And I should not see "Create an access controled link to the file"
+    And I click on "Select this file" "button"
+    And I set the field "This image is decorative only" to "1"
+    And I set the field with xpath "//*[contains(concat(' ', normalize-space(@class), ' '), ' atto_image_widthentry ')]" to "100"
+    And I set the field with xpath "//*[contains(concat(' ', normalize-space(@class), ' '), ' atto_image_heightentry ')]" to "100"
+    And I click on "Save image" "button"
+    And I click on "Save and display" "button"
 
   Scenario: A teacher cannot see the s3 bucket repository in another course context
     When I log in as "teacher"
