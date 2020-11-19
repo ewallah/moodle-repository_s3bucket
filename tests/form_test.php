@@ -48,12 +48,42 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
     /**
      * Create type and instance.
      */
-    public function setUp():void {
+    public function setUp(): void {
         $this->resetAfterTest(true);
+        set_config('s3mock', true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $this->repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
-        $this->data = ['endpoint' => 'eu-west-2', 'secret_key' => 'secret', 'bucket_name' => 'test', 'access_key' => 'abc'];
+        $this->data = [
+            'endpoint' => 'eu-west-2',
+            'secret_key' => 'secret',
+            'bucket_name' => 'test',
+            'access_key' => 'abc'];
         $this->SetAdminUser();
+    }
+
+    /**
+     * Test tearDown.
+     */
+    public function tearDown(): void {
+        set_config('s3mock', false);
+    }
+
+    /**
+     * Test type config form.
+     */
+    public function test_type_config_form() {
+        $context = \context_system::instance();
+        $para = [
+            'plugin' => 's3bucket',
+            'action' => 'show',
+            'pluginname' => 'repository_s3bucket',
+            'contextid' => $context->id];
+        $mform = new repository_type_form('', $para);
+        $this->assertEquals([], repository_s3bucket::type_form_validation($mform, null, []));
+        ob_start();
+        $mform->display();
+        $out = ob_get_clean();
+        $this->assertStringContainsString('(in minutes)', $out);
     }
 
     /**
@@ -78,7 +108,7 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
     public function test_instance_formproxy() {
         global $USER;
         $context = \context_user::instance($USER->id);
-        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
+        $para = ['plugin' => 's3bucket', 'typeid' => null, 'instance' => null, 'contextid' => $context->id];
         $mform = new repository_instance_form('', $para);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
         ob_start();
@@ -114,5 +144,10 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('value="us-east-1" selected', $out);
         $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        set_config('s3mock', false);
+        $mform = new \repository_instance_form('', $para);
+        $repo = new \repository_s3bucket($USER->id, $context);
+        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => $repo, 'contextid' => $context->id];
+        $this->assertCount(0, repository_s3bucket::instance_form_validation($mform, $this->data, []));
     }
 }

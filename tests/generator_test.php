@@ -35,13 +35,17 @@ defined('MOODLE_INTERNAL') || die();
 class repository_s3bucket_generator_testcase extends advanced_testcase {
 
     /**
+     * Create type and instance.
+     */
+    public function setUp():void {
+        $this->resetAfterTest(true);
+    }
+
+    /**
      * Basic test of creation of repository types.
-     *
-     * @return void
      */
     public function test_create_type() {
         global $DB;
-        $this->resetAfterTest(true);
         $repotype = $this->getDataGenerator()->create_repository_type('s3bucket');
         $this->assertEquals($repotype->type, 's3bucket', 'Unexpected name after creating repository type s3bucket');
         $this->assertTrue($DB->record_exists('repository', ['type' => 's3bucket', 'visible' => 1]));
@@ -59,11 +63,8 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
 
     /**
      * Basic test of creation of repository instance.
-     *
-     * @return void
      */
     public function test_create_instance() {
-        $this->resetAfterTest(true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket');
         $this->assertEquals(0, $repo->userid);
@@ -71,13 +72,19 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
 
     /**
      * Installing repository tests
-     *
-     * @return void
      */
     public function test_install_repository() {
-        $this->resetAfterTest(true);
         $plugintype = new repository_type('s3bucket');
         $pluginid = $plugintype->create(false);
         $this->assertIsInt($pluginid);
+    }
+
+    /**
+     * Mocking generator
+     */
+    public function test_class() {
+        $s3generator = new \repository_s3bucket_generator($this->getDataGenerator());
+        phpunit_util::call_internal_method($s3generator, 'prepare_type_record', [['s3bucket']], 'repository_s3bucket_generator');
+        phpunit_util::call_internal_method($s3generator, 'prepare_record', [['s3bucket']], 'repository_s3bucket_generator');
     }
 }
