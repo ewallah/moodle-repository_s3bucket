@@ -246,6 +246,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         require_once($CFG->libdir . '/upgradelib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/upgrade.php');
+        require_once($CFG->dirroot . '/repository/s3bucket/tests/coverage.php');
         $this->expectException('downgrade_exception');
         xmldb_repository_s3bucket_upgrade(time());
     }
