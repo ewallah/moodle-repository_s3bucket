@@ -42,7 +42,7 @@ Feature: S3 bucket repository can be used in user context
     Then I should see "Make a copy of the file"
     And I should not see "Link to the file directly"
     And I should see "Create an alias"
-    
+
   Scenario: An admin does not have access to a private s3 bucket repository in user context
     When I log in as "teacher"
     And I follow "Preferences" in the user menu

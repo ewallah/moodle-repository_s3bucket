@@ -54,7 +54,6 @@ class repository_s3bucket_generator extends testing_repository_generator {
      * @return array
      */
     protected function prepare_record(array $record) {
-        global $USER;
         $record = parent::prepare_type_record($record);
         $arr = [
             'contextid' => \context_system::instance()->id,
