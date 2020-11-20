@@ -27,7 +27,6 @@ env:
 
 jobs:
   include:
-    #- env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_39_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_310_STABLE
     - env: DB=mysqli MOODLE_BRANCH=MOODLE_311_STABLE
@@ -54,15 +53,12 @@ install:
   - moodle-plugin-ci grunt
   - moodle-plugin-ci behat -q --profile default blocks/admin_bookmarks
   - moodle-plugin-ci behat -q --profile chrome lib/editor/atto/plugins/image
-  - vendor/bin/phpunit --testsuite core_privacy_testsuite,tool_dataprivacy_testsuite
+  - vendor/bin/phpunit --filter 'test_all_providers_compliant' > /dev/null
 
 script:
   - moodle-plugin-ci phpunit --coverage-text --coverage-clover
   - moodle-plugin-ci behat
   - moodle-plugin-ci behat --profile chrome
-  - php admin/tool/behat/cli/init.php -a="classic" > /dev/null
-  - moodle-plugin-ci behat --suite="classic"
-  - moodle-plugin-ci behat --suite="classic" --profile chrome
 
 after_success:
   - moodle-plugin-ci coveralls-upload
