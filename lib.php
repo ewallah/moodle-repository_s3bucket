@@ -283,7 +283,6 @@ class repository_s3bucket extends repository {
      * @param string $classname repository class name
      */
     public static function type_config_form($mform, $classname = 'repository') {
-        parent::type_config_form($mform);
         $duration = get_config('s3bucket', 'duration') ?? 2;
         $choices = ['1' => 1, '2' => 2, '10' => 10, '15' => 15, '30' => 30, '60' => 60];
         $mform->addElement('select', 'duration', get_string('duration', $classname), $choices, $duration);
