@@ -44,13 +44,18 @@ jobs:
           repository: moodlehq/moodle-plugin-ci
           path: ci
 
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.15.0'
+
       - name: setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pgsql, mysqli
           tools: composer, behat, phpunit, phpmd, phpcbf, phpcpd, psalm, phpcs
-          path: ci
+          coverage: xdebug
 
       - name: other
         run: |
