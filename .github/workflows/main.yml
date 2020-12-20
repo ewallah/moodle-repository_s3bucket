@@ -2,8 +2,6 @@ name: Tests
 
 on: push
 
-LANG: "en_AU.UTF-8"
-
 jobs:
   ci:
     name: ci
@@ -58,6 +56,7 @@ jobs:
         run: |
            echo "$(cd bin; pwd)" >> $GITHUB_PATH
            echo "$(cd vendor/bin; pwd)" >> $GITHUB_PATH
+           sudo locale-gen en_AU.UTF-8
         with:
           path: ci
 
