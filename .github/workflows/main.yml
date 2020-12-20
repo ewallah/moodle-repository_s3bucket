@@ -38,12 +38,6 @@ jobs:
         with:
           path: this-plugin
 
-      - name: checkout moodle-plugin-ci
-        uses: actions/checkout@v2
-        with:
-          repository: moodlehq/moodle-plugin-ci
-          path: ci
-
       - name: Install node
         uses: actions/setup-node@v1
         with:
@@ -57,9 +51,16 @@ jobs:
           tools: composer, behat, phpunit, phpmd, phpcbf, phpcpd, psalm, phpcs
           coverage: xdebug
 
+      - name: checkout moodle-plugin-ci
+        uses: actions/checkout@v2
+        with:
+          repository: moodlehq/moodle-plugin-ci
+          path: ci
+
       - name: other
         run: |
            cd ci
+           composer install
            echo "$(cd bin; pwd)" >> $GITHUB_PATH
            echo "$(cd vendor/bin; pwd)" >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
