@@ -11,8 +11,8 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_USER: moodleuser
-          POSTGRES_PASSWORD: moodle
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
         options: --health-cmd="pg_isready" --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
@@ -30,6 +30,7 @@ jobs:
       matrix:
         moodle-branch: ['master', 'MOODLE_311_STABLE']
         php: ['7.4']
+        database: ['mariadb', 'pgsql']
 
     steps:
       - name: Setup PHP
