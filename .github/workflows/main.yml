@@ -1,6 +1,5 @@
 name: Tests
 
-# Run this workflow every time a new commit pushed to your repository
 on: push
 
 jobs:
@@ -8,37 +7,37 @@ jobs:
     name: ci
     runs-on: ubuntu-latest
 
-    env:
-      DB: pgsql
-
     services:
       postgres:
         image: postgres
         env:
           POSTGRES_USER: moodleuser
           POSTGRES_PASSWORD: moodle
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: --health-cmd="pg_isready" --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
+      mariadb:
+        image: mariadb
+        env:
+          MYSQL_USER: 'root'
+          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+        ports:
+          - 3306:3306
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - php: '7.4'
-            moodle-branch: 'master'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_311_STABLE'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_310_STABLE'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_39_STABLE'
+        moodle-branch: ['master', 'MOODLE_311_STABLE']
+        php: ['7.4']
 
     steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pgsql, mysqli
+
       - name: Checkout plugin
         uses: actions/checkout@v2
         with:
@@ -51,22 +50,21 @@ jobs:
           path: ci
 
       - name: Composer install
-        run: cd ci; composer install
-
-      - name: Set path 1
-        run: echo "$(cd ci/bin; pwd)" >> $GITHUB_PATH
-
-      - name: Set path 2
-        run: echo "$(cd ci/vendor/bin; pwd)" >> $GITHUB_PATH
-
-      - name: Set AU
-        run: sudo locale-gen en_AU.UTF-8
+        run: |
+           cd ci
+           composer install
+           echo "$(cd bin; pwd)" >> $GITHUB_PATH
+           echo "$(cd vendor/bin; pwd)" >> $GITHUB_PATH
+           sudo locale-gen en_AU.UTF-8
 
       - name: Add plugin
-        run: moodle-plugin-ci add-plugin --clone https://github.com/catalyst/moodle-local_aws.git
+        run: moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git --branch main
 
       - name: Install Moodle
-        run: moodle-plugin-ci install --branch ${{ matrix.moodle-branch }} --db-user moodleuser --db-pass moodle --plugin this-plugin
+        run: moodle-plugin-ci install --db-host=127.0.0.1 --plugin this-plugin
+        env:
+          DB: ${{ matrix.database }}
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
       
       - name: phplint
         run: moodle-plugin-ci phplint

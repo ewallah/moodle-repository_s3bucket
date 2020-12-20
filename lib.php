@@ -189,7 +189,7 @@ class repository_s3bucket extends repository {
             try {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
-            } catch (Aws\S3\Exception\S3Exception $e) {
+            } catch (Exception $e) {
                 throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
             }
             $uri = $req->getUri()->__toString();
