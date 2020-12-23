@@ -33,6 +33,7 @@ jobs:
         php: ['7.4', '7.3']
         database: ['mariadb', 'pgsql']
 
+    steps:
       - name: checkout plugin
         uses: actions/checkout@v2
         with:
