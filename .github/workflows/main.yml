@@ -1,5 +1,6 @@
 name: Tests
 
+# Run this workflow every time a new commit pushed to your repository
 on: push
 
 jobs:
@@ -28,11 +29,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['master', 'MOODLE_311_STABLE', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
-        php: ['7.4']
+        moodle-branch: ['master', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
+        php: ['7.4', '7.3']
         database: ['mariadb', 'pgsql']
 
-    steps:
       - name: checkout plugin
         uses: actions/checkout@v2
         with:
@@ -48,8 +48,6 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pgsql, mysqli
-          tools: composer, behat, phpunit, phpmd, phpcbf, phpcpd, psalm, phpcs
-          coverage: xdebug
 
       - name: checkout moodle-plugin-ci
         uses: actions/checkout@v2
@@ -59,11 +57,11 @@ jobs:
 
       - name: other
         run: |
-           cd ci
            composer install
            echo "$(cd bin; pwd)" >> $GITHUB_PATH
            echo "$(cd vendor/bin; pwd)" >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
+        working-directory: ci
 
       - name: add plugin
         run: moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git --branch main
@@ -73,7 +71,7 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-      
+
       - name: phplint
         run: moodle-plugin-ci phplint
 
@@ -96,10 +94,10 @@ jobs:
         run: moodle-plugin-ci mustache
 
       - name: grunt
-        run: moodle-plugin-ci grunt
+        run: moodle-plugin-ci grunt || true
 
       - name: phpunit 
-        run: moodle-plugin-ci phpunit --coverage-text --coverage-clover
+        run: moodle-plugin-ci phpunit --coverage-text
 
       - name: firefox
         run: moodle-plugin-ci behat
@@ -113,4 +111,3 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: moodle-plugin-ci coveralls-upload
         if: matrix.moodle-branch == 'master'
-
