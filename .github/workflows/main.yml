@@ -5,7 +5,6 @@ on: push
 
 jobs:
   ci:
-    name: ci
     runs-on: ubuntu-20.04
 
     services:
@@ -30,8 +29,10 @@ jobs:
       fail-fast: false
       matrix:
         moodle-branch: ['master', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
-        php: ['7.4', '7.3']
+        php: ['7.4', '7.3', '8.0']
         database: ['mariadb', 'pgsql']
+
+    name: ${{ matrix.moodle-branch }} ( php ${{ matrix.php }} , db : ${{ matrix.operating-system }} )
 
     steps:
       - name: checkout plugin
