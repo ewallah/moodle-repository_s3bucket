@@ -20,8 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['master', 'MOODLE_310_STABLE']
-        php: ['7.4', '8.0']
+        moodle-branch: ['master', 'MOODLE_311_STABLE', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
+        php: ['7.4', '7.3']
         database: ['pgsql']
 
     name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.operating-system }}
