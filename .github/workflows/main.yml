@@ -32,7 +32,7 @@ jobs:
         php: ['7.4', '7.3', '8.0']
         database: ['mariadb', 'pgsql']
 
-    name: ${{ matrix.moodle-branch }} ( php ${{ matrix.php }} , db : ${{ matrix.operating-system }} )
+    name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.operating-system }}
 
     steps:
       - name: checkout plugin
