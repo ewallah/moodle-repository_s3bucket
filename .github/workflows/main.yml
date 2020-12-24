@@ -5,7 +5,7 @@ on: push
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     services:
       postgres:
@@ -16,21 +16,13 @@ jobs:
         options: --health-cmd='pg_isready' --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
-      mariadb:
-        image: mariadb
-        env:
-          MYSQL_USER: 'root'
-          MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-        options: --health-cmd='mysqladmin ping' --health-interval 10s --health-timeout 5s --health-retries 3
-        ports:
-          - 3306:3306
 
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['master', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
-        php: ['7.4', '7.3', '8.0']
-        database: ['mariadb', 'pgsql']
+        moodle-branch: ['master', 'MOODLE_310_STABLE']
+        php: ['7.4', '8.0']
+        database: ['pgsql']
 
     name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.operating-system }}
 
