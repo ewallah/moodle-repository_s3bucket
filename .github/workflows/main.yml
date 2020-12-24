@@ -6,7 +6,7 @@ on: push
 jobs:
   ci:
     name: ci
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     services:
       postgres:
@@ -14,15 +14,15 @@ jobs:
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
-        options: --health-cmd="pg_isready" --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd='pg_isready' --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
       mariadb:
         image: mariadb
         env:
           MYSQL_USER: 'root'
-          MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-        options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+        options: --health-cmd='mysqladmin ping' --health-interval 10s --health-timeout 5s --health-retries 3
         ports:
           - 3306:3306
 
@@ -39,7 +39,7 @@ jobs:
         with:
           path: this-plugin
 
-      - name: Install node
+      - name: install node
         uses: actions/setup-node@v1
         with:
           node-version: '14.15.0'
@@ -56,7 +56,7 @@ jobs:
           repository: moodlehq/moodle-plugin-ci
           path: ci
 
-      - name: other
+      - name: composer
         run: |
            composer install
            echo "$(cd bin; pwd)" >> $GITHUB_PATH
