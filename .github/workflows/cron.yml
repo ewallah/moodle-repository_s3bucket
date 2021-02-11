@@ -1,6 +1,8 @@
-name: Tests
+name: Cron
 
-on: [push, pull_request]
+on:
+  schedule:
+    - cron: "5 10 9 * *"
 
 jobs:
   ci:
@@ -19,11 +21,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['master', 'MOODLE_311_STABLE', 'MOODLE_310_STABLE', 'MOODLE_39_STABLE']
-        php: ['7.4', '7.3']
+        moodle-branch: ['master']
+        php: ['7.4']
         database: ['pgsql']
 
-    name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.operating-system }}
+    name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.database }}
 
     steps:
       - name: checkout plugin
@@ -85,31 +87,7 @@ jobs:
         run: moodle-plugin-ci grunt
 
       - name: phpunit 
-        run: moodle-plugin-ci phpunit --coverage-text --coverage-clover
+        run: moodle-plugin-ci phpunit --coverage-text
 
       - name: firefox
         run: moodle-plugin-ci behat
-      
-      - name: chrome
-        run: moodle-plugin-ci behat --profile chrome
-
-      - name: firefox classic
-        run: moodle-plugin-ci behat --suite="classic"
-      
-      - name: chrome classic
-        run: moodle-plugin-ci behat  --suite="classic" --profile chrome
-
-      - name: admin bookmarks
-        run: php admin/tool/behat/cli/run.php --profile=chrome --tags=@block_admin_bookmarks
-        working-directory: moodle
-
-      - name: privacy
-        run: vendor/bin/phpunit --colors --no-coverage --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
-        working-directory: moodle
-
-      - name: coveralls
-        env:
-          COVERALLS_RUN_LOCALLY: true
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: moodle-plugin-ci coveralls-upload
-        if: matrix.moodle-branch == 'master'
