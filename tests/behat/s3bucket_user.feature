@@ -43,7 +43,7 @@ Feature: S3 bucket repository can be used in user context
     #And I should not see "Link to the file directly"
     #And I should see "Create an alias"
 
-  Scenario: An admin does not have access to a private s3 bucket repository in user context
+  Scenario: An admin does not have access to a private s3 bucket repository of a teacher
     When I log in as "teacher"
     And I follow "Preferences" in the user menu
     And I follow "Manage instances"
@@ -60,6 +60,19 @@ Feature: S3 bucket repository can be used in user context
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Teacher user bucket"
     And I click on "Close" "button" in the "File picker" "dialogue"
+
+  Scenario: An admin does not have access to a private s3 bucket repository in user context
+    When I log in as "teacher"
+    And I follow "Preferences" in the user menu
+    And I follow "Manage instances"
+    And I follow "Create \"Amazon S3 bucket\" instance"
+    And I set the field "Name" to "Teacher user bucket"
+    And I set the field "Bucket name" to "userbucket"
+    And I set the field "Access key" to "anoTherfake@1"
+    And I set the field "Secret key" to "anotherFake_$2"
+    And I click on "Save" "button"
+    And I log out
+    And I log in as "admin"
     And I navigate to "Users > Accounts > Browse list of users" in site administration
     And I follow "Teacher 1"
     And I click on "Preferences" "link" in the ".profile_tree" "css_element"
