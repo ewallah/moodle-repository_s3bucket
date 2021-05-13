@@ -63,7 +63,7 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (Aws\S3\Exception\S3Exception $e) {
+        } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
@@ -125,7 +125,7 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (Aws\S3\Exception\S3Exception $e) {
+        } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
@@ -248,7 +248,7 @@ class repository_s3bucket extends repository {
            'SaveAs' => $path];
         try {
             $s3->getCommand('GetObject', $options);
-        } catch (Aws\S3\Exception\S3Exception $e) {
+        } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         return ['path' => $path, 'url' => $filepath];
