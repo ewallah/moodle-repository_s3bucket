@@ -247,7 +247,7 @@ class repository_s3bucket extends repository {
            'Key' => $filepath,
            'SaveAs' => $path];
         try {
-            $s3->getCommand('GetObject', $options);
+            $s3->getObject($options);
         } catch (Exception $e) {
             throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
