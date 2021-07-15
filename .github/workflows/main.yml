@@ -17,7 +17,7 @@ jobs:
         ports:
           - 5432:5432
       mariadb:
-        image: mariadb
+        image: mariadb:10.5
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -96,7 +96,7 @@ jobs:
         run: moodle-plugin-ci --ansi grunt
 
       - name: phpunit 
-        run: moodle-plugin-ci --ansi phpunit
+        run: moodle-plugin-ci --ansi phpunit --coverage-text || true
 
       - name: firefox
         run: moodle-plugin-ci --ansi behat
