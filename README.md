@@ -7,6 +7,9 @@ possible to give teachers and managers access to a specific S3 folder (bucket).
 Multiple instances are supported, you only have to create a IAM user who has read access
 to your S3 root folder, but read and write permissions to your S3 bucket.
 
+Warning:  This plugin is dependent on the local_aws plugin. If you want to use the latest
+sdk version, you will have to use the [eWallah version](https://github.com/ewallah/moodle-local_aws) that supports
+all new regions.
 
 
 [![Build Status](https://github.com/ewallah/moodle-repository_s3bucket/workflows/Tests/badge.svg)](https://github.com/ewallah/moodle-repository_s3bucket/actions)
