@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021060800;
+$plugin->version   = 2021071700;
 $plugin->requires  = 2020061500;
 $plugin->component = 'repository_s3bucket';
 $plugin->maturity  = MATURITY_STABLE;
