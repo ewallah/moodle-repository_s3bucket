@@ -59,14 +59,14 @@ Feature: S3 bucket repository is private in user context
   @_file_upload @atto
   Scenario: A teacher can add files from the s3 bucket repository in course context
     When I log in as "teacher"
-    And I am on "Course 1" course homepage
-    And I navigate to "Edit settings" in current page administration
-    And I set the field with xpath "//select[@name='summary_editor[format]']" to "1"
-    And I click on "Save and display" "button"
-    And I navigate to "Edit settings" in current page administration
-    And I set the field "Course summary" to "<p>Image test</p>"
-    And I select the text in the "Course summary" Atto editor
-    And I click on "Insert or edit image" "button"
+    And I am on "Course 1" course homepage with editing mode on
+    When I add a "Workshop" to section "1" and I fill the form with:
+      | Workshop name | Workshop with embedded images  |
+    And I am on the "Workshop with embedded images" "workshop activity editing" page
+    And I expand all fieldsets
+    And I set the field "Instructions for submission" to "<p>Image test</p>"
+    And I select the text in the "Instructions for submission" Atto editor
+    And I click on "Insert or edit image" "button" in the "//*[@data-fieldtype='editor']/*[descendant::*[@id='id_instructauthorseditor']]" "xpath_element"
     And I click on "Browse repositories..." "button"
     Then I should see "Course 1 Bucket"
     And I follow "Course 1 Bucket"
