@@ -110,10 +110,8 @@ Feature: S3 bucket repository is private in user context
       | assignsubmission_file_enabled | 1 |
       | Maximum number of uploaded files | 2 |
     And I log out
-    And I log in as "student"
-    And I am on "Course 1" course homepage
-    And I follow "Test assignment name"
-    When I press "Add submission"
+    When I am on the "Test assignment name" "assign activity" page logged in as student
+    And I press "Add submission"
     And I follow "Add..."
     Then I should not see "Course 1 Bucket"
 
