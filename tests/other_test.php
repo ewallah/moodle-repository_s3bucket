@@ -21,6 +21,7 @@
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace repository_s3bucket;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -37,7 +38,7 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \repository_s3bucket
  */
-class repository_s3bucket_other_tests extends \advanced_testcase {
+class other_test extends \advanced_testcase {
 
     /** @var int repo */
     protected $repo;
@@ -80,7 +81,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         global $USER;
         $repo = new \repository_s3bucket($this->repo);
         $fs = get_file_storage();
-        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
+        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => \context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/'];
         $file = $fs->create_file_from_string($filerecord, 'test content');
         $this->expectException('repository_exception');
@@ -104,7 +105,7 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $repo->disabled = true;
         try {
             $repo->get_reference_details('filename.txt');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->assertEquals('Cannot download this file', $e->getMessage());
         }
         $repo->disabled = false;
@@ -217,23 +218,23 @@ class repository_s3bucket_other_tests extends \advanced_testcase {
         $cm = get_coursemodule_from_instance('url', $url->id);
         $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $coursecontext, 'hr', [], true));
         try {
-             repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
-        } catch (Exception $e) {
+             \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
+        } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
         try {
-            repository_s3bucket_pluginfile($course, $cm, $coursecontext, 's3', [$courserepo->id, 'tst.jpg'], true);
-        } catch (Exception $e) {
+            \repository_s3bucket_pluginfile($course, $cm, $coursecontext, 's3', [$courserepo->id, 'tst.jpg'], true);
+        } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
         try {
-            repository_s3bucket_pluginfile($course, $cm, $usercontext, 's3', [$userrepo->id, 'tst.jpg'], true);
-        } catch (Exception $e) {
+            \repository_s3bucket_pluginfile($course, $cm, $usercontext, 's3', [$userrepo->id, 'tst.jpg'], true);
+        } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
         try {
-            repository_s3bucket_pluginfile($course, $cm, $modcontext, 's3', [$modrepo->id, 'tst.jpg'], true);
-        } catch (Exception $e) {
+            \repository_s3bucket_pluginfile($course, $cm, $modcontext, 's3', [$modrepo->id, 'tst.jpg'], true);
+        } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
     }

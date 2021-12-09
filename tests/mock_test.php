@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace repository_s3bucket;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -39,7 +41,7 @@ use Aws\S3\S3Client;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \repository_s3bucket
  */
-class repository_s3bucket_mock_tests extends \advanced_testcase {
+class mock_test extends \advanced_testcase {
 
     /**
      * Create type and instance.
@@ -59,7 +61,7 @@ class repository_s3bucket_mock_tests extends \advanced_testcase {
      * Test listobjects s3.
      */
     public function test_listobjects() {
-        $result = new Aws\Result(['key1' => 'object1', 'key2' => 'object2', 'key3' => 'object3']);
+        $result = new \Aws\Result(['key1' => 'object1', 'key2' => 'object2', 'key3' => 'object3']);
         $args = ['Bucket' => 'test', 'Key' => 'key', 'SaveAs' => 'path'];
         $options = [
             'Bucket' => 'test',
@@ -120,9 +122,9 @@ class repository_s3bucket_mock_tests extends \advanced_testcase {
         $this->SetAdminUser();
 
         set_config('s3mock', true);
-        $s3bucket = new repository_s3bucket($repo);
+        $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-east-1']);
-        $reflection = new ReflectionClass($s3bucket);
+        $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $method->setAccessible(true);
         $client = $method->invoke($s3bucket);
@@ -135,9 +137,9 @@ class repository_s3bucket_mock_tests extends \advanced_testcase {
         $this->assertNotEmpty($client->createPresignedRequest($result, 2));
 
         set_config('s3mock', false);
-        $s3bucket = new repository_s3bucket($repo);
+        $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-west-1']);
-        $reflection = new ReflectionClass($s3bucket);
+        $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $method->setAccessible(true);
         $client = $method->invoke($s3bucket);

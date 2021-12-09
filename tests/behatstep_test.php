@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass behat_repository_s3bucket
  */
-class behat_step_testcase extends \advanced_testcase {
+class behatstep_test extends \advanced_testcase {
 
     /**
      * Basic test of step.
@@ -43,6 +43,7 @@ class behat_step_testcase extends \advanced_testcase {
     public function test_do_step() {
         global $CFG, $DB;
         $this->resetAfterTest(true);
+        $this->SetAdminUser();
         require_once($CFG->dirroot . '/repository/s3bucket/tests/behat/behat_repository_s3bucket.php');
         $this->assertFalse($DB->record_exists('repository', ['type' => 's3bucket']));
         $beha = new \behat_repository_s3bucket();

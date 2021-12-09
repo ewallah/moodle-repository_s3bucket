@@ -41,7 +41,6 @@ class behat_repository_s3bucket extends behat_base {
      * @Given /^I enable repository "(?P<repository_string>(?:[^"]|\\")*)"$/
      * @param string $repository
      * @throws dml_exception
-
      */
     public function i_enable_repository($repository) {
         global $DB;

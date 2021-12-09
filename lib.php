@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+global $CFG;
 require_once($CFG->dirroot . '/repository/lib.php');
 require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
 
@@ -64,7 +65,7 @@ class repository_s3bucket extends repository {
         try {
             $results = $s3->listObjectsV2($options);
         } catch (Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
         foreach ($results->search('CommonPrefixes[].{Prefix: Prefix}') as $item) {
@@ -126,7 +127,7 @@ class repository_s3bucket extends repository {
         try {
             $results = $s3->listObjectsV2($options);
         } catch (Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
         $dirsearch = 'CommonPrefixes[?contains(Prefix, \'' . $q . '\')].{Prefix: Prefix}';
@@ -190,13 +191,13 @@ class repository_s3bucket extends repository {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
             } catch (Exception $e) {
-                throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+                throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
             }
             $uri = $req->getUri()->__toString();
             header("Location: $uri");
             die;
         }
-        throw new repository_exception('cannotdownload', 'repository');
+        throw new \repository_exception('cannotdownload', 'repository');
     }
 
     /**
@@ -211,7 +212,7 @@ class repository_s3bucket extends repository {
         $file = $path['basename'];
         $directory = $path['dirname'];
         $directory = $directory == '.' ? '/' : '/' . $directory . '/';
-        return moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, $directory, $file)->out();
+        return \moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, $directory, $file)->out();
     }
 
     /**
@@ -222,7 +223,7 @@ class repository_s3bucket extends repository {
      */
     public function get_reference_details($reference, $filestatus = 0) {
         if ($this->disabled) {
-            throw new repository_exception('cannotdownload', 'repository');
+            throw new \repository_exception('cannotdownload', 'repository');
         }
         if ($filestatus == 666) {
             $reference = '';
@@ -248,8 +249,8 @@ class repository_s3bucket extends repository {
            'SaveAs' => $path];
         try {
             $s3->getObject($options);
-        } catch (Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+        } catch (\Exception $e) {
+            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         return ['path' => $path, 'url' => $filepath];
     }
@@ -380,7 +381,7 @@ class repository_s3bucket extends repository {
         if ($this->_s3client == null) {
             $accesskey = $this->get_option('access_key');
             if (empty($accesskey)) {
-                throw new moodle_exception('needaccesskey', 'repository_s3');
+                throw new \moodle_exception('needaccesskey', 'repository_s3');
             }
             $arr = self::addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
@@ -413,10 +414,7 @@ class repository_s3bucket extends repository {
             $result = new \Aws\Result([
                 'CommonPrefixes' => [['Prefix' => '2020_dir']],
                 'Contents' => [['Key' => '2020_f.jpg', 'Size' => 15, 'StorageClass' => 'STANDARD', 'LastModified' => $day]]]);
-            $mock->append($result);
-            $mock->append($result);
-            $mock->append($result);
-            $mock->append($result);
+            $mock->append($result, $result);
             $settings['handler'] = $mock;
         }
         return $settings;

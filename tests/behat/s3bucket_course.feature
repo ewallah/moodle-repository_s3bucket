@@ -3,20 +3,20 @@ Feature: S3 bucket repository is private in user context
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | category |
-      | Course 1 | C1 | 0 |
-      | Course 2 | C2 | 0 |
+      | fullname | shortname |
+      | Course 1 | C1        |
+      | Course 2 | C2        |
     And the following "users" exist:
-      | username | email | firstname | lastname |
-      | student | s@example.com | Student | 1 |
-      | teacher | t@example.com | Teacher | 1 |
-      | facilitator | f@example.com | Teacher | 2 |
+      | username    |
+      | student     |
+      | teacher     |
+      | facilitator |
     And the following "course enrolments" exist:
-      | user | course | role |
-      | student | C1 | student |
-      | teacher | C1 | editingteacher |
-      | teacher | C2 | editingteacher |
-      | facilitator | C1 | editingteacher |
+      | user        | course | role           |
+      | student     | C1     | student        |
+      | teacher     | C1     | editingteacher |
+      | teacher     | C2     | editingteacher |
+      | facilitator | C1     | editingteacher |
     And I enable repository "s3bucket"
     And I log in as "admin"
     And I navigate to "Plugins > Repositories > Amazon S3 bucket" in site administration

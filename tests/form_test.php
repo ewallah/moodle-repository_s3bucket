@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace repository_s3bucket;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -37,7 +39,7 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \repository_s3bucket
  */
-class repository_s3bucket_form_tests extends \advanced_testcase {
+class form_test extends \advanced_testcase {
 
     /** @var int repo */
     protected $repo;
@@ -78,8 +80,8 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
             'action' => 'show',
             'pluginname' => 'repository_s3bucket',
             'contextid' => $context->id];
-        $mform = new repository_type_form('', $para);
-        $this->assertEquals([], repository_s3bucket::type_form_validation($mform, null, []));
+        $mform = new \repository_type_form('', $para);
+        $this->assertEquals([], \repository_s3bucket::type_form_validation($mform, null, []));
         ob_start();
         $mform->display();
         $out = ob_get_clean();
@@ -93,9 +95,9 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
         global $USER;
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
-        $mform = new repository_instance_form('', $para);
+        $mform = new \repository_instance_form('', $para);
         $this->data['endpoint'] = 'us-west-2';
-        $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
         ob_start();
         $mform->display();
         $out = ob_get_clean();
@@ -109,8 +111,8 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
         global $USER;
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => null, 'instance' => null, 'contextid' => $context->id];
-        $mform = new repository_instance_form('', $para);
-        $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $mform = new \repository_instance_form('', $para);
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
         ob_start();
         $mform->display();
         $out = ob_get_clean();
@@ -136,18 +138,20 @@ class repository_s3bucket_form_tests extends \advanced_testcase {
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('There are required fields', $out);
-        $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
         ob_start();
         $mform->display();
         $fromform = $mform->get_data();
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('value="us-east-1" selected', $out);
-        $this->assertEquals([], repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
         set_config('s3mock', false);
         $mform = new \repository_instance_form('', $para);
         $repo = new \repository_s3bucket($USER->id, $context);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => $repo, 'contextid' => $context->id];
-        $this->assertCount(0, repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertCount(0, \repository_s3bucket::instance_form_validation($mform, $this->data, []));
     }
 }

@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \repository_s3bucket
  */
-class delete_tests extends \advanced_testcase {
+class delete_test extends \advanced_testcase {
 
     /**
      * Test deleting a s3 bucket.

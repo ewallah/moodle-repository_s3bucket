@@ -21,6 +21,7 @@
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace repository_s3bucket;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass repository_s3bucket_generator
  */
-class repository_s3bucket_generator_testcase extends advanced_testcase {
+class generator_test extends \advanced_testcase {
 
     /**
      * Create type and instance.
@@ -53,7 +54,7 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
         $caughtexception = false;
         try {
             $this->getDataGenerator()->create_repository_type('s3bucket');
-        } catch (repository_exception $e) {
+        } catch (\repository_exception $e) {
             if ($e->getMessage() === 'This repository already exists') {
                 $caughtexception = true;
             }
@@ -74,7 +75,7 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
      * Installing repository tests
      */
     public function test_install_repository() {
-        $plugintype = new repository_type('s3bucket');
+        $plugintype = new \repository_type('s3bucket');
         $pluginid = $plugintype->create(false);
         $this->assertIsInt($pluginid);
     }
@@ -84,7 +85,7 @@ class repository_s3bucket_generator_testcase extends advanced_testcase {
      */
     public function test_class() {
         $s3generator = new \repository_s3bucket_generator($this->getDataGenerator());
-        phpunit_util::call_internal_method($s3generator, 'prepare_type_record', [['s3bucket']], 'repository_s3bucket_generator');
-        phpunit_util::call_internal_method($s3generator, 'prepare_record', [['s3bucket']], 'repository_s3bucket_generator');
+        \phpunit_util::call_internal_method($s3generator, 'prepare_type_record', [['s3bucket']], 'repository_s3bucket_generator');
+        \phpunit_util::call_internal_method($s3generator, 'prepare_record', [['s3bucket']], 'repository_s3bucket_generator');
     }
 }
