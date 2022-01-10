@@ -24,8 +24,6 @@
 
 namespace repository_s3bucket\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for repository_s3bucket implementing null_provider.
  *

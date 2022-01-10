@@ -39,7 +39,6 @@ use Aws\S3\S3Client;
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \repository_s3bucket
  */
 class mock_test extends \advanced_testcase {
 

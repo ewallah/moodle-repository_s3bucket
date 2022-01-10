@@ -24,10 +24,7 @@
 
 namespace repository_s3bucket\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 use \core_privacy\tests\provider_testcase;
-
 
 /**
  * Privacy tests.

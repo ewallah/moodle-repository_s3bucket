@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['master']
-        php: ['7.4']
+        moodle-branch: ['MOODLE_311_STABLE']
+        php: ['8.0']
         database: ['mysqli']
 
     name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.database }}
@@ -30,7 +30,6 @@ jobs:
           extensions: mbstring, mysqli, gd, zip
           ini-values: max_input_vars=5000
           coverage: xdebug
-
 
       - name: composer
         run: |

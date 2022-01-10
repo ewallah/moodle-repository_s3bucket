@@ -23,8 +23,6 @@
  */
 namespace repository_s3bucket;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Amazon S3bucket repository data generator test
  *

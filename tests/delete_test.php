@@ -24,19 +24,12 @@
 
 namespace repository_s3bucket;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->dirroot . '/repository/lib.php');
-require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
-
 /**
  * Delete tests.
  *
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass \repository_s3bucket
  */
 class delete_test extends \advanced_testcase {
 
@@ -44,8 +37,10 @@ class delete_test extends \advanced_testcase {
      * Test deleting a s3 bucket.
      */
     public function test_deletebucket() {
-        global $DB, $USER;
+        global $CFG, $DB, $USER;
         $this->resetAfterTest(true);
+        require_once($CFG->dirroot . '/repository/lib.php');
+        require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
         $reference = 'filename.jpg';
         $cnt = $DB->count_records('repository_instances');
         $this->getDataGenerator()->create_repository_type('s3bucket');
