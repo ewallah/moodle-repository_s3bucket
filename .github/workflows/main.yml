@@ -59,6 +59,7 @@ jobs:
            echo $(cd ci/bin; pwd) >> $GITHUB_PATH
            echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
+           sed -i 's/phpdbg -d memory_limit=-1 -qrr//g' ci/src/Command/PHPUnitCommand.php
 
       - name: add plugin
         run: moodle-plugin-ci add-plugin --clone https://github.com/ewallah/moodle-local_aws.git --branch main
