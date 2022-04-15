@@ -36,6 +36,7 @@ class behatstep_test extends \advanced_testcase {
      * Basic test of step.
      *
      * @return void
+     * @covers \behat_repository_s3bucket
      */
     public function test_do_step() {
         global $CFG, $DB;

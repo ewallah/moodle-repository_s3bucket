@@ -194,6 +194,11 @@ class repository_s3bucket extends repository {
                 throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
             }
             $uri = $req->getUri()->__toString();
+            $mimetype = get_mimetype_description(['filename' => $reference]);
+            header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
+            header('Pragma: no-cache');
+            header("Content-Type: $mimetype\n");
+            header("Content-Disposition: attachment; filename=\"$reference\"");
             header("Location: $uri");
             die;
         }

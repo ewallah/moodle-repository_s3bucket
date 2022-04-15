@@ -35,6 +35,7 @@ class delete_test extends \advanced_testcase {
 
     /**
      * Test deleting a s3 bucket.
+     * @covers \repository_s3bucket
      */
     public function test_deletebucket() {
         global $CFG, $DB, $USER;

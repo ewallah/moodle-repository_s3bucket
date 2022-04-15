@@ -75,6 +75,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test sendfile s3.
+     * @covers \repository_s3bucket
      */
     public function test_sendfiles3() {
         global $USER;
@@ -89,6 +90,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test class in system context.
+     * @covers \repository_s3bucket
      */
     public function test_class() {
         $repo = new \repository_s3bucket($this->repo);
@@ -125,6 +127,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test empty in course context.
+     * @covers \repository_s3bucket
      */
     public function test_empty() {
         $courseid = $this->getDataGenerator()->create_course()->id;
@@ -139,6 +142,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test search.
+     * @covers \repository_s3bucket
      */
     public function test_search() {
         $userid = $this->getDataGenerator()->create_user()->id;
@@ -158,6 +162,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test no access_key.
+     * @covers \repository_s3bucket
      */
     public function test_noaccess_key() {
         $courseid = $this->getDataGenerator()->create_course()->id;
@@ -169,6 +174,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test get file in user context.
+     * @covers \repository_s3bucket
      */
     public function test_getfile() {
         global $USER;
@@ -186,6 +192,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test get url in user context.
+     * @covers \repository_s3bucket
      */
     public function test_getlink() {
         global $USER;
@@ -200,6 +207,8 @@ class other_test extends \advanced_testcase {
 
     /**
      * Test get url in course context.
+     * @covers \repository_s3bucket
+     * @covers \repository_s3bucket_pluginfile
      */
     public function test_pluginfile() {
         $headerf = 'Cannot modify header information - headers already sent';
@@ -240,6 +249,7 @@ class other_test extends \advanced_testcase {
 
     /**
      * Tests other files.
+     * @coversNothing
      */
     public function test_local_other() {
         global $CFG;

@@ -32,12 +32,12 @@ use \core_privacy\tests\provider_testcase;
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass repository_s3bucket\privacy\provider
  */
 class privacy_test extends provider_testcase {
 
     /**
      * Test privacy.
+     * @covers \repository_s3bucket\privacy\provider
      */
     public function test_privacy() {
         $collection = new \core_privacy\local\metadata\collection('repository_s3bucket');

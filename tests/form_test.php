@@ -72,6 +72,7 @@ class form_test extends \advanced_testcase {
 
     /**
      * Test type config form.
+     * @covers \repository_s3bucket
      */
     public function test_type_config_form() {
         $context = \context_system::instance();
@@ -90,6 +91,7 @@ class form_test extends \advanced_testcase {
 
     /**
      * Test instance form.
+     * @covers \repository_s3bucket
      */
     public function test_instance_form() {
         global $USER;
@@ -106,6 +108,7 @@ class form_test extends \advanced_testcase {
 
     /**
      * Test instance form with proxy.
+     * @covers \repository_s3bucket
      */
     public function test_instance_formproxy() {
         global $USER;
@@ -121,6 +124,7 @@ class form_test extends \advanced_testcase {
 
     /**
      * Test form.
+     * @covers \repository_s3bucket
      */
     public function test_form() {
         global $USER;

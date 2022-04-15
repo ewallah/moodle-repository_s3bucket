@@ -29,7 +29,6 @@ namespace repository_s3bucket;
  * @package    repository_s3bucket
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @coversDefaultClass repository_s3bucket_generator
  */
 class generator_test extends \advanced_testcase {
 
@@ -42,6 +41,8 @@ class generator_test extends \advanced_testcase {
 
     /**
      * Basic test of creation of repository types.
+     * @covers \repository_s3bucket
+     * @covers \repository_s3bucket_generator
      */
     public function test_create_type() {
         global $DB;
@@ -62,6 +63,8 @@ class generator_test extends \advanced_testcase {
 
     /**
      * Basic test of creation of repository instance.
+     * @covers \repository_s3bucket
+     * @covers \repository_s3bucket_generator
      */
     public function test_create_instance() {
         $this->getDataGenerator()->create_repository_type('s3bucket');
@@ -71,6 +74,8 @@ class generator_test extends \advanced_testcase {
 
     /**
      * Installing repository tests
+     * @covers \repository_s3bucket
+     * @covers \repository_s3bucket_generator
      */
     public function test_install_repository() {
         $plugintype = new \repository_type('s3bucket');
@@ -80,6 +85,8 @@ class generator_test extends \advanced_testcase {
 
     /**
      * Mocking generator
+     * @covers \repository_s3bucket
+     * @covers \repository_s3bucket_generator
      */
     public function test_class() {
         $s3generator = new \repository_s3bucket_generator($this->getDataGenerator());
