@@ -13,6 +13,9 @@ Feature: S3 bucket repository can be used in user context
       | teacher | editingteacher | System       | |
       | editor  | editingteacher | System       | |
       | manager | manager        | System       | |
+    And the following "blocks" exist:
+      | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
+      | private_files | System       | 1         | my-index        | side-post     |
     And I enable repository "s3bucket"
     And I log in as "admin"
     And I navigate to "Plugins > Repositories > Amazon S3 bucket" in site administration
@@ -32,7 +35,7 @@ Feature: S3 bucket repository can be used in user context
     And I set the field "Access key" to "anoTherfake@1"
     And I set the field "Secret key" to "anotherFake_$2"
     And I click on "Save" "button"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Teacher user bucket"
@@ -55,7 +58,7 @@ Feature: S3 bucket repository can be used in user context
     And I click on "Save" "button"
     And I log out
     And I log in as "admin"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Teacher user bucket"
@@ -92,7 +95,7 @@ Feature: S3 bucket repository can be used in user context
     And I click on "Save" "button"
     And I log out
     And I log in as "manager"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Teacher user bucket"
@@ -109,7 +112,7 @@ Feature: S3 bucket repository can be used in user context
     And I click on "Save" "button"
     And I log out
     And I log in as "editor"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should not see "Teacher user bucket"
@@ -134,7 +137,7 @@ Feature: S3 bucket repository can be used in user context
     And I set the field "Access key" to "anoTherfake@1"
     And I set the field "Secret key" to "anotherFake_$2"
     And I click on "Save" "button"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Manager user bucket"
@@ -164,7 +167,7 @@ Feature: S3 bucket repository can be used in user context
     And I set the field "Access key" to "anoTherfake@1"
     And I set the field "Secret key" to "anotherFake_$2"
     And I click on "Save" "button"
-    And I follow "Dashboard" in the user menu
+    And I follow "Dashboard"
     And I follow "Manage private files..."
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Admin user bucket"

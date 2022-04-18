@@ -13,6 +13,9 @@ Feature: S3 bucket behavour in popups
       | user        | course | role           |
       | student     | C1     | student        |
       | teacher     | C1     | editingteacher |
+    And the following "blocks" exist:
+      | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
+      | private_files | System       | 1         | my-index        | side-post     |
     And I enable repository "s3bucket"
     And I log in as "admin"
     And I navigate to "Plugins > Repositories > Amazon S3 bucket" in site administration
