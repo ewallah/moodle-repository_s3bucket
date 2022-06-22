@@ -390,6 +390,7 @@ class repository_s3bucket extends repository {
             }
             $arr = self::addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
+                'use_path_style_endpoint' => true,
                 'region' => $this->get_option('endpoint')]);
             $this->_s3client = \Aws\S3\S3Client::factory($arr);
         }
