@@ -84,7 +84,7 @@ class repository_s3bucket extends repository {
         $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
         foreach ($results->search($filesearch) as $item) {
             $pathinfo = pathinfo($item['Key']);
-            if ($pathinfo['dirname'] == $epath or $pathinfo['dirname'] . '//' == $epath) {
+            if ($pathinfo['dirname'] == $epath || $pathinfo['dirname'] . '//' == $epath) {
                 $files[] = [
                    'title' => $pathinfo['basename'],
                    'size' => $item['Size'],
@@ -267,7 +267,7 @@ class repository_s3bucket extends repository {
      * @return string
      */
     public function get_file_source_info($filepath) {
-        if (empty($filepath) or $filepath == '') {
+        if (empty($filepath) || $filepath == '') {
             return get_string('unknownsource', 'repository');
         }
         return $this->get_short_filename('s3://' . $this->get_option('bucket_name') . '/' . $filepath, 50);
@@ -410,7 +410,7 @@ class repository_s3bucket extends repository {
         if (!empty($CFG->proxyhost) && !empty($CFG->proxytype) && $CFG->proxytype != 'SOCKS5') {
             $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
             $type = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
-            $cond = (!empty($CFG->proxyuser) and !empty($CFG->proxypassword));
+            $cond = (!empty($CFG->proxyuser) && !empty($CFG->proxypassword));
             $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
             $settings['request.options'] = ['proxy' => "$type$user$host"];
         }
