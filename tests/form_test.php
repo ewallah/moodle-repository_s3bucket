@@ -103,7 +103,7 @@ class form_test extends \advanced_testcase {
         ob_start();
         $mform->display();
         $out = ob_get_clean();
-        $this->assertStringContainsString('There are required fields in this form marked', $out);
+        $this->assertStringContainsString('Required', $out);
     }
 
     /**
@@ -119,7 +119,7 @@ class form_test extends \advanced_testcase {
         ob_start();
         $mform->display();
         $out = ob_get_clean();
-        $this->assertStringContainsString('There are required fields in this form marked', $out);
+        $this->assertStringContainsString('Required', $out);
     }
 
     /**
@@ -141,7 +141,7 @@ class form_test extends \advanced_testcase {
         $fromform = $mform->get_data();
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
-        $this->assertStringContainsString('There are required fields', $out);
+        $this->assertStringContainsString('Required', $out);
         $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
         ob_start();
         $mform->display();
