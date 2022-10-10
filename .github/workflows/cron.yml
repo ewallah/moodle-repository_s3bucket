@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: this-plugin
-          ref: dev
+          ref: 'MOODLE_400_STABLE'
 
       - name: add plugin
         uses: actions/checkout@v2
