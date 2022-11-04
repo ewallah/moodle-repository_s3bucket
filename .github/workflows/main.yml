@@ -43,12 +43,12 @@ jobs:
 
     steps:
       - name: checkout plugin
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: this-plugin
 
       - name: add plugin
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ewallah/moodle-local_aws.git
           ref: 'main'
