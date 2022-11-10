@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_400_STABLE']
+        moodle-branch: ['master', 'MOODLE_400_STABLE']
         php: ['8.0']
         database: ['mariadb', 'pgsql']
 
@@ -54,7 +54,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pgsql, mysqli, gd, xmlrpc,zip
           ini-values: max_input_vars=5000
-          coverage: none
+          coverage: xdebug
 
       - name: composer
         run: |
