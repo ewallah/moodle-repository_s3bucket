@@ -53,7 +53,7 @@ jobs:
         run: |
           sed -i '/GuzzleHttp/d' extras/local_aws/sdk/aws-autoloader.php
           sed -i '/Psr/d' extras/local_aws/sdk/aws-autoloader.php
-          sed -i -e 's/\\GuzzleHttp\\default_user_agent\(\)/ "PHP\\" \. PHP_VERSION/g' extras/local_aws/sdk/Aws/Handler/GuzzleV6/GuzzleHandler.php
+          sed -i -e 's/\\GuzzleHttp\\default_user_agent()/ "PHP\/" \. PHP_VERSION/g' extras/local_aws/sdk/Aws/Handler/GuzzleV6/GuzzleHandler.php
 
       - name: setup PHP
         uses: shivammathur/setup-php@v2
