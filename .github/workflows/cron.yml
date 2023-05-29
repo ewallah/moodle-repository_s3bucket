@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
-        php: ['8.0', '8.1']
+        moodle-branch: ['MOODLE_401_STABLE']
+        php: ['8.0']
         database: ['mysqli']
 
     name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.database }}

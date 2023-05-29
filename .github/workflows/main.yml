@@ -30,9 +30,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'master']
-        php: ['8.0']
+        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
+        php: ['8.1']
         database: ['mariadb', 'pgsql']
+        include:
+          - php: '8.0'
+            moodle-branch: 'MOODLE_400_STABLE'
+            database: 'pgsql'
+          - php: '7.4'
+            moodle-branch: 'MOODLE_400_STABLE'
+            database: 'pgsql'
+
 
     steps:
       - name: checkout plugin
@@ -48,13 +56,6 @@ jobs:
           ref: 'main'
           path: extras/local_aws
 
-      - name: Double Guzzle
-        if: ${{ matrix.moodle-branch == 'master'}}
-        run: |
-          sed -i '/GuzzleHttp/d' extras/local_aws/sdk/aws-autoloader.php
-          sed -i '/Psr/d' extras/local_aws/sdk/aws-autoloader.php
-          sed -i -e 's/\\GuzzleHttp\\default_user_agent()/ "PHP\/" \. PHP_VERSION/g' extras/local_aws/sdk/Aws/Handler/GuzzleV6/GuzzleHandler.php
-
       - name: setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -65,7 +66,7 @@ jobs:
 
       - name: composer
         run: |
-           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+           composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
            echo $(cd ci/bin; pwd) >> $GITHUB_PATH
            echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
