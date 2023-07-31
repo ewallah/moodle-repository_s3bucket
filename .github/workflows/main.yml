@@ -52,15 +52,13 @@ jobs:
       - name: add plugin
         uses: actions/checkout@v3
         with:
-          repository: ewallah/moodle-local_aws.git
-          ref: 'main'
+          repository: catalyst/moodle-local_aws
           path: extras/local_aws
 
       - name: setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, pgsql, mysqli, gd, xmlrpc,zip
           ini-values: max_input_vars=5000
           coverage: xdebug
 
