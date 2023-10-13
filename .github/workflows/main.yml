@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'master']
+        moodle-branch: ['MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'master']
         php: ['8.1']
         database: ['mariadb', 'pgsql']
         include:
@@ -60,7 +60,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           ini-values: max_input_vars=5000
-          coverage: xdebug
+          coverage: pcov
 
       - name: composer
         run: |
@@ -80,68 +80,68 @@ jobs:
         working-directory: moodle/local/aws/sdk/GuzzleHttp
 
       - name: phplint
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi phplint
 
       - name: phpcpd
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi phpcpd
 
       - name: phpmd
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi phpmd
 
       - name: phpdoc
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi phpdoc
 
       - name: codechecker
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi codechecker
 
       - name: validate
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi validate
 
       - name: savepoints
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi savepoints
 
       - name: grunt
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi grunt
 
       - name: mustache
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi mustache
 
       - name: phpunit
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi phpunit --coverage-text --coverage-clover
 
       - name: privacy
         run: vendor/bin/phpunit --colors --no-coverage --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         working-directory: moodle
 
       - name: firefox
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi behat
       
       - name: chrome
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi behat --profile chrome
 
       - name: firefox classic
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi behat --suite classic
       
       - name: chrome classic
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi behat --suite classic --profile=chrome
 
       - name: coveralls
-        if: ${{ always() }}
+        if: ${{ !cancelled() }}
         run: moodle-plugin-ci coveralls-upload
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -51,7 +51,7 @@ class delete_test extends \advanced_testcase {
         $this->assertEquals($cnt + 1, $DB->count_records('repository_instances'));
         $fs = get_file_storage();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => \context_user::instance($USER->id)->id,
-                       'itemid' => file_get_unused_draft_itemid(), 'filename' => $reference, 'filepath' => '/'];
+                       'itemid' => file_get_unused_draft_itemid(), 'filename' => $reference, 'filepath' => '/', ];
         $this->assertEquals(0, $DB->count_records('files_reference'));
         $fs->create_file_from_reference($filerecord, $repoid, $reference);
         $this->assertEquals(1, $DB->count_records('files_reference'));

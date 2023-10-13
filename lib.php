@@ -59,7 +59,7 @@ class repository_s3bucket extends repository {
             'Prefix' => $path,
             'MaxKeys' => 1000,
             'EncodingType' => 'url',
-            'Delimiter' => '/'];
+            'Delimiter' => '/', ];
         $results = $files = [];
         $s3 = $this->create_s3();
         try {
@@ -75,7 +75,7 @@ class repository_s3bucket extends repository {
                   'thumbnail' => $diricon,
                   'thumbnail_height' => 64,
                   'thumbnail_width' => 64,
-                  'path' => $item['Prefix']];
+                  'path' => $item['Prefix'], ];
         }
 
         $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\'';
@@ -93,7 +93,7 @@ class repository_s3bucket extends repository {
                    'thumbnail_height' => 64,
                    'thumbnail_width' => 64,
                    'source' => $item['Key'],
-                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false)];
+                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false), ];
             }
         }
         return [
@@ -102,7 +102,7 @@ class repository_s3bucket extends repository {
            'manage' => false,
            'dynload' => true,
            'nologin' => true,
-           'nosearch' => false];
+           'nosearch' => false, ];
     }
 
     /**
@@ -121,7 +121,7 @@ class repository_s3bucket extends repository {
             'FetchOwner' => false,
             'MaxKeys' => 1000,
             'EncodingType' => 'url',
-            'Delimiter' => '/'];
+            'Delimiter' => '/', ];
         $results = $files = [];
         $s3 = $this->create_s3();
         try {
@@ -138,7 +138,7 @@ class repository_s3bucket extends repository {
                   'thumbnail' => $diricon,
                   'thumbnail_height' => 64,
                   'thumbnail_width' => 64,
-                  'path' => $item['Prefix']];
+                  'path' => $item['Prefix'], ];
         }
 
         $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\'';
@@ -155,7 +155,7 @@ class repository_s3bucket extends repository {
                'thumbnail_height' => 64,
                'thumbnail_width' => 64,
                'source' => $item['Key'],
-               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false)];
+               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false), ];
         }
         return ['list' => $files, 'dynload' => true, 'pages' => 0, 'page' => $page];
     }
@@ -186,7 +186,7 @@ class repository_s3bucket extends repository {
             $options = [
                'Bucket' => $this->get_option('bucket_name'),
                'Key' => $reference,
-               'ResponseContentDisposition' => 'attachment'];
+               'ResponseContentDisposition' => 'attachment', ];
             try {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
@@ -251,7 +251,7 @@ class repository_s3bucket extends repository {
         $options = [
            'Bucket' => $this->get_option('bucket_name'),
            'Key' => $filepath,
-           'SaveAs' => $path];
+           'SaveAs' => $path, ];
         try {
             $s3->getObject($options);
         } catch (\Exception $e) {
@@ -391,7 +391,7 @@ class repository_s3bucket extends repository {
             $arr = self::addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
                 'use_path_style_endpoint' => true,
-                'region' => $this->get_option('endpoint')]);
+                'region' => $this->get_option('endpoint'), ]);
             $this->_s3client = \Aws\S3\S3Client::factory($arr);
         }
         return $this->_s3client;
@@ -419,7 +419,7 @@ class repository_s3bucket extends repository {
             $day = new DateTime();
             $result = new \Aws\Result([
                 'CommonPrefixes' => [['Prefix' => '2020_dir']],
-                'Contents' => [['Key' => '2020_f.jpg', 'Size' => 15, 'StorageClass' => 'STANDARD', 'LastModified' => $day]]]);
+                'Contents' => [['Key' => '2020_f.jpg', 'Size' => 15, 'StorageClass' => 'STANDARD', 'LastModified' => $day]], ]);
             $mock->append($result, $result);
             $settings['handler'] = $mock;
         }

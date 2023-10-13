@@ -59,7 +59,7 @@ class form_test extends \advanced_testcase {
             'endpoint' => 'eu-west-2',
             'secret_key' => 'secret',
             'bucket_name' => 'test',
-            'access_key' => 'abc'];
+            'access_key' => 'abc', ];
         $this->SetAdminUser();
     }
 
@@ -80,7 +80,7 @@ class form_test extends \advanced_testcase {
             'plugin' => 's3bucket',
             'action' => 'show',
             'pluginname' => 'repository_s3bucket',
-            'contextid' => $context->id];
+            'contextid' => $context->id, ];
         $mform = new \repository_type_form('', $para);
         $this->assertEquals([], \repository_s3bucket::type_form_validation($mform, null, []));
         ob_start();

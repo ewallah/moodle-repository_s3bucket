@@ -24,7 +24,7 @@
 
 namespace repository_s3bucket\privacy;
 
-use \core_privacy\tests\provider_testcase;
+use core_privacy\tests\provider_testcase;
 
 /**
  * Privacy tests.

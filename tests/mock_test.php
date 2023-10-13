@@ -69,7 +69,7 @@ class mock_test extends \advanced_testcase {
             'Prefix' => '.',
             'MaxKeys' => 1000,
             'EncodingType' => 'url',
-            'Delimiter' => '/'];
+            'Delimiter' => '/', ];
         $client = $this->getMockBuilder('Aws\S3\S3Client')
             ->disableOriginalConstructor()
             ->setMethods(['listObjectsV2', 'getPaginator', 'getObject'])

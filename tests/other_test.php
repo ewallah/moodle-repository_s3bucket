@@ -62,7 +62,7 @@ class other_test extends \advanced_testcase {
            'endpoint' => 'eu-north-1',
            'secret_key' => 'secret',
            'bucket_name' => 'test',
-           'access_key' => 'abc'];
+           'access_key' => 'abc', ];
         $this->SetAdminUser();
     }
 
@@ -82,7 +82,7 @@ class other_test extends \advanced_testcase {
         $repo = new \repository_s3bucket($this->repo);
         $fs = get_file_storage();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => \context_user::instance($USER->id)->id,
-                       'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/'];
+                       'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/', ];
         $file = $fs->create_file_from_string($filerecord, 'test content');
         $this->expectException('repository_exception');
         $repo->send_file($file);
@@ -184,7 +184,7 @@ class other_test extends \advanced_testcase {
         $repo->set_option($this->data);
         $draft = file_get_unused_draft_itemid();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => $context->id,
-                       'itemid' => $draft, 'filename' => 'filename.txt', 'filepath' => '/'];
+                       'itemid' => $draft, 'filename' => 'filename.txt', 'filepath' => '/', ];
         get_file_storage()->create_file_from_string($filerecord, 'test content');
         $result = $repo->get_file('/filename.txt');
         $this->assertEquals('/filename.txt', $result['url']);
