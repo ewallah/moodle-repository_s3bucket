@@ -93,7 +93,7 @@ class repository_s3bucket extends repository {
                    'thumbnail_height' => 64,
                    'thumbnail_width' => 64,
                    'source' => $item['Key'],
-                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false), ];
+                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false), ];
             }
         }
         return [
@@ -114,7 +114,7 @@ class repository_s3bucket extends repository {
      */
     public function search($q, $page = 1) {
         global $OUTPUT;
-        $diricon = $OUTPUT->image_url(file_folder_icon(64))->out(false);
+        $diricon = $OUTPUT->image_url(file_folder_icon())->out(false);
         $bucket = $this->get_option('bucket_name');
         $options = [
             'Bucket' => $bucket,
@@ -155,7 +155,7 @@ class repository_s3bucket extends repository {
                'thumbnail_height' => 64,
                'thumbnail_width' => 64,
                'source' => $item['Key'],
-               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename'], 64))->out(false), ];
+               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false), ];
         }
         return ['list' => $files, 'dynload' => true, 'pages' => 0, 'page' => $page];
     }
