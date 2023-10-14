@@ -49,7 +49,7 @@ class repository_s3bucket extends repository {
      */
     public function get_listing($path = '.', $page = 1) {
         global $OUTPUT;
-        $diricon = $OUTPUT->image_url(file_folder_icon(64))->out(false);
+        $diricon = $OUTPUT->image_url(file_folder_icon())->out(false);
         $bucket = $this->get_option('bucket_name');
         $place = [['name' => $bucket, 'path' => $path]];
         $epath = ($path === '') ? '.' : $path . '/';
