@@ -11,9 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: ['MOODLE_401_STABLE']
-        php: ['8.0']
-        database: ['mysqli']
+        moodle-branch: [master]
+        php: [8.1]
+        database: [mysqli]
 
     name: ${{ matrix.moodle-branch }}  php ${{ matrix.php }}  ${{ matrix.database }}
 
@@ -22,12 +22,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: this-plugin
-          ref: 'MOODLE_400_STABLE'
 
       - name: add plugin
         uses: actions/checkout@v3
         with:
-          repository: catalyst/moodle-local_aws
+          repository: ewallah/moodle-local_aws
           path: extras/local_aws
 
       - name: setup PHP
