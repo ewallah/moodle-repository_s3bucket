@@ -8,10 +8,11 @@ to your S3 root folder, but read and write permissions to your S3 bucket.
 
 ## Dependencies
 
-* Currently this plugin is using the [Amazon's SDK for PHP plugin](https://moodle.org/plugins/local_aws).
+* Currently this plugin is using a custumized [Amazon's SDK for PHP plugin](https://github.com/ewallah/moodle-local_aws.git).
 
 ## Warnings
 
+* This plugin is NOT compatible with the original [Amazon's SDK for PHP plugin](https://moodle.org/plugins/local_aws). If you use the original SDK, your site will become unavailable. 
 * Encrypted files or buckets are not supported.
 
 ## Theme support
