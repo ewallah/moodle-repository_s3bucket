@@ -44,7 +44,7 @@ class generator_test extends \advanced_testcase {
      * @covers \repository_s3bucket
      * @covers \repository_s3bucket_generator
      */
-    public function test_create_type() {
+    public function test_create_type(): void {
         global $DB;
         $repotype = $this->getDataGenerator()->create_repository_type('s3bucket');
         $this->assertEquals($repotype->type, 's3bucket', 'Unexpected name after creating repository type s3bucket');
@@ -66,7 +66,7 @@ class generator_test extends \advanced_testcase {
      * @covers \repository_s3bucket
      * @covers \repository_s3bucket_generator
      */
-    public function test_create_instance() {
+    public function test_create_instance(): void {
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket');
         $this->assertEquals(0, $repo->userid);
@@ -77,7 +77,7 @@ class generator_test extends \advanced_testcase {
      * @covers \repository_s3bucket
      * @covers \repository_s3bucket_generator
      */
-    public function test_install_repository() {
+    public function test_install_repository(): void {
         $plugintype = new \repository_type('s3bucket');
         $pluginid = $plugintype->create(false);
         $this->assertIsInt($pluginid);
@@ -88,7 +88,7 @@ class generator_test extends \advanced_testcase {
      * @covers \repository_s3bucket
      * @covers \repository_s3bucket_generator
      */
-    public function test_class() {
+    public function test_class(): void {
         $s3generator = new \repository_s3bucket_generator($this->getDataGenerator());
         \phpunit_util::call_internal_method($s3generator, 'prepare_type_record', [['s3bucket']], 'repository_s3bucket_generator');
         \phpunit_util::call_internal_method($s3generator, 'prepare_record', [['s3bucket']], 'repository_s3bucket_generator');

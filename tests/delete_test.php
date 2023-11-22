@@ -37,7 +37,7 @@ class delete_test extends \advanced_testcase {
      * Test deleting a s3 bucket.
      * @covers \repository_s3bucket
      */
-    public function test_deletebucket() {
+    public function test_deletebucket(): void {
         global $CFG, $DB, $USER;
         $this->resetAfterTest(true);
         require_once($CFG->dirroot . '/repository/lib.php');

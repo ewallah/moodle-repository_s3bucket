@@ -60,7 +60,7 @@ class mock_test extends \advanced_testcase {
      * Test listobjects s3.
      * @covers \repository_s3bucket
      */
-    public function test_listobjects() {
+    public function test_listobjects(): void {
         $result = new \Aws\Result(['key1' => 'object1', 'key2' => 'object2', 'key3' => 'object3']);
         $args = ['Bucket' => 'test', 'Key' => 'key', 'SaveAs' => 'path'];
         $options = [
@@ -116,7 +116,7 @@ class mock_test extends \advanced_testcase {
      * Test mock exception s3.
      * @covers \repository_s3bucket
      */
-    public function test_mockexception() {
+    public function test_mockexception(): void {
         $this->resetAfterTest(true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
