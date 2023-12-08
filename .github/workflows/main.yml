@@ -35,7 +35,7 @@ jobs:
         database: [mariadb, pgsql]
         include:
           - php: 8.2
-            moodle-branch: master
+            moodle-branch: main
             database: pgsql
 
     steps:
