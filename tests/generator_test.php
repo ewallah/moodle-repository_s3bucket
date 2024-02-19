@@ -35,7 +35,7 @@ class generator_test extends \advanced_testcase {
     /**
      * Create type and instance.
      */
-    public function setUp():void {
+    public function setUp(): void {
         $this->resetAfterTest(true);
     }
 
