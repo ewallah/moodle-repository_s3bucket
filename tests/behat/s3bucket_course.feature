@@ -17,6 +17,10 @@ Feature: S3 bucket repository is private in user context
       | teacher     | C1     | editingteacher |
       | teacher     | C2     | editingteacher |
       | facilitator | C1     | editingteacher |
+    And the following "activities" exist:
+      | activity | name    | course | idnumber | section |
+      | page     | PageA   | C1     | pageA    | 1       |
+      | folder   | FolderB | C1     | folderB  | 1       |
     And the following "blocks" exist:
       | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
       | private_files | System       | 1         | my-index        | side-post     |
@@ -39,21 +43,17 @@ Feature: S3 bucket repository is private in user context
 
   @_file_upload
   Scenario: A teacher can add files from the s3 bucket repository in module context
-    When I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "Folder" to section "1"
-    And I set the following fields to these values:
-      | Name | Folder name |
-      | Description | Folder description |
+    Given I am on the "folderB" "folder activity editing" page logged in as teacher
     And I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Course 1 Bucket"
+    And I should see "Course 1 Bucket"
     And I follow "Course 1 Bucket"
-    Then I should see "2020_dir"
+    And I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
-    # Then I should see "Make a copy of the file"
-    # And I should see "Create an alias"
-    # And I should not see "Create an access controled link to the file"
+    Then I should see "Make a copy of the file"
+    And I should see "Link to the file"
+    And I should not see "Create an alias"
+    And I should not see "Create an access controled link to the file"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save and display" "button"
@@ -72,36 +72,27 @@ Feature: S3 bucket repository is private in user context
     Then I should not see "Course 1 Bucket"
 
   Scenario: Another teacher can see the s3 bucket repository in same course context
-    When I log in as "facilitator"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "Folder" to section "1"
-    And I set the following fields to these values:
-      | Name | Folder name |
-      | Description | Folder description |
-    And I click on "Add..." "button" in the "Files" "form_row"
+    Given I am on the "folderB" "folder activity editing" page logged in as teacher
+    When I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Course 1 Bucket"
 
   Scenario: A student cannot see a s3 course bucket
-    When I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    And I add a "Assignment" to section "1" and I fill the form with:
-      | Assignment name | Test assignment name |
-      | Description | Submit your online text |
-      | assignsubmission_onlinetext_enabled | 0 |
-      | assignsubmission_file_enabled | 1 |
-      | Maximum number of uploaded files | 2 |
-    And I log out
+    Given the following "activity" exists:
+      | activity                            | assign                  |
+      | course                              | C1                      |
+      | name                                | Test assignment name    |
+      | intro                               | Submit your online text |
+      | submissiondrafts                    | 0                       |
+      | assignsubmission_onlinetext_enabled | 0                       |
+      | assignsubmission_file_enabled       | 1                       |
+      | assignsubmission_file_maxfiles      | 2                       |
+      | assignsubmission_file_maxsizebytes  | 1000000                 |
     When I am on the "Test assignment name" "assign activity" page logged in as student
     And I press "Add submission"
     And I follow "Add..."
     Then I should not see "Course 1 Bucket"
 
   Scenario: An admin can see a s3 course bucket
-    When I log in as "admin"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "Folder" to section "1"
-    And I set the following fields to these values:
-      | Name | Folder name |
-      | Description | Folder description |
-    And I click on "Add..." "button" in the "Files" "form_row"
+    Given I am on the "folderB" "folder activity editing" page logged in as admin
+    When I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Course 1 Bucket"

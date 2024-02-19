@@ -13,6 +13,9 @@ Feature: S3 bucket behavour in popups
       | user        | course | role           |
       | student     | C1     | student        |
       | teacher     | C1     | editingteacher |
+    And the following "activities" exist:
+      | activity | name      | course | idnumber  | section |
+      | resource | ResourceA | C1     | resourceA | 1       |
     And the following "blocks" exist:
       | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
       | private_files | System       | 1         | my-index        | side-post     |
@@ -34,14 +37,7 @@ Feature: S3 bucket behavour in popups
 
   @_file_upload
   Scenario Outline: A teacher can add files from the s3 bucket repository as a resouce
-    When I am on "Course 1" course homepage with editing mode on
-    And I add a "File" to section "1"
-    And I set the following fields to these values:
-      | Name                      | Myfile    |
-      | id_display                | <display> |
-      | Show size                 | 0         |
-      | Show type                 | 0         |
-      | Show upload/modified date | 0         |
+    Given I am on the "resourceA" "resource activity editing" page
     And I click on "Add..." "button"
     Then I should see "coursebucket"
     And I follow "coursebucket"
@@ -51,13 +47,9 @@ Feature: S3 bucket behavour in popups
     And I press "Select this file"
     And I press "Save and return to course"
     And I log out
-    And I log in as "student"
-    And I am on "Course 1" course homepage
-    Then I should see "Myfile"
-    And I follow "Myfile"
-    #And I am on the "Myfile" "resource activity" page
+    When I am on the "ResourceA" "resource activity" page logged in as student
     # TODO: Fix InvalidAccessKeyId.
-    # Then I should see "<result>"
+    Then I should not see "<result>"
 
     Examples:
       | display        | result |

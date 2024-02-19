@@ -13,6 +13,10 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
       | user | course | role |
       | student | C1 | student |
       | teacher | C1 | editingteacher |
+    And the following "activities" exist:
+      | activity | name    | course | idnumber | section |
+      | url      | UrlA    | C1     | urlA     | 1       |
+      | folder   | FolderB | C1     | folderB  | 1       |
     And the following "blocks" exist:
       | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
       | private_files | System       | 1         | my-index        | side-post     |
@@ -38,10 +42,6 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
-    # Then I should see "Make a copy of the file"
-    # And I should not see "Link to the file directly"
-    # And I should see "Create an alias"
-    # And I click on "Make a copy of the file" "radio"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save changes" "button"
@@ -75,44 +75,27 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
 
   @javascript @_file_upload
   Scenario: A teacher can see the global s3 bucket repository in a course module
-    When I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "Folder" to section "1"
-    And I set the following fields to these values:
-      | Name | Folder name |
-      | Description | Folder description |
+    Given I am on the "folderB" "folder activity editing" page logged in as teacher
     And I click on "Add..." "button" in the "Files" "form_row"
     Then I should see "Global bucket"
     And I follow "Global bucket"
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
-    # Then I should see "Make a copy of the file"
-    # And I should see "Create an alias"
-    # And I should not see "Link to the file directly"
-    # And I should not see "Create an access controled link to the file"
     And I click on "Select this file" "button"
     Then I should see "2020_f.jpg"
     And I click on "Save and display" "button"
-    Then I should see "Folder description"
     And I should see "2020_f.jpg"
 
   @javascript
   Scenario: A teacher can not add a global s3 bucket link in a url module
-    When I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    When I add a "URL" to section "1" and I fill the form with:
-      | Name | Bucketurl |
+    Given I am on the "urlA" "url activity editing" page logged in as teacher
     And I click on "Choose a link..." "button"
     Then I should see "Global bucket"
     And I follow "Global bucket"
     Then I should see "2020_dir"
     And I should see "2020_f.jpg"
     And I follow "2020_f.jpg"
-    # Then I should not see "Make a copy of the file"
-    # And I should not see "Create an alias"
-    # And I should not see "Link to the file directly"
-    # And I should not see "Create an access controled link to the file"
     And I click on "Select this file" "button"
 
   Scenario: A student cannot see the global s3 bucket repository
