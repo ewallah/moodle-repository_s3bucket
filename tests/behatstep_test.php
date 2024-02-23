@@ -38,7 +38,7 @@ class behatstep_test extends \advanced_testcase {
      * @return void
      * @covers \behat_repository_s3bucket
      */
-    public function test_do_step() {
+    public function test_do_step(): void {
         global $CFG, $DB;
         $this->resetAfterTest(true);
         $this->SetAdminUser();

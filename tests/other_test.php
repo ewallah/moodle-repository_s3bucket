@@ -77,7 +77,7 @@ class other_test extends \advanced_testcase {
      * Test sendfile s3.
      * @covers \repository_s3bucket
      */
-    public function test_sendfiles3() {
+    public function test_sendfiles3(): void {
         global $USER;
         $repo = new \repository_s3bucket($this->repo);
         $fs = get_file_storage();
@@ -92,7 +92,7 @@ class other_test extends \advanced_testcase {
      * Test class in system context.
      * @covers \repository_s3bucket
      */
-    public function test_class() {
+    public function test_class(): void {
         $repo = new \repository_s3bucket($this->repo);
         $this->assertEquals('S3 bucket', $repo->get_name());
         $this->assertTrue($repo->check_login());
@@ -129,7 +129,7 @@ class other_test extends \advanced_testcase {
      * Test empty in course context.
      * @covers \repository_s3bucket
      */
-    public function test_empty() {
+    public function test_empty(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
         $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
         $result = $repo->get_listing('.');
@@ -144,7 +144,7 @@ class other_test extends \advanced_testcase {
      * Test search.
      * @covers \repository_s3bucket
      */
-    public function test_search() {
+    public function test_search(): void {
         $userid = $this->getDataGenerator()->create_user()->id;
         $context = \context_user::instance($userid);
         $repo = new \repository_s3bucket($this->repo, $context, $this->data);
@@ -164,7 +164,7 @@ class other_test extends \advanced_testcase {
      * Test no access_key.
      * @covers \repository_s3bucket
      */
-    public function test_noaccess_key() {
+    public function test_noaccess_key(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
         $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid));
         $repo->set_option(['access_key' => null]);
@@ -176,7 +176,7 @@ class other_test extends \advanced_testcase {
      * Test get file in user context.
      * @covers \repository_s3bucket
      */
-    public function test_getfile() {
+    public function test_getfile(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
         $repo = new \repository_s3bucket($USER->id, $context);
@@ -194,7 +194,7 @@ class other_test extends \advanced_testcase {
      * Test get url in user context.
      * @covers \repository_s3bucket
      */
-    public function test_getlink() {
+    public function test_getlink(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
         $repo = new \repository_s3bucket($USER->id, $context);
@@ -210,7 +210,7 @@ class other_test extends \advanced_testcase {
      * @covers \repository_s3bucket
      * @covers \repository_s3bucket_pluginfile
      */
-    public function test_pluginfile() {
+    public function test_pluginfile(): void {
         $headerf = 'Cannot modify header information - headers already sent';
         $systemcontext = \context_system::instance();
         $systemrepo = new \repository_s3bucket($this->repo, $systemcontext);
@@ -251,7 +251,7 @@ class other_test extends \advanced_testcase {
      * Tests other files.
      * @coversNothing
      */
-    public function test_local_other() {
+    public function test_local_other(): void {
         global $CFG;
         require_once($CFG->libdir . '/upgradelib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');

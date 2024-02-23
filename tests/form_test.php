@@ -74,7 +74,7 @@ class form_test extends \advanced_testcase {
      * Test type config form.
      * @covers \repository_s3bucket
      */
-    public function test_type_config_form() {
+    public function test_type_config_form(): void {
         $context = \context_system::instance();
         $para = [
             'plugin' => 's3bucket',
@@ -93,7 +93,7 @@ class form_test extends \advanced_testcase {
      * Test instance form.
      * @covers \repository_s3bucket
      */
-    public function test_instance_form() {
+    public function test_instance_form(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
@@ -110,7 +110,7 @@ class form_test extends \advanced_testcase {
      * Test instance form with proxy.
      * @covers \repository_s3bucket
      */
-    public function test_instance_formproxy() {
+    public function test_instance_formproxy(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => null, 'instance' => null, 'contextid' => $context->id];
@@ -126,7 +126,7 @@ class form_test extends \advanced_testcase {
      * Test form.
      * @covers \repository_s3bucket
      */
-    public function test_form() {
+    public function test_form(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
         $page = new \moodle_page();
