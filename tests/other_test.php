@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class other_test extends \advanced_testcase {
+final class other_test extends \advanced_testcase {
 
     /** @var int repo */
     protected $repo;

@@ -31,7 +31,7 @@ namespace repository_s3bucket;
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class delete_test extends \advanced_testcase {
+final class delete_test extends \advanced_testcase {
 
     /**
      * Test deleting a s3 bucket.

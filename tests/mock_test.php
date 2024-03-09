@@ -40,7 +40,7 @@ use Aws\S3\S3Client;
  * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mock_test extends \advanced_testcase {
+final class mock_test extends \advanced_testcase {
 
     /**
      * Create type and instance.
