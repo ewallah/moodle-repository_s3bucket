@@ -28,6 +28,6 @@ $plugin->requires = 2023042400;
 $plugin->component = 'repository_s3bucket';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = ['repository_s3' => ANY_VERSION, 'local_aws' => 2023042400];
-$plugin->release = 'v4.2.2';
+$plugin->release = 'v4.2.3';
 $plugin->supported = [402, 403];
-$plugin->version = 2023110100;
+$plugin->version = 2024031000;
