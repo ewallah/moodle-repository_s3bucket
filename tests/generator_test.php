@@ -31,7 +31,6 @@ namespace repository_s3bucket;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class generator_test extends \advanced_testcase {
-
     /**
      * Create type and instance.
      */

@@ -41,7 +41,6 @@ use Aws\S3\S3Client;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class mock_test extends \advanced_testcase {
-
     /**
      * Create type and instance.
      */
@@ -105,7 +104,7 @@ final class mock_test extends \advanced_testcase {
             ->setMethods(['getObject'])
             ->setConstructorArgs(['key', 'secret'])
             ->getMock();
-        $client->expects( $this->once())
+        $client->expects($this->once())
             ->method('getObject')
             ->with(['Bucket' => 'testbucket', 'key' => 'key'])
             ->will($this->returnValue([]));

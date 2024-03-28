@@ -26,7 +26,7 @@ namespace repository_s3bucket;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->libdir. '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/repository/lib.php');
 require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
 
@@ -38,7 +38,6 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class other_test extends \advanced_testcase {
-
     /** @var int repo */
     protected $repo;
 

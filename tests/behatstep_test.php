@@ -31,7 +31,6 @@ namespace repository_s3bucket;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class behatstep_test extends \advanced_testcase {
-
     /**
      * Basic test of step.
      *

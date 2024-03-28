@@ -36,7 +36,6 @@ require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket extends repository {
-
     /** @var _s3client s3 client object */
     private $_s3client;
 

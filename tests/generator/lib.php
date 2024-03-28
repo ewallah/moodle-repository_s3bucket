@@ -30,7 +30,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket_generator extends testing_repository_generator {
-
     /**
      * Fill in type record defaults.
      *

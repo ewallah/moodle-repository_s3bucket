@@ -27,7 +27,7 @@ namespace repository_s3bucket;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->libdir. '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/repository/lib.php');
 require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
 
@@ -40,7 +40,6 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @coversDefaultClass \repository_s3bucket
  */
 final class form_test extends \advanced_testcase {
-
     /** @var int repo */
     protected $repo;
 
