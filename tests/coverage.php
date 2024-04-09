@@ -24,7 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// PHPUnit_coverage_info class.
+/**
+ * Unit tests for the s3bucket repository.
+ *
+ * @package    repository_s3bucket
+ * @copyright  2020 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 return new class extends phpunit_coverage_info {
     /** @var array The list of folders relative to the plugin root to whitelist in coverage generation. */
     protected $includelistfolders = ['classes', 'tests/generator'];

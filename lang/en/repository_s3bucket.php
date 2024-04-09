@@ -37,6 +37,6 @@ $string['duration_help'] = 'The time after which the Pre-Signed URL should expir
 $string['pluginname'] = 'Amazon S3 bucket';
 $string['pluginname_help'] = 'AWS S3 bucket repository';
 $string['privacy:metadata'] = 'The AWS S3 repository does not store any personal data.';
-$string['privacy:metadata'] = 'The AWS S3 bucket repository plugin does not store any personal data, but can transmit files from Moodle to AWS.';
+$string['privacy:metadata_help'] = 'The AWS S3 bucket repository plugin does not store any personal data, but can transmit files from Moodle to AWS.';
 $string['s3bucket:view'] = 'View AWS S3 bucket repository';
 $string['storageclass'] = 'Storage class';
