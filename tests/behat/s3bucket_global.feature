@@ -3,16 +3,16 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
 
   Background:
     Given the following "courses" exist:
-      | fullname | shortname | category |
-      | Course 1 | C1 | 0 |
+      | fullname | shortname |
+      | Course 1 | C1        |
     And the following "users" exist:
-      | username | email | firstname | lastname |
-      | student | s@example.com | Student | 1 |
-      | teacher | t@example.com | Teacher | 1 |
+      | username |
+      | student  |
+      | teacher  |
     And the following "course enrolments" exist:
-      | user | course | role |
-      | student | C1 | student |
-      | teacher | C1 | editingteacher |
+      | user    | course | role |
+      | student | C1     | student |
+      | teacher | C1     | editingteacher |
     And the following "activities" exist:
       | activity | name    | course | idnumber | section |
       | url      | UrlA    | C1     | urlA     | 1       |
