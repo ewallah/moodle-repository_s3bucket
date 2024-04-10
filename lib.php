@@ -36,8 +36,8 @@ require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket extends repository {
-    /** @var _s3client s3 client object */
-    private $_s3client;
+    /** @var s3client s3 client object */
+    private $s3client;
 
     /**
      * Get S3 file list
@@ -63,7 +63,7 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
@@ -125,7 +125,7 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
@@ -190,7 +190,7 @@ class repository_s3bucket extends repository {
             try {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
             }
             $uri = $req->getUri()->__toString();
@@ -352,7 +352,7 @@ class repository_s3bucket extends repository {
             try {
                 // Check if the bucket exists.
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
         }
@@ -383,7 +383,7 @@ class repository_s3bucket extends repository {
      * @return s3
      */
     private function create_s3() {
-        if ($this->_s3client == null) {
+        if ($this->s3client == null) {
             $accesskey = $this->get_option('access_key');
             if (empty($accesskey)) {
                 throw new \moodle_exception('needaccesskey', 'repository_s3');
@@ -392,9 +392,9 @@ class repository_s3bucket extends repository {
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
                 'use_path_style_endpoint' => true,
                 'region' => $this->get_option('endpoint'), ]);
-            $this->_s3client = \Aws\S3\S3Client::factory($arr);
+            $this->s3client = \Aws\S3\S3Client::factory($arr);
         }
-        return $this->_s3client;
+        return $this->s3client;
     }
 
     /**

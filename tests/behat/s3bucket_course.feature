@@ -2,7 +2,9 @@
 Feature: S3 bucket repository is private in user context
 
   Background:
-    Given the following "courses" exist:
+    # TODO: Why is this not working on github actions?
+    Given the site is running Moodle version 4.3 or lower
+    And the following "courses" exist:
       | fullname | shortname |
       | Course 1 | C1        |
       | Course 2 | C2        |
@@ -43,7 +45,7 @@ Feature: S3 bucket repository is private in user context
 
   @_file_upload
   Scenario: A teacher can add files from the s3 bucket repository in module context
-    Given I am on the "folderB" "folder activity editing" page logged in as teacher
+    And I am on the "folderB" "folder activity editing" page logged in as teacher
     And I click on "Add..." "button" in the "Files" "form_row"
     And I should see "Course 1 Bucket"
     And I follow "Course 1 Bucket"

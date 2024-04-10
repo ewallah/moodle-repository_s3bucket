@@ -225,7 +225,7 @@ final class other_test extends \advanced_testcase {
         $cm = get_coursemodule_from_instance('url', $url->id);
         $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $coursecontext, 'hr', [], true));
         try {
-             \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
+            \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
         } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
@@ -244,6 +244,9 @@ final class other_test extends \advanced_testcase {
         } catch (\Exception $e) {
             $this->assertStringContainsString($headerf, $e->getMessage());
         }
+        $systemrepo->set_option(['access_key' => null]);
+        $this->expectException('moodle_exception');
+        \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
     }
 
     /**
