@@ -187,6 +187,10 @@ final class other_test extends \advanced_testcase {
         get_file_storage()->create_file_from_string($filerecord, 'test content');
         $result = $repo->get_file('/filename.txt');
         $this->assertEquals('/filename.txt', $result['url']);
+        $result = $repo->get_file('/otherfilename.txt');
+        $this->assertEquals('/otherfilename.txt', $result['url']);
+        $this->expectException('moodle_exception');
+        $result = $repo->get_file('');
     }
 
     /**

@@ -24,12 +24,6 @@
 
 namespace repository_s3bucket;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-require_once($CFG->libdir . '/formslib.php');
-require_once($CFG->dirroot . '/repository/lib.php');
-require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
 
 /**
  * Form tests.
@@ -50,6 +44,10 @@ final class form_test extends \advanced_testcase {
      * Create type and instance.
      */
     public function setUp(): void {
+        global $CFG;
+        require_once($CFG->libdir . '/formslib.php');
+        require_once($CFG->dirroot . '/repository/lib.php');
+        require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
         $this->resetAfterTest(true);
         set_config('s3mock', true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
@@ -58,7 +56,8 @@ final class form_test extends \advanced_testcase {
             'endpoint' => 'eu-west-2',
             'secret_key' => 'secret',
             'bucket_name' => 'test',
-            'access_key' => 'abc', ];
+            'access_key' => 'abc',
+        ];
         $this->SetAdminUser();
     }
 
@@ -104,6 +103,25 @@ final class form_test extends \advanced_testcase {
         $out = ob_get_clean();
         $this->assertStringContainsString('Required', $out);
     }
+
+    /**
+     * Test instance form error.
+     * @covers \repository_s3bucket
+     */
+    public function test_instance_form2(): void {
+        global $USER;
+        $context = \context_user::instance($USER->id);
+        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
+        $mform = new \repository_instance_form('', $para);
+        $this->data['bucket_name'] = '';
+        $this->expectException('InvalidArgumentException');
+        \repository_s3bucket::instance_form_validation($mform, $this->data, []);
+        $this->data['bucket_name'] = 'test';
+        $this->data['endpoint'] = 'aws_instance_wrong';
+        $this->expectException('Aws\Exception\InvalidRegionException');
+        \repository_s3bucket::instance_form_validation($mform, $this->data, []);
+    }
+
 
     /**
      * Test instance form with proxy.
