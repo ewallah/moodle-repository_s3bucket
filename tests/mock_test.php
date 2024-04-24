@@ -126,7 +126,6 @@ final class mock_test extends \advanced_testcase {
         $s3bucket->set_option(['endpoint' => 'us-east-1']);
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
-        $method->setAccessible(true);
         $client = $method->invoke($s3bucket);
         $this->assertInstanceOf('Aws\S3\S3Client', $client);
         $this->assertInstanceOf('Aws\Command', $client->getCommand('HeadBucket', ['Bucket' => 'testwallah']));
@@ -141,7 +140,6 @@ final class mock_test extends \advanced_testcase {
         $s3bucket->set_option(['endpoint' => 'us-west-1']);
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
-        $method->setAccessible(true);
         $client = $method->invoke($s3bucket);
         $this->assertInstanceOf('Aws\S3\S3Client', $client);
         $this->assertInstanceOf('Aws\ResultPaginator', $client->getPaginator('ListObjects', []));
