@@ -104,7 +104,7 @@ jobs:
 
       - name: phpunit
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi phpunit --coverage-text --coverage-clover
+        run: moodle-plugin-ci --ansi phpunit --testdox --coverage-text --coverage-clover
 
       - name: privacy
         run: vendor/bin/phpunit --colors --no-coverage --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite

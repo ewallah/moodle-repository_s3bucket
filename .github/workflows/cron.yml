@@ -85,7 +85,7 @@ jobs:
       - name: phpunit
         continue-on-error: true
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi phpunit --coverage-text --coverage-clover
+        run: moodle-plugin-ci --ansi phpunit --testdox --coverage-text --coverage-clover
 
       - name: behat
         if: ${{ !cancelled() }}
