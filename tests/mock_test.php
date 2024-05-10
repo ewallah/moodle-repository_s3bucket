@@ -18,7 +18,8 @@
  * Mock tests.
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,7 +38,8 @@ use Aws\S3\S3Client;
  * Mock tests.
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class mock_test extends \advanced_testcase {

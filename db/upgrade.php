@@ -18,8 +18,8 @@
  * S3bucket upgrade
  *
  * @package   repository_s3bucket
- * @copyright 2020 eWallah.net
- * @author    Renaat Debleu (www.ewallah.net)
+ * @copyright eWallah (www.eWallah.net)
+ * @author    Renaat Debleu <info@eWallah.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

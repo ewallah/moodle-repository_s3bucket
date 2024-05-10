@@ -18,7 +18,8 @@
  * This plugin is used to access s3bucket files
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,7 +33,8 @@ require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
  * This is a repository class used to browse a Amazon S3 bucket.
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket extends repository {

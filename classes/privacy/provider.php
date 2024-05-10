@@ -18,7 +18,8 @@
  * Privacy Subsystem implementation for repository_s3bucket.
  *
  * @package    repository_s3bucket
- * @copyright  2015 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +29,8 @@ namespace repository_s3bucket\privacy;
  * Privacy Subsystem for repository_s3bucket implementing null_provider.
  *
  * @package    repository_s3bucket
- * @copyright  2015 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {

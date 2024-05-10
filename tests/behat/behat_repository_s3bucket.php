@@ -18,7 +18,8 @@
  * Steps definitions related to Repository s3bucket.
  *
  * @package    repository_s3bucket
- * @copyright  2019 Renaat Debleu (www.eWallah.net)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +31,8 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * Repository s3bucket related steps definitions.
  *
  * @package    repository_s3bucket
- * @copyright  2019 Renaat Debleu (www.eWallah.net)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_repository_s3bucket extends behat_base {

@@ -18,7 +18,8 @@
  * Unit tests for the s3bucket repository.
  *
  * @package    repository_s3bucket
- * @copyright  2020 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +29,8 @@ defined('MOODLE_INTERNAL') || die();
  * Unit tests for the s3bucket repository.
  *
  * @package    repository_s3bucket
- * @copyright  2020 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 return new class extends phpunit_coverage_info {

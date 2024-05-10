@@ -18,7 +18,8 @@
  * Amazon S3bucket repository data generator
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,7 +27,8 @@
  * Amazon S3bucket repository data generator
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket_generator extends testing_repository_generator {

@@ -18,8 +18,8 @@
  * Plugin capabilities.
  *
  * @package    repository_s3bucket
- * @copyright  2015 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
- * @author     Renaat Debleu (www.eWallah.net)
+ * @copyright  eWallah (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

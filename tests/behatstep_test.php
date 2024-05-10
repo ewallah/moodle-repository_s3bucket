@@ -18,7 +18,8 @@
  * Amazon S3bucket behat step test
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace repository_s3bucket;
@@ -27,7 +28,8 @@ namespace repository_s3bucket;
  * Amazon S3bucket behat step tests
  *
  * @package    repository_s3bucket
- * @copyright  2017 Renaat Debleu (www.eWallah.net) (based on work by Dongsheng Cai)
+ * @copyright  eWallah (www.eWallah.net)
+ * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class behatstep_test extends \advanced_testcase {
