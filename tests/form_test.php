@@ -49,6 +49,7 @@ final class form_test extends \advanced_testcase {
         require_once($CFG->libdir . '/formslib.php');
         require_once($CFG->dirroot . '/repository/lib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
+        parent::setUp();
         $this->resetAfterTest(true);
         set_config('s3mock', true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
@@ -67,6 +68,7 @@ final class form_test extends \advanced_testcase {
      */
     public function tearDown(): void {
         set_config('s3mock', false);
+        parent::tearDown();
     }
 
     /**

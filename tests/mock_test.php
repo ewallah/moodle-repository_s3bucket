@@ -47,6 +47,7 @@ final class mock_test extends \advanced_testcase {
      * Create type and instance.
      */
     public function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest(true);
     }
 
@@ -55,6 +56,7 @@ final class mock_test extends \advanced_testcase {
      */
     public function tearDown(): void {
         set_config('s3mock', false);
+        parent::tearDown();
     }
 
     /**
