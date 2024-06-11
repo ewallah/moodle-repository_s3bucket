@@ -169,9 +169,9 @@ class repository_s3bucket extends repository {
      * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
      * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
      * @param bool $forcedownload If true (default true), forces download of file rather than view in browser/plugin
-     * @param array $options additional options affecting the file serving
+     * @param array|null $options additional options affecting the file serving
      */
-    public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, array $options = null) {
+    public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, ?array $options = null) {
         $duration = get_config('s3bucket', 'duration');
         $this->send_otherfile($storedfile->get_reference(), "+$duration minutes");
     }
