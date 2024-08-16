@@ -27,7 +27,6 @@ defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/repository/lib.php');
-require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
 
 /**
  * This is a repository class used to browse a Amazon S3 bucket.
@@ -318,7 +317,7 @@ class repository_s3bucket extends repository {
         $strrequired = get_string('required');
         $textops = ['maxlength' => 255, 'size' => 50];
         $endpointselect = [];
-        $all = require($CFG->dirroot . '/local/aws/sdk/Aws/data/endpoints.json.php');
+        $all = require($CFG->libdir . '/aws-sdk/src/data/endpoints.json.php');
         $endpoints = $all['partitions'][0]['regions'];
         foreach ($endpoints as $key => $value) {
             $endpointselect[$key] = $value['description'];

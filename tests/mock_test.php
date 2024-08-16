@@ -25,12 +25,6 @@
 
 namespace repository_s3bucket;
 
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-
-require_once($CFG->dirroot . '/local/aws/sdk/aws-autoloader.php');
-
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 
