@@ -182,7 +182,7 @@ final class other_test extends \advanced_testcase {
     public function test_getfile(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
-        $repo = new \repository_s3bucket($USER->id, $context);
+        $repo = new \repository_s3bucket($this->repo, $context);
         $this->data['endpoint'] = 'ap-south-1';
         $repo->set_option($this->data);
         $draft = file_get_unused_draft_itemid();
@@ -204,7 +204,7 @@ final class other_test extends \advanced_testcase {
     public function test_getlink(): void {
         global $USER;
         $context = \context_user::instance($USER->id);
-        $repo = new \repository_s3bucket($USER->id, $context);
+        $repo = new \repository_s3bucket($this->repo, $context);
         $url = $repo->get_link('tst.jpg');
         $this->assertStringContainsString('/s3/', $url);
         set_config('s3mock', false);
