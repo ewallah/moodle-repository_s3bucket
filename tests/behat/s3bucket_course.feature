@@ -2,9 +2,7 @@
 Feature: S3 bucket repository is private in user context
 
   Background:
-    # TODO: Why is this not working on github actions?
-    Given the site is running Moodle version 4.3 or lower
-    And the following "courses" exist:
+    Given the following "courses" exist:
       | fullname | shortname |
       | Course 1 | C1        |
       | Course 2 | C2        |
@@ -12,13 +10,11 @@ Feature: S3 bucket repository is private in user context
       | username    |
       | student     |
       | teacher     |
-      | facilitator |
     And the following "course enrolments" exist:
       | user        | course | role           |
       | student     | C1     | student        |
       | teacher     | C1     | editingteacher |
       | teacher     | C2     | editingteacher |
-      | facilitator | C1     | editingteacher |
     And the following "activities" exist:
       | activity | name    | course | idnumber | section |
       | page     | PageA   | C1     | pageA    | 1       |
