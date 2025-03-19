@@ -330,9 +330,8 @@ class repository_s3bucket extends repository {
         $mform->addElement('text', 'bucket_name', get_string('bucketname', 'repository_s3bucket'), $textops);
         $mform->setType('bucket_name', PARAM_RAW_TRIMMED);
 
-        $boptions = ['placeholder' => 'us-east-1'];
+        $boptions = ['placeholder' => 'us-east-1', 'tags' => true];
         $mform->addElement('autocomplete', 'endpoint', get_string('endpoint', 'repository_s3'), $endpointselect, $boptions);
-        // $mform->addElement('select', 'endpoint', get_string('endpoint', 'repository_s3'), $endpointselect);
         $mform->setDefault('endpoint', 'us-east-1');
 
         $mform->addRule('access_key', $strrequired, 'required', null, 'client');

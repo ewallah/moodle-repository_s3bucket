@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        moodle-branch: [MOODLE_404_STABLE]
+        moodle-branch: [MOODLE_404_STABLE, MOODLE_405_STABLE]
         php: [8.2]
         database: [mariadb, pgsql]
         include:
@@ -57,7 +57,6 @@ jobs:
            echo $(cd ci/bin; pwd) >> $GITHUB_PATH
            echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
-           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
       - name: install Moodle
         run: moodle-plugin-ci --ansi install --db-host=127.0.0.1 --plugin this-plugin
@@ -102,8 +101,8 @@ jobs:
         run: moodle-plugin-ci --ansi phpunit --testdox --coverage-text --coverage-clover
 
       - name: privacy
-        run: vendor/bin/phpunit --colors --no-coverage --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
         if: ${{ !cancelled() }}
+        run: vendor/bin/phpunit --colors --no-coverage --testsuite tool_dataprivacy_testsuite,tool_policy_testsuite,core_privacy_testsuite
         working-directory: moodle
 
       - name: firefox
