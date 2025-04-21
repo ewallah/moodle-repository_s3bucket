@@ -24,6 +24,8 @@
  */
 namespace repository_s3bucket;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 /**
  * Amazon S3bucket behat step tests
  *
@@ -32,12 +34,12 @@ namespace repository_s3bucket;
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\behat_repository_s3bucket::class)]
 final class behatstep_test extends \advanced_testcase {
     /**
      * Basic test of step.
      *
      * @return void
-     * @covers \behat_repository_s3bucket
      */
     public function test_do_step(): void {
         global $CFG, $DB;

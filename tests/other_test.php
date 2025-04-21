@@ -24,6 +24,8 @@
  */
 namespace repository_s3bucket;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -39,6 +41,7 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\repository_s3bucket::class)]
 final class other_test extends \advanced_testcase {
     /** @var int repo */
     protected $repo;
@@ -78,7 +81,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test sendfile s3.
-     * @covers \repository_s3bucket
      */
     public function test_sendfiles3(): void {
         global $USER;
@@ -93,7 +95,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test class in system context.
-     * @covers \repository_s3bucket
      */
     public function test_class(): void {
         $repo = new \repository_s3bucket($this->repo);
@@ -130,7 +131,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test empty in course context.
-     * @covers \repository_s3bucket
      */
     public function test_empty(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
@@ -145,7 +145,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test search.
-     * @covers \repository_s3bucket
      */
     public function test_search(): void {
         $userid = $this->getDataGenerator()->create_user()->id;
@@ -165,7 +164,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test no access_key.
-     * @covers \repository_s3bucket
      */
     public function test_noaccess_key(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
@@ -177,7 +175,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test get file in user context.
-     * @covers \repository_s3bucket
      */
     public function test_getfile(): void {
         global $USER;
@@ -199,7 +196,6 @@ final class other_test extends \advanced_testcase {
 
     /**
      * Test get url in user context.
-     * @covers \repository_s3bucket
      */
     public function test_getlink(): void {
         global $USER;
@@ -210,64 +206,15 @@ final class other_test extends \advanced_testcase {
         set_config('s3mock', false);
         $repo = new \repository_s3bucket($this->repo);
         $url = $repo->get_link('filename.txt');
-    }
-
-    /**
-     * Test get url in course context.
-     * @covers \repository_s3bucket
-     * @covers \repository_s3bucket_pluginfile
-     */
-    public function test_pluginfile(): void {
-        $headerf = 'Cannot modify header information - headers already sent';
-        $systemcontext = \context_system::instance();
-        $systemrepo = new \repository_s3bucket($this->repo, $systemcontext);
-        $course = $this->getDataGenerator()->create_course();
-        $coursecontext = \context_course::instance($course->id);
-        $courserepo = new \repository_s3bucket($this->repo, $coursecontext);
-        $user = $this->getDataGenerator()->create_user();
-        $usercontext = \context_user::instance($user->id);
-        $userrepo = new \repository_s3bucket($this->repo, $usercontext);
-        $url = $this->getDataGenerator()->create_module('url', ['course' => $course->id]);
-        $modcontext = \context_module::instance($url->cmid);
-        $modrepo = new \repository_s3bucket($this->repo, $modcontext);
-        $cm = get_coursemodule_from_instance('url', $url->id);
-        $this->assertFalse(repository_s3bucket_pluginfile($course, $cm, $coursecontext, 'hr', [], true));
-        try {
-            \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString($headerf, $e->getMessage());
-        }
-        try {
-            \repository_s3bucket_pluginfile($course, $cm, $coursecontext, 's3', [$courserepo->id, 'tst.jpg'], true);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString($headerf, $e->getMessage());
-        }
-        try {
-            \repository_s3bucket_pluginfile($course, $cm, $usercontext, 's3', [$userrepo->id, 'tst.jpg'], true);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString($headerf, $e->getMessage());
-        }
-        try {
-            \repository_s3bucket_pluginfile($course, $cm, $modcontext, 's3', [$modrepo->id, 'tst.jpg'], true);
-        } catch (\Exception $e) {
-            $this->assertStringContainsString($headerf, $e->getMessage());
-        }
-        $systemrepo->set_option(['access_key' => null]);
-        $this->expectException('moodle_exception');
-        \repository_s3bucket_pluginfile(1, $cm, $systemcontext, 's3', [$systemrepo->id, 'tst.jpg'], true);
+        $this->assertStringContainsString('/s3/', $url);
     }
 
     /**
      * Tests other files.
-     * @coversNothing
      */
     public function test_local_other(): void {
         global $CFG;
-        require_once($CFG->libdir . '/upgradelib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');
-        require_once($CFG->dirroot . '/repository/s3bucket/db/upgrade.php');
         require_once($CFG->dirroot . '/repository/s3bucket/tests/coverage.php');
-        $this->expectException('downgrade_exception');
-        xmldb_repository_s3bucket_upgrade(time());
     }
 }

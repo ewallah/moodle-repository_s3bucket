@@ -25,6 +25,7 @@
 
 namespace repository_s3bucket;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Form tests.
@@ -32,8 +33,8 @@ namespace repository_s3bucket;
  * @package    repository_s3bucket
  * @copyright  eWallah (www.eWallah.net)
  * @author     Renaat Debleu <info@eWallah.net>
- * @coversDefaultClass \repository_s3bucket
  */
+#[CoversClass(\repository_s3bucket::class)]
 final class form_test extends \advanced_testcase {
     /** @var int repo */
     protected $repo;
@@ -73,7 +74,6 @@ final class form_test extends \advanced_testcase {
 
     /**
      * Test type config form.
-     * @covers \repository_s3bucket
      */
     public function test_type_config_form(): void {
         $context = \context_system::instance();
@@ -92,7 +92,6 @@ final class form_test extends \advanced_testcase {
 
     /**
      * Test instance form.
-     * @covers \repository_s3bucket
      */
     public function test_instance_form(): void {
         global $USER;
@@ -109,7 +108,6 @@ final class form_test extends \advanced_testcase {
 
     /**
      * Test instance form error.
-     * @covers \repository_s3bucket
      */
     public function test_instance_form2(): void {
         global $USER;
@@ -128,7 +126,6 @@ final class form_test extends \advanced_testcase {
 
     /**
      * Test instance form with proxy.
-     * @covers \repository_s3bucket
      */
     public function test_instance_formproxy(): void {
         global $USER;
@@ -144,7 +141,6 @@ final class form_test extends \advanced_testcase {
 
     /**
      * Test form.
-     * @covers \repository_s3bucket
      */
     public function test_form(): void {
         global $USER;

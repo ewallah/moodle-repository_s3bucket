@@ -24,6 +24,7 @@
  */
 
 namespace repository_s3bucket;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Delete tests.
@@ -33,10 +34,10 @@ namespace repository_s3bucket;
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\repository_s3bucket::class)]
 final class delete_test extends \advanced_testcase {
     /**
      * Test deleting a s3 bucket.
-     * @covers \repository_s3bucket
      */
     public function test_deletebucket(): void {
         global $CFG, $DB, $USER;

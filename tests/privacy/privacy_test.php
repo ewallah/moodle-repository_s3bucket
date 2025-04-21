@@ -26,6 +26,7 @@
 namespace repository_s3bucket\privacy;
 
 use core_privacy\tests\provider_testcase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Privacy tests.
@@ -35,10 +36,10 @@ use core_privacy\tests\provider_testcase;
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(provider::class)]
 final class privacy_test extends provider_testcase {
     /**
      * Test privacy.
-     * @covers \repository_s3bucket\privacy\provider
      */
     public function test_privacy(): void {
         $collection = new \core_privacy\local\metadata\collection('repository_s3bucket');

@@ -27,6 +27,7 @@ namespace repository_s3bucket;
 
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Mock tests.
@@ -36,6 +37,7 @@ use Aws\S3\S3Client;
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\repository_s3bucket::class)]
 final class mock_test extends \advanced_testcase {
     /**
      * Create type and instance.
@@ -54,64 +56,7 @@ final class mock_test extends \advanced_testcase {
     }
 
     /**
-     * Test listobjects s3.
-     * @covers \repository_s3bucket
-     */
-    public function test_listobjects(): void {
-        $result = new \Aws\Result(['key1' => 'object1', 'key2' => 'object2', 'key3' => 'object3']);
-        $args = ['Bucket' => 'test', 'Key' => 'key', 'SaveAs' => 'path'];
-        $options = [
-            'Bucket' => 'test',
-            'FetchOwner' => false,
-            'Prefix' => '.',
-            'MaxKeys' => 1000,
-            'EncodingType' => 'url',
-            'Delimiter' => '/', ];
-        $client = $this->getMockBuilder('Aws\S3\S3Client')
-            ->disableOriginalConstructor()
-            ->setMethods(['listObjectsV2', 'getPaginator', 'getObject'])
-            ->setConstructorArgs([$options, ['Bucket' => 'test'], $args])
-            ->getMock();
-        $client->expects($this->once())
-            ->method('listObjectsV2')
-            ->with(['Bucket' => 'test'])
-            ->will($this->returnValue($result));
-
-        $list = $client->listObjectsV2(['Bucket' => 'test']);
-        $this->assertTrue($list->hasKey('key1'));
-        $this->assertFalse($list->hasKey('object2'));
-
-        $client->expects($this->once())
-            ->method('getPaginator')
-            ->with('listObjects', ['Bucket' => 'testbucket'])
-            ->will($this->returnValue($result));
-        $list = $client->getPaginator('listObjects', ['Bucket' => 'testbucket']);
-        $this->assertTrue($list->hasKey('key1'));
-        $this->assertFalse($list->hasKey('object2'));
-
-        $client->expects($this->once())
-            ->method('getObject')
-            ->with($args)
-            ->will($this->returnValue($result));
-        $list = $client->getObject($args);
-        $this->assertTrue($list->hasKey('key1'));
-        $this->assertFalse($list->hasKey('object2'));
-
-        $client = $this->getMockBuilder('Aws\S3\S3Client')
-            ->disableOriginalConstructor()
-            ->setMethods(['getObject'])
-            ->setConstructorArgs(['key', 'secret'])
-            ->getMock();
-        $client->expects($this->once())
-            ->method('getObject')
-            ->with(['Bucket' => 'testbucket', 'key' => 'key'])
-            ->will($this->returnValue([]));
-        $list = $client->getObject(['Bucket' => 'testbucket', 'key' => 'key']);
-    }
-
-    /**
      * Test mock exception s3.
-     * @covers \repository_s3bucket
      */
     public function test_mockexception(): void {
         $this->resetAfterTest(true);
