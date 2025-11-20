@@ -2,6 +2,11 @@ name: Localstack
 
 on: [push]
 
+env:
+  aws-region: eu-west-1
+  aws-access-key-id: test
+  aws-secret-access-key: test
+
 jobs:
   localstack:
     name: Localstack
@@ -69,10 +74,6 @@ jobs:
         run: |
           aws s3 mb s3://testrepo
           aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
-        env:
-          aws-region: eu-west-1
-          aws-access-key-id: test
-          aws-secret-access-key: test
 
       - name: phpunit
         if: ${{ !cancelled() }}
