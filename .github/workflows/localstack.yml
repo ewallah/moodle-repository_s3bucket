@@ -1,15 +1,25 @@
-name: Cron
+name: Localstack
 
-on:
-  schedule:
-    - cron: "5 10 9 * *"
+on: [push]
 
 jobs:
-  ci:
-    name: Cron
+  localstack:
+    name: Localstack
     runs-on: ubuntu-latest
 
     services:
+
+      localstack:
+        image: localstack/localstack:latest
+        env:
+          SERVICES: s3
+          DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        ports:
+          - 4566:4566
+          - 4571:4571
+
       postgres:
         image: postgres
         env:
@@ -51,38 +61,6 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-
-      - name: phplint
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi phplint
-
-      - name: phpmd
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi phpmd
-
-      - name: phpdoc
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi phpdoc
-
-      - name: codechecker
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi codechecker
-
-      - name: validate
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi validate
-
-      - name: savepoints
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi savepoints
-
-      - name: grunt
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi grunt
-
-      - name: mustache
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi mustache
 
       - name: phpunit
         if: ${{ !cancelled() }}
