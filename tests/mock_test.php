@@ -67,6 +67,7 @@ final class mock_test extends \advanced_testcase {
         set_config('s3mock', true);
         $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-east-1']);
+
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $client = $method->invoke($s3bucket);
@@ -81,6 +82,7 @@ final class mock_test extends \advanced_testcase {
         set_config('s3mock', false);
         $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-west-1']);
+
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $client = $method->invoke($s3bucket);

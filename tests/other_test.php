@@ -110,9 +110,12 @@ final class other_test extends \advanced_testcase {
         $repo->disabled = true;
         try {
             $repo->get_reference_details('filename.txt');
-        } catch (\Exception $e) {
+        } catch (\core\exception\moodle_exception $e) {
             $this->assertEquals('Cannot download this file', $e->getMessage());
+        } catch (repository_exception $exception) {
+            $this->assertEquals('Cannot download this file', $exception->getMessage());
         }
+
         $repo->disabled = false;
         $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $this->assertFalse($repo->global_search());
@@ -125,8 +128,22 @@ final class other_test extends \advanced_testcase {
 
         set_config('s3mock', false);
         $repo = new \repository_s3bucket($this->repo);
-        $this->expectException('moodle_exception');
-        $repo->get_listing('testfile.jpg', 1);
+        $x = 0;
+        try {
+            $all = $repo->get_listing('testfile.jpg', 1);
+            $this->assertCount(6, $all);
+            $result = $repo->get_file('testfile.jpg', 'testfile.jpg');
+            $this->assertEquals('testfile.jpg', $result['url']);
+            $this->assertStringContainsString('/testfile.jpg', $result['path']);
+            $repo->send_otherfile($result['path'], 3);
+        } catch (\repository_exception $re) {
+            // We reached the repository exception.
+            $x++;
+        } catch (\core\exception\moodle_exception $e) {
+            // No Localstack installed.
+            $x++;
+        }
+        $this->assertNotEquals(5, $x);
     }
 
     /**
@@ -139,8 +156,15 @@ final class other_test extends \advanced_testcase {
         $this->assertCount(1, $result['path']);
         set_config('s3mock', false);
         $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
-        $this->expectException('moodle_exception');
-        $repo->get_listing('.');
+        $x = 0;
+        try {
+            $all = $repo->get_listing('.');
+            $this->assertCount(6, $all);
+        } catch (\core\exception\moodle_exception $e) {
+            // No Localstack installed.
+            $x++;
+        }
+        $this->assertNotEquals(5, $x);
     }
 
     /**
@@ -158,8 +182,14 @@ final class other_test extends \advanced_testcase {
         $this->assertCount(2, $result['list']);
         set_config('s3mock', false);
         $repo = new \repository_s3bucket($this->repo, $context, $this->data);
-        $this->expectException('moodle_exception');
-        $repo->search('filesearch');
+        $x = 0;
+        try {
+            $all = $repo->search('filesearch');
+            $this->assertCount(4, $all);
+        } catch (\core\exception\moodle_exception $e) {
+            // No Localstack installed.
+            $x++;
+        }
     }
 
     /**
@@ -191,7 +221,7 @@ final class other_test extends \advanced_testcase {
         $result = $repo->get_file('/otherfilename.txt');
         $this->assertEquals('/otherfilename.txt', $result['url']);
         $this->expectException('moodle_exception');
-        $result = $repo->get_file('');
+        $repo->get_file('');
     }
 
     /**

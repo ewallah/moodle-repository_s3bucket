@@ -42,8 +42,7 @@ final class privacy_test extends provider_testcase {
      * Test privacy.
      */
     public function test_privacy(): void {
-        $collection = new \core_privacy\local\metadata\collection('repository_s3bucket');
-        $reason = \repository_s3bucket\privacy\provider::get_reason($collection);
+        $reason = provider::get_reason();
         $this->assertEquals($reason, 'privacy:metadata');
         $this->assertStringContainsString('does not store', get_string($reason, 'repository_s3bucket'));
     }

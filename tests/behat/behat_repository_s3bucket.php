@@ -39,11 +39,11 @@ class behat_repository_s3bucket extends behat_base {
     /**
      * Enable s3 bucket.
      *
-     * @Given /^I enable repository "(?P<repository_string>(?:[^"]|\\")*)"$/
-     * @param string $repository
+     * @param string $repository Repository
      * @throws dml_exception
      */
-    public function i_enable_repository($repository) {
+    #[\Behat\Step\Given('/^I enable repository "(?P<repository_string>(?:[^"]|\\\\")*)"$/')]
+    public function i_enable_repository($repository): void {
         global $CFG;
         require_once($CFG->dirroot . '/repository/lib.php');
         $s3bucketplugin = new repository_type($repository, [], true);

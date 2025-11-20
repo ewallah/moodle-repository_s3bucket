@@ -38,8 +38,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 final class behatstep_test extends \advanced_testcase {
     /**
      * Basic test of step.
-     *
-     * @return void
      */
     public function test_do_step(): void {
         global $CFG, $DB;

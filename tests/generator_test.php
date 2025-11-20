@@ -57,11 +57,12 @@ final class generator_test extends \advanced_testcase {
         $caughtexception = false;
         try {
             $this->getDataGenerator()->create_repository_type('s3bucket');
-        } catch (\repository_exception $e) {
-            if ($e->getMessage() === 'This repository already exists') {
+        } catch (\repository_exception $repositoryexception) {
+            if ($repositoryexception->getMessage() === 'This repository already exists') {
                 $caughtexception = true;
             }
         }
+
         $this->assertTrue($caughtexception, "Repository type 's3bucket' should have already been enabled");
     }
 

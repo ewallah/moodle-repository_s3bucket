@@ -35,22 +35,23 @@ class repository_s3bucket_generator extends testing_repository_generator {
     /**
      * Fill in type record defaults.
      *
-     * @param array $record
-     * @return array
+     * @param array $record Record
+     * @return array Prepared record
      */
     protected function prepare_type_record(array $record) {
         $record = parent::prepare_type_record($record);
         if (!isset($record['duration'])) {
             $record['duration'] = 5;
         }
+
         return $record;
     }
 
     /**
      * Fill in record defaults.
      *
-     * @param array $record
-     * @return array
+     * @param array $record Record
+     * @return array Prepared record
      */
     protected function prepare_record(array $record) {
         $record = parent::prepare_type_record($record);
