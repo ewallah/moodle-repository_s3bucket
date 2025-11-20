@@ -62,16 +62,17 @@ jobs:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
 
-      - name: S3Bucket
-        env:
-            AWS_ACCESS_KEY_ID: test
-            AWS_SECRET_ACCESS_KEY: test
-            AWS_DEFAULT_REGION: eu-west-1
-            AWS_DEFAULT_OUTPUT: json
+      - name: Configure Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: eu-west-1
+          aws-access-key-id: test
+          aws-secret-access-key: test
+
+      - name: Create Bucket
         run: |
-            sudo apt install awscli
-            aws s3 mb s3://testrepo
-            aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
+          aws s3 mb s3://testrepo
+          aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
       - name: phpunit
         if: ${{ !cancelled() }}
