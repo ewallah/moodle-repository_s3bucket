@@ -19,7 +19,6 @@ jobs:
         ports:
           - 4566:4566
           - 4571:4571
-        install-awslocal: 'true'
 
       postgres:
         image: postgres
@@ -70,6 +69,7 @@ jobs:
             AWS_DEFAULT_REGION: eu-west-1
             AWS_DEFAULT_OUTPUT: json
         run: |
+            sudo apt install awscli
             aws s3 mb s3://testrepo
             aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
