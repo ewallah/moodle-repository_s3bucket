@@ -5,7 +5,8 @@ on: [push]
 env:
   AWS_ACCESS_KEY_ID: test
   AWS_SECRET_ACCESS_KEY: test
-  AWS_REGION: eu-west-1
+  AWS_REGION: us-east-1
+  DEFAULT_REGION: us-east-1
 
 jobs:
   localstack:
@@ -18,9 +19,6 @@ jobs:
         image: localstack/localstack:latest
         env:
           SERVICES: s3
-          DEFAULT_REGION: eu-west-1
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
         ports:
           - 4566:4566
           - 4571:4571
