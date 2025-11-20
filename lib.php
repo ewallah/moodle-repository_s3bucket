@@ -22,6 +22,7 @@
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use core\exception\moodle_exception;
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -60,42 +61,51 @@ class repository_s3bucket extends repository {
             'MaxKeys' => 1000,
             'EncodingType' => 'url',
             'Delimiter' => '/', ];
-        $results = $files = [];
+        $results = [];
+        $files = [];
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
         } catch (\Exception $e) {
-            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
-        foreach ($results->search('CommonPrefixes[].{Prefix: Prefix}') as $item) {
-             $files[] = [
-                  'title' => basename($item['Prefix']),
-                  'children' => [],
-                  'thumbnail' => $diricon,
-                  'thumbnail_height' => 64,
-                  'thumbnail_width' => 64,
-                  'path' => $item['Prefix'], ];
-        }
-
-        $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\'';
-        $filesearch .= ' && StorageClass != \'GLACIER\'';
-        $filesearch .= ' && starts_with(Key, \'' . $path . '\')]';
-        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
-        foreach ($results->search($filesearch) as $item) {
-            $pathinfo = pathinfo($item['Key']);
-            if ($pathinfo['dirname'] == $epath || $pathinfo['dirname'] . '//' == $epath) {
+        $items = $results->search('CommonPrefixes[].{Prefix: Prefix}');
+        if ($items) {
+            foreach ($items as $item) {
                 $files[] = [
-                   'title' => $pathinfo['basename'],
-                   'size' => $item['Size'],
-                   'path' => $item['Key'],
-                   'datemodified' => date_timestamp_get($item['LastModified']),
-                   'thumbnail_height' => 64,
-                   'thumbnail_width' => 64,
-                   'source' => $item['Key'],
-                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false), ];
+                      'title' => basename((string) $item['Prefix']),
+                      'children' => [],
+                      'thumbnail' => $diricon,
+                      'thumbnail_height' => 64,
+                      'thumbnail_width' => 64,
+                      'path' => $item['Prefix'], ];
             }
         }
+
+        $filesearch = "Contents[?StorageClass != 'DEEP_ARCHIVE'";
+        $filesearch .= " && StorageClass != 'GLACIER'";
+        $filesearch .= " && starts_with(Key, '{$path}')]";
+        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
+
+        $items = $results->search($filesearch);
+        if ($items) {
+            foreach ($items as $item) {
+                $pathinfo = pathinfo((string)$item['Key']);
+                if ($pathinfo['dirname'] == $epath || $pathinfo['dirname'] . '//' === $epath) {
+                    $files[] = [
+                       'title' => $pathinfo['basename'],
+                       'size' => $item['Size'],
+                       'path' => $item['Key'],
+                       'datemodified' => date_timestamp_get($item['LastModified']),
+                       'thumbnail_height' => 64,
+                       'thumbnail_width' => 64,
+                       'source' => $item['Key'],
+                       'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false), ];
+                }
+            }
+        }
+
         return [
            'list' => $files,
            'path' => $place,
@@ -122,42 +132,51 @@ class repository_s3bucket extends repository {
             'MaxKeys' => 1000,
             'EncodingType' => 'url',
             'Delimiter' => '/', ];
-        $results = $files = [];
+        $results = [];
+        $files = [];
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
         } catch (\Exception $e) {
-            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
 
-        $dirsearch = 'CommonPrefixes[?contains(Prefix, \'' . $q . '\')].{Prefix: Prefix}';
-        foreach ($results->search($dirsearch) as $item) {
-             $files[] = [
-                  'title' => basename($item['Prefix']),
-                  'children' => [],
-                  'thumbnail' => $diricon,
-                  'thumbnail_height' => 64,
-                  'thumbnail_width' => 64,
-                  'path' => $item['Prefix'], ];
+        $dirsearch = "CommonPrefixes[?contains(Prefix, '{$q}')].{Prefix: Prefix}";
+        $items = $results->search($dirsearch);
+        if ($items) {
+            foreach ($items as $item) {
+                $files[] = [
+                    'title' => basename((string)$item['Prefix']),
+                    'children' => [],
+                    'thumbnail' => $diricon,
+                    'thumbnail_height' => 64,
+                    'thumbnail_width' => 64,
+                    'path' => $item['Prefix'], ];
+            }
         }
 
-        $filesearch = 'Contents[?StorageClass != \'DEEP_ARCHIVE\'';
-        $filesearch .= ' && StorageClass != \'GLACIER\'';
-        $filesearch .= ' && contains(Key, \'' . $q . '\')]';
+        $filesearch = "Contents[?StorageClass != 'DEEP_ARCHIVE'";
+        $filesearch .= " && StorageClass != 'GLACIER'";
+        $filesearch .= " && contains(Key, '{$q}')]";
         $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
-        foreach ($results->search($filesearch) as $item) {
-            $pathinfo = pathinfo($item['Key']);
-            $files[] = [
-               'title' => $pathinfo['basename'],
-               'size' => $item['Size'],
-               'path' => $item['Key'],
-               'datemodified' => date_timestamp_get($item['LastModified']),
-               'thumbnail_height' => 64,
-               'thumbnail_width' => 64,
-               'source' => $item['Key'],
-               'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false),
-            ];
+
+        $items = $results->search($filesearch);
+        if ($items) {
+            foreach ($results->search($filesearch) as $item) {
+                $pathinfo = pathinfo((string)$item['Key']);
+                $files[] = [
+                   'title' => $pathinfo['basename'],
+                   'size' => $item['Size'],
+                   'path' => $item['Key'],
+                   'datemodified' => date_timestamp_get($item['LastModified']),
+                   'thumbnail_height' => 64,
+                   'thumbnail_width' => 64,
+                   'source' => $item['Key'],
+                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false),
+                ];
+            }
         }
+
         return ['list' => $files, 'dynload' => true, 'pages' => 0, 'page' => $page];
     }
 
@@ -172,7 +191,7 @@ class repository_s3bucket extends repository {
      */
     public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, ?array $options = null) {
         $duration = get_config('s3bucket', 'duration');
-        $this->send_otherfile($storedfile->get_reference(), "+$duration minutes");
+        $this->send_otherfile($storedfile->get_reference(), "+{$duration} minutes");
     }
 
     /**
@@ -192,17 +211,20 @@ class repository_s3bucket extends repository {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
             } catch (\Exception $e) {
-                throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+                throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
             }
             $uri = $req->getUri()->__toString();
             $mimetype = get_mimetype_description(['filename' => $reference]);
-            header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
-            header('Pragma: no-cache');
-            header("Content-Type: $mimetype\n");
-            header("Content-Disposition: attachment; filename=\"$reference\"");
-            header("Location: $uri");
-            die;
+            if (!PHPUNIT_TEST) {
+                header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
+                header('Pragma: no-cache');
+                header("Content-Type: {$mimetype}");
+                header("Content-Disposition: attachment; filename=\"{$reference}\"");
+                header("Location: {$uri}");
+                die;
+            }
         }
+
         throw new \repository_exception('cannotdownload', 'repository');
     }
 
@@ -231,9 +253,11 @@ class repository_s3bucket extends repository {
         if ($this->disabled) {
             throw new \repository_exception('cannotdownload', 'repository');
         }
+
         if ($filestatus == 666) {
             $reference = '';
         }
+
         return $this->get_file_source_info($reference);
     }
 
@@ -256,7 +280,7 @@ class repository_s3bucket extends repository {
         try {
             $s3->getObject($options);
         } catch (\Exception $e) {
-            throw new \moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
         }
         return ['path' => $path, 'url' => $filepath];
     }
@@ -389,34 +413,38 @@ class repository_s3bucket extends repository {
         if ($this->s3client == null) {
             $accesskey = $this->get_option('access_key');
             if (empty($accesskey)) {
-                throw new \moodle_exception('needaccesskey', 'repository_s3');
+                throw new moodle_exception('needaccesskey', 'repository_s3');
             }
+
             $arr = self::addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
                 'use_path_style_endpoint' => true,
                 'region' => $this->get_option('endpoint'), ]);
             $this->s3client = \Aws\S3\S3Client::factory($arr);
         }
+
         return $this->s3client;
     }
 
     /**
      * Add proxy
      *
-     * @param array $settings
-     * @return array
+     * @param array $settings Settings
+     * @return array Array of settings
      */
     private static function addproxy($settings) {
         global $CFG;
         $settings['version'] = 'latest';
         $settings['signature_version'] = 'v4';
+
         if (!empty($CFG->proxyhost) && !empty($CFG->proxytype) && $CFG->proxytype != 'SOCKS5') {
             $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
             $type = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
             $cond = (!empty($CFG->proxyuser) && !empty($CFG->proxypassword));
             $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
-            $settings['request.options'] = ['proxy' => "$type$user$host"];
+            $settings['request.options'] = ['proxy' => "{$type}{$user}{$host}"];
         }
+
         if (defined('BEHAT_SITE_RUNNING') || get_config('core', 's3mock')) {
             $mock = new \Aws\MockHandler();
             $day = new DateTime();
@@ -426,6 +454,7 @@ class repository_s3bucket extends repository {
             $mock->append($result, $result);
             $settings['handler'] = $mock;
         }
+
         return $settings;
     }
 
@@ -460,20 +489,20 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
             $handled = has_capability('moodle/course:view', $context);
         } else if ($context->contextlevel === CONTEXT_COURSE) {
             $handled = $course && has_capability('moodle/course:view', $context);
-        } else if ($cm) {
-            if (has_capability('mod/' . $cm->modname . ':view', $context)) {
-                $modinfo = get_fast_modinfo($course);
-                $cmi = $modinfo->cms[$cm->id];
-                $handled = ($cmi->uservisible && $cmi->is_visible_on_course_page());
-            }
+        } else if ($cm && has_capability('mod/' . $cm->modname . ':view', $context)) {
+            $modinfo = get_fast_modinfo($course);
+            $cmi = $modinfo->cms[$cm->id];
+            $handled = ($cmi->uservisible && $cmi->is_visible_on_course_page());
         }
     }
+
     if ($handled) {
         $duration = get_config('s3bucket', 'duration');
         $itemid = array_shift($args);
         $reference = implode('/', $args);
         $repo = repository::get_repository_by_id($itemid, $context);
-        $repo->send_otherfile($reference, "+$duration minutes");
+        $repo->send_otherfile($reference, "+{$duration} minutes");
     }
+
     return false;
 }
