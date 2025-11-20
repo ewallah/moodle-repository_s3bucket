@@ -3,9 +3,9 @@ name: Localstack
 on: [push]
 
 env:
-  aws-region: eu-west-1
-  aws-access-key-id: test
-  aws-secret-access-key: test
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_REGION: eu-west-1
 
 jobs:
   localstack:
