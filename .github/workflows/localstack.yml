@@ -74,7 +74,7 @@ jobs:
         run: |
           mkdir ~/.aws
           echo '[default]  aws_access_key_id=test   aws_secret_access_key=test ' > ~/.aws/credentials
-          echo '[default]  region=us-east-1   output=json   > ~/.aws/config
+          echo '[default]  region=us-east-1   output=json  endpoint_url=http://localhost:4566  ' > ~/.aws/config
           aws s3 mb s3://testrepo
           aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
