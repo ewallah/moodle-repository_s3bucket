@@ -73,8 +73,8 @@ jobs:
       - name: Create Bucket
         run: |
           mkdir ~/.aws
-          echo '[default]\n  aws_access_key_id=test \n  aws_secret_access_key=test \n' > ~/.aws/credentials
-          echo '[default]\n  region=us-east-1\n   output=json\n > ~/aws/config
+          echo '[default]  aws_access_key_id=test   aws_secret_access_key=test ' > ~/.aws/credentials
+          echo '[default]  region=us-east-1   output=json   > ~/.aws/config
           aws s3 mb s3://testrepo
           aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
