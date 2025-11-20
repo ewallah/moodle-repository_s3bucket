@@ -7,7 +7,6 @@ env:
   AWS_SECRET_ACCESS_KEY: test
   AWS_REGION: us-east-1
   DEFAULT_REGION: us-east-1
-  endpoint_url: http://localhost:4566
   ENDPOINT_URL: http://localhost:4566
 
 
