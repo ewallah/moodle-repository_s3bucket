@@ -66,13 +66,13 @@ jobs:
         uses: unfor19/install-aws-cli-action@v1
 
       - name: Create Bucket
+        run: |
+          aws s3 mb s3://testrepo
+          aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
         with:
           aws-region: eu-west-1
           aws-access-key-id: test
           aws-secret-access-key: test
-        run: |
-          aws s3 mb s3://testrepo
-          aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
       - name: phpunit
         if: ${{ !cancelled() }}

@@ -380,7 +380,7 @@ class repository_s3bucket extends repository {
                 // Check if the bucket exists.
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
             } catch (\Aws\Exception\InvalidRegionException $regionexeption) {
-                $errors[] = $regionexeption->get_message();
+                $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             } catch (\Exception) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
