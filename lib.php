@@ -375,11 +375,13 @@ class repository_s3bucket extends repository {
         if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
             $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
             $arr = self::addproxy(['credentials' => $credentials, 'region' => $data['endpoint']]);
-            $s3 = \Aws\S3\S3Client::factory($arr);
             try {
+                $s3 = \Aws\S3\S3Client::factory($arr);
                 // Check if the bucket exists.
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
-            } catch (\Exception $e) {
+            } catch (\Aws\Exception\InvalidRegionException $regionexeption) {
+                $errors[] = $regionexeption->get_message();
+            } catch (\Exception) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
         }

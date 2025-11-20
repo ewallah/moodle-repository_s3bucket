@@ -13,12 +13,13 @@ jobs:
         image: localstack/localstack:latest
         env:
           SERVICES: s3
-          DEFAULT_REGION: us-east-1
+          DEFAULT_REGION: eu-west-1
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
         ports:
           - 4566:4566
           - 4571:4571
+        install-awslocal: 'true'
 
       postgres:
         image: postgres
@@ -61,6 +62,16 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: S3Bucket
+        env:
+            AWS_ACCESS_KEY_ID: test
+            AWS_SECRET_ACCESS_KEY: test
+            AWS_DEFAULT_REGION: eu-west-1
+            AWS_DEFAULT_OUTPUT: json
+        run: |
+            aws s3 mb s3://testrepo
+            aws s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testrepo/testfile.jpg
 
       - name: phpunit
         if: ${{ !cancelled() }}
