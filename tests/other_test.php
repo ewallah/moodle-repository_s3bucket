@@ -104,8 +104,8 @@ final class other_test extends \advanced_testcase {
         $this->assertEquals(['duration'], $repo->get_type_option_names());
         $this->assertCount(4, $repo->get_instance_option_names());
         $this->assertEquals('Unknown source', $repo->get_reference_details(''));
-        $this->assertEquals('s3://testrepo/filename.txt', $repo->get_file_source_info('filename.txt'));
-        $this->assertEquals('s3://testrepo/filename.txt', $repo->get_reference_details('filename.txt'));
+        $this->assertEquals('s3://testbucket/filename.txt', $repo->get_file_source_info('filename.txt'));
+        $this->assertEquals('s3://testbucket/filename.txt', $repo->get_reference_details('filename.txt'));
         $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
         $repo->disabled = true;
         try {
@@ -136,13 +136,14 @@ final class other_test extends \advanced_testcase {
             $this->assertEquals('testfile.jpg', $result['url']);
             $this->assertStringContainsString('/testfile.jpg', $result['path']);
             $repo->send_otherfile($result['path'], 3);
-        } catch (\repository_exception $re) {
+        } catch (\repository_exception) {
             // We reached the repository exception.
             $x++;
-        } catch (\core\exception\moodle_exception $e) {
+        } catch (\core\exception\moodle_exception) {
             // No Localstack installed.
             $x++;
         }
+
         $this->assertNotEquals(5, $x);
     }
 
@@ -160,10 +161,11 @@ final class other_test extends \advanced_testcase {
         try {
             $all = $repo->get_listing('.');
             $this->assertCount(6, $all);
-        } catch (\core\exception\moodle_exception $e) {
+        } catch (\core\exception\moodle_exception) {
             // No Localstack installed.
             $x++;
         }
+
         $this->assertNotEquals(5, $x);
     }
 
@@ -186,7 +188,7 @@ final class other_test extends \advanced_testcase {
         try {
             $all = $repo->search('filesearch');
             $this->assertCount(4, $all);
-        } catch (\core\exception\moodle_exception $e) {
+        } catch (\core\exception\moodle_exception) {
             // No Localstack installed.
             $x++;
         }

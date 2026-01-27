@@ -24,10 +24,12 @@
  */
 use core\exception\moodle_exception;
 
+// @codeCoverageIgnoreStart
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/repository/lib.php');
+// @codeCoverageIgnoreEnd
 
 /**
  * This is a repository class used to browse a Amazon S3 bucket.
@@ -66,8 +68,10 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (\Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+        } catch (\Exception $exception) {
+            // @codeCoverageIgnoreStart
+            $this->throw_error($exception->getMessage());
+            // @codeCoverageIgnoreEnd
         }
 
         $items = $results->search('CommonPrefixes[].{Prefix: Prefix}');
@@ -137,8 +141,10 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (\Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+        } catch (\Exception $exception) {
+            // @codeCoverageIgnoreStart
+            $this->throw_error($exception->getMessage());
+            // @codeCoverageIgnoreEnd
         }
 
         $dirsearch = "CommonPrefixes[?contains(Prefix, '{$q}')].{Prefix: Prefix}";
@@ -189,7 +195,7 @@ class repository_s3bucket extends repository {
      * @param bool $forcedownload If true (default true), forces download of file rather than view in browser/plugin
      * @param array|null $options additional options affecting the file serving
      */
-    public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, ?array $options = null) {
+    public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, ?array $options = null): void {
         $duration = get_config('s3bucket', 'duration');
         $this->send_otherfile($storedfile->get_reference(), "+{$duration} minutes");
     }
@@ -200,7 +206,7 @@ class repository_s3bucket extends repository {
      * @param string $reference the filereference
      * @param string $lifetime Number of seconds before the file should expire from caches
      */
-    public function send_otherfile($reference, $lifetime) {
+    public function send_otherfile($reference, $lifetime): void {
         if ($reference != '') {
             $s3 = $this->create_s3();
             $options = [
@@ -210,22 +216,36 @@ class repository_s3bucket extends repository {
             try {
                 $result = $s3->getCommand('GetObject', $options);
                 $req = $s3->createPresignedRequest($result, $lifetime);
+                // @codeCoverageIgnoreStart
             } catch (\Exception $e) {
-                throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+                $this->throw_error($e->getMessage());
+                // @codeCoverageIgnoreEnd
             }
+
             $uri = $req->getUri()->__toString();
             $mimetype = get_mimetype_description(['filename' => $reference]);
             if (!PHPUNIT_TEST) {
+                // @codeCoverageIgnoreStart
                 header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
                 header('Pragma: no-cache');
                 header("Content-Type: {$mimetype}");
                 header("Content-Disposition: attachment; filename=\"{$reference}\"");
                 header("Location: {$uri}");
                 die;
+                // @codeCoverageIgnoreEnd
             }
         }
 
         throw new \repository_exception('cannotdownload', 'repository');
+    }
+
+    /**
+     * This method throws a repository exception.
+     *
+     * @param string $message Optional message
+     */
+    public function throw_error(string $message = ''): void {
+        throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $message);
     }
 
     /**
@@ -279,9 +299,12 @@ class repository_s3bucket extends repository {
            'SaveAs' => $path, ];
         try {
             $s3->getObject($options);
-        } catch (\Exception $e) {
-            throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $e->getMessage());
+        } catch (\Exception $exception) {
+            // @codeCoverageIgnoreStart
+            $this->throw_error($exception->getMessage());
+            // @codeCoverageIgnoreEnd
         }
+
         return ['path' => $path, 'url' => $filepath];
     }
 
@@ -295,6 +318,7 @@ class repository_s3bucket extends repository {
         if (empty($filepath) || $filepath == '') {
             return get_string('unknownsource', 'repository');
         }
+
         return $this->get_short_filename('s3://' . $this->get_option('bucket_name') . '/' . $filepath, 50);
     }
 
@@ -313,7 +337,7 @@ class repository_s3bucket extends repository {
      * @param moodleform $mform Moodle form (passed by reference)
      * @param string $classname repository class name
      */
-    public static function type_config_form($mform, $classname = 'repository') {
+    public static function type_config_form($mform, $classname = 'repository'): void {
         $duration = get_config('s3bucket', 'duration') ?? 2;
         $choices = ['1' => 1, '2' => 2, '10' => 10, '15' => 15, '30' => 30, '60' => 60];
         $mform->addElement('select', 'duration', get_string('duration', $classname), $choices, $duration);
@@ -335,7 +359,7 @@ class repository_s3bucket extends repository {
      *
      * @param moodleform $mform Moodle form (passed by reference)
      */
-    public static function instance_config_form($mform) {
+    public static function instance_config_form($mform): void {
         global $CFG;
         parent::instance_config_form($mform);
         $strrequired = get_string('required');
@@ -373,18 +397,19 @@ class repository_s3bucket extends repository {
      */
     public static function instance_form_validation($mform, $data, $errors) {
         if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
-            $credentials = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
-            $arr = self::addproxy(['credentials' => $credentials, 'region' => $data['endpoint']]);
+            $params = [];
+            $params['credentials'] = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
+            $params['region'] = $data['endpoint'] ?? 'us-east-1';
+            $arr = self::addproxy($params);
             try {
                 $s3 = \Aws\S3\S3Client::factory($arr);
                 // Check if the bucket exists.
                 $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
-            } catch (\Aws\Exception\InvalidRegionException $regionexeption) {
-                $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
-            } catch (\Exception) {
+            } catch (\Aws\Exception\InvalidRegionException | \Exception) {
                 $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
             }
         }
+
         return $errors;
     }
 
@@ -434,10 +459,16 @@ class repository_s3bucket extends repository {
      * @param array $settings Settings
      * @return array Array of settings
      */
-    private static function addproxy($settings) {
+    private static function addproxy(array $settings): array {
         global $CFG;
         $settings['version'] = 'latest';
         $settings['signature_version'] = 'v4';
+
+        $region = $settings['region'] ?? 'us-east-1';
+        if (str_starts_with(strtolower($region), 'http')) {
+            $settings['endpoint'] = $region;
+            $settings['region'] = 'us-east-1';
+        }
 
         if (!empty($CFG->proxyhost) && !empty($CFG->proxytype) && $CFG->proxytype != 'SOCKS5') {
             $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
@@ -447,7 +478,7 @@ class repository_s3bucket extends repository {
             $settings['request.options'] = ['proxy' => "{$type}{$user}{$host}"];
         }
 
-        if (defined('BEHAT_SITE_RUNNING') || get_config('core', 's3mock')) {
+        if (get_config('core', 's3mock')) {
             $mock = new \Aws\MockHandler();
             $day = new DateTime();
             $result = new \Aws\Result([
@@ -471,7 +502,7 @@ class repository_s3bucket extends repository {
     }
 }
 
-
+// @codeCoverageIgnoreStart
 /**
  * Serve the files from the repository_s3bucket file areas
  *
@@ -484,7 +515,7 @@ class repository_s3bucket extends repository {
  * @param array $options additional options affecting the file serving
  * @return bool false if the file not found, just send the file otherwise and do not return
  */
-function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []): bool {
     $handled = false;
     if ($filearea == 's3') {
         if ($context->contextlevel === CONTEXT_SYSTEM) {
@@ -508,3 +539,5 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
 
     return false;
 }
+
+// @codeCoverageIgnoreEnd

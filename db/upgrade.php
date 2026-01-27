@@ -28,7 +28,7 @@
  * @param int $oldversion the version we are upgrading from
  * @return bool result
  */
-function xmldb_repository_s3bucket_upgrade($oldversion) {
+function xmldb_repository_s3bucket_upgrade($oldversion): bool {
     global $DB;
     if ($oldversion < 2020110101) {
         if ($instances = $DB->get_fieldset_sql("SELECT instanceid FROM {repository_instance_config} WHERE name = 'bucket_name'")) {
@@ -41,7 +41,9 @@ function xmldb_repository_s3bucket_upgrade($oldversion) {
                 $DB->execute($sql, ['instanceid' => $instance, 'newvalue' => 'us-east-1']);
             }
         }
+
         upgrade_plugin_savepoint(true, 2020110101, 'repository', 's3bucket');
     }
+
     return true;
 }

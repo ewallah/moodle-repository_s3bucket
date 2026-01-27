@@ -15,39 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Steps definitions related to Repository s3bucket.
+ * Amazon S3bucket repository data generator
  *
  * @package    repository_s3bucket
  * @copyright  eWallah (www.eWallah.net)
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// NOTE: no MOODLE_INTERNAL test here, this file may be required by behat before including /config.php.
-
-require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
 /**
- * Repository s3bucket related steps definitions.
+ * Amazon S3bucket repository data generator
  *
  * @package    repository_s3bucket
  * @copyright  eWallah (www.eWallah.net)
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class behat_repository_s3bucket extends behat_base {
+class behat_repository_s3bucket_generator extends behat_generator_base {
     /**
-     * Enable s3 bucket.
-     *
-     * @param string $repository Repository
-     * @throws dml_exception
+     * Get a list of the entities that Behat can create using the generator step.
      */
-    #[\Behat\Step\Given('/^I enable repository "(?P<repository_string>(?:[^"]|\\\\")*)"$/')]
-    public function i_enable_repository($repository): void {
-        global $CFG;
-        require_once($CFG->dirroot . '/repository/lib.php');
-        $options = ['enablecourseinstances' => true, 'enableuserinstances' => true];
-        $s3bucketplugin = new repository_type($repository, $options, true);
-        $s3bucketplugin->create(true);
+    protected function get_creatable_entities(): array {
+        return [
+            's3buckets' => [
+                'datagenerator' => 's3bucket',
+                'required' => ['access_key', 'secret_key', 'bucket_name', 'endpoint', 'contextlevel'],
+            ],
+        ];
     }
 }

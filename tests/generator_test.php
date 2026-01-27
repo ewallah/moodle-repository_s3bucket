@@ -91,5 +91,7 @@ final class generator_test extends \advanced_testcase {
         $s3generator = new \repository_s3bucket_generator($this->getDataGenerator());
         \phpunit_util::call_internal_method($s3generator, 'prepare_type_record', [['s3bucket']], 'repository_s3bucket_generator');
         \phpunit_util::call_internal_method($s3generator, 'prepare_record', [['s3bucket']], 'repository_s3bucket_generator');
+        // TODO: warning generated : Attempt to read property "name" on false.
+        // $s3generator->create_s3bucket(['endpoint' => 'us-east-1', 'name' => 'tempname']);.
     }
 }

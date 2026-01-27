@@ -61,7 +61,36 @@ class repository_s3bucket_generator extends testing_repository_generator {
             'access_key' => 'access',
             'secret_key' => 'secret',
             'endpoint' => 'us-east-1',
-            'bucket_name' => 'testrepo', ];
+            'bucket_name' => 'testbucket', ];
         return array_merge($arr, $record);
+    }
+
+    /**
+     * Create s3repository.
+     *
+     * @param array $record Record
+     * @return array Prepared record
+     */
+    public function create_s3bucket($record) {
+        global $DB;
+        switch ($record['contextlevel']) {
+            case 'Course':
+                // We do not have access to $COURSE, so we use the last created course.
+                $context = \context_course::instance(array_key_last(get_courses()));
+                break;
+            case 'User':
+                // We do not have access to $USER, so we fall back to role name.
+                $who = str_replace('bucket', '', ($record['name']));
+                $id = $DB->get_field('user', 'id', ['username' => $who]);
+                $context = \context_user::instance($id);
+                break;
+            default:
+                $context = \context_system::instance();
+        }
+
+        $id = \repository_s3bucket::create('s3bucket', 1, $context, $record);
+        $repo = new \repository_s3bucket($id, $context, $record);
+        $record['type'] = $repo->get_typename();
+        return $record;
     }
 }

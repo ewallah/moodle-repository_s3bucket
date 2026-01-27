@@ -23,56 +23,44 @@ Feature: S3 bucket repository is private in user context
       | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
       | private_files | System       | 1         | my-index        | side-post     |
     And I enable repository "s3bucket"
-    And I log in as "admin"
-    And I navigate to "Plugins > Repositories > Amazon S3 bucket" in site administration
-    And I click on "Allow users to add a repository instance into the course" "checkbox"
-    And I click on "Save" "button"
-    And I log out
-    And I log in as "teacher"
-    And I am on "Course 1" course homepage with editing mode on
-    And I navigate to "Repositories" in current page administration
-    And I follow "Create \"Amazon S3 bucket\" instance"
-    And I set the field "Name" to "Course 1 Bucket"
-    And I set the field "Bucket name" to "coursebucket"
-    And I set the field "Access key" to "anoTherfake@1"
-    And I set the field "Secret key" to "anotherFake_$2"
-    And I click on "Save" "button"
-    And I log out
+    And the following "repository_s3bucket > s3buckets" exist:
+      | name         | bucket_name | access_key | secret_key | endpoint              | contextlevel |
+      | coursebucket | testbucket  | test       | test       | http://localhost:4566 | Course       |
 
   @_file_upload
   Scenario: A teacher can add files from the s3 bucket repository in module context
-    And I am on the "folderB" "folder activity editing" page logged in as teacher
+    Given I am on the "folderB" "folder activity editing" page logged in as teacher
     And I click on "Add..." "button" in the "Files" "form_row"
-    And I should see "Course 1 Bucket"
-    And I follow "Course 1 Bucket"
-    And I should see "2020_dir"
-    And I should see "2020_f.jpg"
-    And I follow "2020_f.jpg"
-    Then I should see "Make a copy of the file"
+    And I should see "coursebucket"
+    And I follow "coursebucket"
+    And I should see "testdirectory"
+    And I should see "testfile.jpg"
+    And I follow "testfile.jpg"
+    And I should see "Make a copy of the file"
     And I should see "Link to the file"
     And I should not see "Create an alias"
     And I should not see "Create an access controled link to the file"
-    And I click on "Select this file" "button"
-    Then I should see "2020_f.jpg"
+    When I click on "Select this file" "button"
+    Then I should see "testfile.jpg"
     And I click on "Save and display" "button"
-    And I should see "2020_f.jpg"
+    And I should see "testfile.jpg"
 
   Scenario: A teacher cannot add files from the s3 bucket repository in profile
     Given I log in as "teacher"
-    And I open my profile in edit mode
-    And I click on "Add..." "button" in the "New picture" "form_row"
-    Then I should not see "Course 1 Bucket"
+    When I open my profile in edit mode
+    Then I click on "Add..." "button" in the "New picture" "form_row"
+    But I should not see "coursebucket"
 
   Scenario: A teacher cannot see the s3 bucket repository in another course context
     When I log in as "teacher"
     And I am on "Course 2" course homepage with editing mode on
     And I navigate to "Repositories" in current page administration
-    Then I should not see "Course 1 Bucket"
+    Then I should not see "coursebucket"
 
   Scenario: Another teacher can see the s3 bucket repository in same course context
     Given I am on the "folderB" "folder activity editing" page logged in as teacher
     When I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Course 1 Bucket"
+    Then I should see "coursebucket"
 
   Scenario: A student cannot see a s3 course bucket
     Given the following "activity" exists:
@@ -88,9 +76,9 @@ Feature: S3 bucket repository is private in user context
     When I am on the "Test assignment name" "assign activity" page logged in as student
     And I press "Add submission"
     And I follow "Add..."
-    Then I should not see "Course 1 Bucket"
+    Then I should not see "coursebucket"
 
   Scenario: An admin can see a s3 course bucket
     Given I am on the "folderB" "folder activity editing" page logged in as admin
     When I click on "Add..." "button" in the "Files" "form_row"
-    Then I should see "Course 1 Bucket"
+    Then I should see "coursebucket"
