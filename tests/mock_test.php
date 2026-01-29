@@ -40,22 +40,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(\repository_s3bucket::class)]
 final class mock_test extends \advanced_testcase {
     /**
-     * Create type and instance.
-     */
-    public function setUp(): void {
-        parent::setUp();
-        $this->resetAfterTest(true);
-    }
-
-    /**
-     * Test tearDown.
-     */
-    public function tearDown(): void {
-        set_config('s3mock', false);
-        parent::tearDown();
-    }
-
-    /**
      * Test mock exception s3.
      */
     public function test_mockexception(): void {
@@ -64,7 +48,6 @@ final class mock_test extends \advanced_testcase {
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();
 
-        set_config('s3mock', true);
         $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-east-1']);
 
@@ -79,7 +62,6 @@ final class mock_test extends \advanced_testcase {
         $this->assertInstanceOf('Aws\Command', $result);
         $this->assertNotEmpty($client->createPresignedRequest($result, 2));
 
-        set_config('s3mock', false);
         $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'us-west-1']);
 

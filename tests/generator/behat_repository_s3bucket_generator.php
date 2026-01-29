@@ -32,9 +32,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_repository_s3bucket_generator extends behat_generator_base {
-    /**
-     * Get a list of the entities that Behat can create using the generator step.
-     */
+    #[\Override]
     protected function get_creatable_entities(): array {
         return [
             's3buckets' => [

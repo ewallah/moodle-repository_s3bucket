@@ -21,9 +21,6 @@ Feature: S3 bucket global repositories should be seen by admins and teachers
       | blockname     | contextlevel | reference | pagetypepattern | defaultregion |
       | private_files | System       | 1         | my-index        | side-post     |
     And I enable repository "s3bucket"
-    And the following config values are set as admin:
-      | config | value | plugin              |
-      | s3mock | false | repository_s3bucket |
     And the following "repository_s3bucket > s3buckets" exist:
       | name          | bucket_name | access_key | secret_key | endpoint              | contextlevel |
       | Global bucket | testbucket  | test       | test       | http://localhost:4566 | System       |

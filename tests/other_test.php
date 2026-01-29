@@ -24,6 +24,10 @@
  */
 namespace repository_s3bucket;
 
+use advanced_testcase;
+use context_course;
+use context_system;
+use context_user;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -42,109 +46,73 @@ require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(\repository_s3bucket::class)]
-final class other_test extends \advanced_testcase {
+final class other_test extends advanced_testcase {
     /** @var int repo */
     protected $repo;
-
-    /** @var array data */
-    protected $data;
 
     /**
      * Create type and instance.
      */
     public function setUp(): void {
         parent::setUp();
+        if (\repository_s3bucket::no_localstack()) {
+            $this->markTestSkipped('Skipping as localstack is not installed.');
+        }
         $this->resetAfterTest(true);
-        set_config('s3mock', true);
-        set_config('proxyhost', '192.168.192.168');
-        set_config('proxyport', 66);
-        set_config('proxytype', 'http');
-        set_config('proxyuser', 'user');
-        set_config('proxypassword', 'pass');
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $this->repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
-        $this->data = [
-           'endpoint' => 'eu-north-1',
-           'secret_key' => 'secret',
-           'bucket_name' => 'test',
-           'access_key' => 'abc', ];
         $this->SetAdminUser();
-    }
-
-    /**
-     * Test tearDown.
-     */
-    public function tearDown(): void {
-        set_config('s3mock', false);
-        parent::tearDown();
     }
 
     /**
      * Test sendfile s3.
      */
-    public function test_sendfiles3(): void {
+    public function test_sendfile_s3(): void {
         global $USER;
-        $repo = new \repository_s3bucket($this->repo);
+        $repo = $this->create_repo(context_system::instance());
         $fs = get_file_storage();
-        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => \context_user::instance($USER->id)->id,
+        $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => context_user::instance($USER->id)->id,
                        'itemid' => file_get_unused_draft_itemid(), 'filename' => 'filename.jpg', 'filepath' => '/', ];
         $file = $fs->create_file_from_string($filerecord, 'test content');
         $this->expectException('repository_exception');
         $repo->send_file($file);
     }
 
+    #[\core\attribute\label('Test disabled.')]
+    public function test_disabled(): void {
+        $repo = $this->create_repo(context_system::instance());
+        $repo->disabled = true;
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage('Cannot download this file');
+        $repo->get_reference_details('testfile.jpg');
+    }
+
     /**
      * Test class in system context.
      */
     public function test_class(): void {
-        $repo = new \repository_s3bucket($this->repo);
+        $repo = $this->create_repo(context_system::instance());
         $this->assertEquals('S3 bucket', $repo->get_name());
         $this->assertTrue($repo->check_login());
         $this->assertFalse($repo->contains_private_data());
         $this->assertEquals(['duration'], $repo->get_type_option_names());
         $this->assertCount(4, $repo->get_instance_option_names());
         $this->assertEquals('Unknown source', $repo->get_reference_details(''));
-        $this->assertEquals('s3://testbucket/filename.txt', $repo->get_file_source_info('filename.txt'));
-        $this->assertEquals('s3://testbucket/filename.txt', $repo->get_reference_details('filename.txt'));
-        $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
-        $repo->disabled = true;
-        try {
-            $repo->get_reference_details('filename.txt');
-        } catch (\core\exception\moodle_exception $e) {
-            $this->assertEquals('Cannot download this file', $e->getMessage());
-        } catch (repository_exception $exception) {
-            $this->assertEquals('Cannot download this file', $exception->getMessage());
-        }
-
-        $repo->disabled = false;
-        $this->assertEquals('Unknown source', $repo->get_reference_details('filename.txt', 666));
+        $this->assertEquals('s3://testbucket/testfile.jpg', $repo->get_file_source_info('testfile.jpg'), 1);
+        $this->assertEquals('s3://testbucket/testfile.jpg', $repo->get_reference_details('testfile.jpg'), 0);
+        $this->assertEquals('Unknown source', $repo->get_reference_details('testfile.jpg', 666));
+        $this->assertEquals('s3://testbucket/testfile.jpg', $repo->get_reference_details('testfile.jpg', 999));
         $this->assertFalse($repo->global_search());
         $this->assertEquals(7, $repo->supported_returntypes());
         $this->assertEquals(4, $repo->default_returntype());
         $this->SetAdminUser();
         $this->assertEquals(2, $repo->check_capability());
-        $result = $repo->get_listing('', 1);
-        $this->assertCount(2, $result['list']);
 
-        set_config('s3mock', false);
-        $repo = new \repository_s3bucket($this->repo);
-        $x = 0;
-        try {
-            $all = $repo->get_listing('testfile.jpg', 1);
-            $this->assertCount(6, $all);
-            $result = $repo->get_file('testfile.jpg', 'testfile.jpg');
-            $this->assertEquals('testfile.jpg', $result['url']);
-            $this->assertStringContainsString('/testfile.jpg', $result['path']);
-            $repo->send_otherfile($result['path'], 3);
-        } catch (\repository_exception) {
-            // We reached the repository exception.
-            $x++;
-        } catch (\core\exception\moodle_exception) {
-            // No Localstack installed.
-            $x++;
-        }
-
-        $this->assertNotEquals(5, $x);
+        $all = $repo->get_listing();
+        $this->assertCount(6, $all);
+        $result = $repo->get_file('testfile.jpg', 'testfile.jpg');
+        $this->assertEquals('testfile.jpg', $result['url']);
+        $this->assertStringContainsString('/testfile.jpg', $result['path']);
     }
 
     /**
@@ -152,21 +120,75 @@ final class other_test extends \advanced_testcase {
      */
     public function test_empty(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
-        $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
-        $result = $repo->get_listing('.');
+        $repo = $this->create_repo(context_course::instance($courseid));
+        $result = $repo->get_listing('');
+        $path = ['name' => 'testbucket', 'path' => ''];
         $this->assertCount(1, $result['path']);
-        set_config('s3mock', false);
-        $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid), $this->data);
-        $x = 0;
-        try {
-            $all = $repo->get_listing('.');
-            $this->assertCount(6, $all);
-        } catch (\core\exception\moodle_exception) {
-            // No Localstack installed.
-            $x++;
-        }
+        $this->assertEquals($path, $result['path'][0]);
+        $this->assertCount(3, $result['list']);
+        $directory = [
+            'title' => 'fakedirectory',
+            'children' => [],
+            'thumbnail' => 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/folder',
+            'thumbnail_height' => 64,
+            'thumbnail_width' => 64,
+            'path' => 'fakedirectory/',
+        ];
+        $this->assertEquals($directory, $result['list'][0]);
+        $directory = [
+            'title' => 'testdirectory',
+            'children' => [],
+            'thumbnail' => 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/folder',
+            'thumbnail_height' => 64,
+            'thumbnail_width' => 64,
+            'path' => 'testdirectory/',
+        ];
+        $this->assertEquals($directory, $result['list'][1]);
+        $this->assertEquals($result['list'][2]['title'], 'testfile.jpg');
+        $this->assertEquals($result['list'][2]['size'], '645');
+        $this->assertEquals($result['list'][2]['path'], 'testfile.jpg');
+        $this->assertEquals($result['list'][2]['thumbnail_height'], 64);
+        $this->assertEquals($result['list'][2]['thumbnail_width'], 64);
+        $this->assertEquals($result['list'][2]['source'], 'testfile.jpg');
+        $this->assertEquals($result['list'][2]['thumbnail'], 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/image');
+        $this->assertFalse($result['manage']);
+        $this->assertTrue($result['dynload']);
+        $this->assertTrue($result['nologin']);
+        $this->assertFalse($result['nosearch']);
 
-        $this->assertNotEquals(5, $x);
+        $result = $repo->get_listing('testdirectory');
+        $this->assertCount(6, $result);
+        $path = ['name' => 'testbucket', 'path' => 'testdirectory'];
+        $this->assertEquals($path, $result['path'][0]);
+        $list = [
+            'title' => 'testdirectory',
+            'children' => [],
+            'thumbnail' => 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/folder',
+            'thumbnail_height' => 64,
+            'thumbnail_width' => 64,
+            'path' => 'testdirectory/',
+        ];
+        $this->assertEquals($list, $result['list'][0]);
+        $this->assertFalse($result['manage']);
+        $this->assertTrue($result['dynload']);
+        $this->assertTrue($result['nologin']);
+        $this->assertFalse($result['nosearch']);
+
+        $result = $repo->get_listing('testdirectory/');
+        $path = ['name' => 'testbucket', 'path' => 'testdirectory/'];
+        $this->assertEquals($path, $result['path'][0]);
+        $this->assertEquals($result['list'][0]['title'], 'testfile.jpg');
+        $this->assertEquals($result['list'][0]['size'], '7237');
+        $this->assertEquals($result['list'][0]['path'], 'testdirectory/testfile.jpg');
+        $this->assertEquals($result['list'][0]['thumbnail_height'], 64);
+        $this->assertEquals($result['list'][0]['thumbnail_width'], 64);
+        $this->assertEquals($result['list'][0]['source'], 'testdirectory/testfile.jpg');
+        $this->assertEquals($result['list'][0]['thumbnail'], 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/image');
+
+        $this->assertEquals($repo->get_file_source_info('test.png'), 's3://testbucket/test.png');
+        $s1 = 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest.jpg';
+        $s2 = 's3://testbucket/testtesttesttesttesttesttesttestte...';
+        $this->assertEquals($repo->get_file_source_info($s1), $s2);
     }
 
     /**
@@ -174,24 +196,34 @@ final class other_test extends \advanced_testcase {
      */
     public function test_search(): void {
         $userid = $this->getDataGenerator()->create_user()->id;
-        $context = \context_user::instance($userid);
-        $repo = new \repository_s3bucket($this->repo, $context, $this->data);
-        $this->data['endpoint'] = 'eu-central-1';
-        $repo->set_option($this->data);
-        $result = $repo->search('filesearch');
+        $context = context_user::instance($userid);
+        $repo = $this->create_repo($context);
+
+        $result = $repo->search('filesearch', 2);
         $this->assertCount(0, $result['list']);
-        $result = $repo->search('2020');
+        $this->assertEquals($result['page'], 2);
+        $this->assertTrue($result['dynload']);
+        $this->assertEquals($result['pages'], 0);
+
+        $result = $repo->search('test');
         $this->assertCount(2, $result['list']);
-        set_config('s3mock', false);
-        $repo = new \repository_s3bucket($this->repo, $context, $this->data);
-        $x = 0;
-        try {
-            $all = $repo->search('filesearch');
-            $this->assertCount(4, $all);
-        } catch (\core\exception\moodle_exception) {
-            // No Localstack installed.
-            $x++;
-        }
+        $list = $result['list'];
+        $this->assertEquals($list[0]['title'], 'testdirectory');
+        $this->assertEquals($list[0]['children'], []);
+        $this->assertEquals($list[0]['thumbnail'], 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/folder');
+        $this->assertEquals($list[0]['thumbnail_height'], 64);
+        $this->assertEquals($list[0]['thumbnail_width'], 64);
+        $this->assertEquals($list[0]['path'], 'testdirectory/');
+        $this->assertEquals($list[1]['title'], 'testfile.jpg');
+        $this->assertEquals($list[1]['size'], '645');
+        $this->assertEquals($list[1]['path'], 'testfile.jpg');
+        $this->assertEquals($list[1]['thumbnail_height'], 64);
+        $this->assertEquals($list[1]['thumbnail_width'], 64);
+        $this->assertEquals($list[1]['source'], 'testfile.jpg');
+        $this->assertEquals($list[1]['thumbnail'], 'https://www.example.com/moodle/theme/image.php/boost/core/1/f/image');
+        $this->assertTrue($result['dynload']);
+        $this->assertEquals($result['pages'], 0);
+        $this->assertEquals($result['page'], 1);
     }
 
     /**
@@ -199,7 +231,7 @@ final class other_test extends \advanced_testcase {
      */
     public function test_noaccess_key(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
-        $repo = new \repository_s3bucket($this->repo, \context_course::instance($courseid));
+        $repo = $this->create_repo(context_course::instance($courseid));
         $repo->set_option(['access_key' => null]);
         $this->expectException('moodle_exception');
         $repo->get_listing();
@@ -210,20 +242,18 @@ final class other_test extends \advanced_testcase {
      */
     public function test_getfile(): void {
         global $USER;
-        $context = \context_user::instance($USER->id);
-        $repo = new \repository_s3bucket($this->repo, $context);
-        $this->data['endpoint'] = 'ap-south-1';
-        $repo->set_option($this->data);
+        $context = context_user::instance($USER->id);
+        $repo = $this->create_repo($context);
         $draft = file_get_unused_draft_itemid();
         $filerecord = ['component' => 'user', 'filearea' => 'draft', 'contextid' => $context->id,
-                       'itemid' => $draft, 'filename' => 'filename.txt', 'filepath' => '/', ];
+                       'itemid' => $draft, 'filename' => 'testfile.jpg', 'filepath' => '/', ];
         get_file_storage()->create_file_from_string($filerecord, 'test content');
-        $result = $repo->get_file('/filename.txt');
-        $this->assertEquals('/filename.txt', $result['url']);
-        $result = $repo->get_file('/otherfilename.txt');
-        $this->assertEquals('/otherfilename.txt', $result['url']);
+        $result = $repo->get_file('testfile.jpg');
+        $this->assertEquals('testfile.jpg', $result['url']);
+        $this->assertStringStartsWith('/tmp/requestdir', $result['path']);
+
         $this->expectException('moodle_exception');
-        $repo->get_file('');
+        $repo->get_file('/otherfilename.txt');
     }
 
     /**
@@ -231,14 +261,19 @@ final class other_test extends \advanced_testcase {
      */
     public function test_getlink(): void {
         global $USER;
-        $context = \context_user::instance($USER->id);
-        $repo = new \repository_s3bucket($this->repo, $context);
-        $url = $repo->get_link('tst.jpg');
+        $context = context_user::instance($USER->id);
+        $userid = $context->id;
+        $repo = $this->create_repo($context);
+        $url = $repo->get_link('testdir/tst.jpg');
+        $this->assertStringStartsWith("https://www.example.com/moodle/pluginfile.php/{$userid}/repository_s3bucket/s3/", $url);
+        $this->assertStringEndsWith('/testdir/tst.jpg', $url);
         $this->assertStringContainsString('/s3/', $url);
-        set_config('s3mock', false);
-        $repo = new \repository_s3bucket($this->repo);
-        $url = $repo->get_link('filename.txt');
-        $this->assertStringContainsString('/s3/', $url);
+
+        $context = context_system::instance();
+        $repo = $this->create_repo($context);
+        $url = $repo->get_link('testfile.jpg');
+        $this->assertStringStartsWith('https://www.example.com/moodle/pluginfile.php/1/repository_s3bucket/s3/', $url);
+        $this->assertStringEndsWith('/testfile.jpg', $url);
     }
 
     /**
@@ -248,5 +283,19 @@ final class other_test extends \advanced_testcase {
         global $CFG;
         require_once($CFG->dirroot . '/repository/s3bucket/db/access.php');
         require_once($CFG->dirroot . '/repository/s3bucket/tests/coverage.php');
+    }
+
+    /**
+     * Create localstack repository.
+     * @param context $context Context
+     */
+    private function create_repo($context): \repository_s3bucket {
+        $repository = new \repository_s3bucket($this->repo, $context);
+        $repository->set_option(['endpoint' => 'http://localhost:4566']);
+        $repository->set_option(['region' => 'HTTp://localhost:4566']);
+        $repository->set_option(['secret_key' => 'test']);
+        $repository->set_option(['bucket_name' => 'testbucket']);
+        $repository->set_option(['access_key' => 'test']);
+        return $repository;
     }
 }

@@ -40,26 +40,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(\repository_s3bucket::class)]
 final class localstack_test extends \advanced_testcase {
     /**
-     * Create type and instance.
-     */
-    public function setUp(): void {
-        parent::setUp();
-        $this->resetAfterTest(true);
-        set_config('s3mock', false);
-    }
-
-    /**
-     * Test tearDown.
-     */
-    public function tearDown(): void {
-        set_config('s3mock', false);
-        parent::tearDown();
-    }
-
-    /**
      * Test mock exception s3.
      */
     public function test_localstack(): void {
+        $this->resetAfterTest(true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();

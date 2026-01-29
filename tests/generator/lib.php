@@ -32,12 +32,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_s3bucket_generator extends testing_repository_generator {
-    /**
-     * Fill in type record defaults.
-     *
-     * @param array $record Record
-     * @return array Prepared record
-     */
+    #[\Override]
     protected function prepare_type_record(array $record) {
         $record = parent::prepare_type_record($record);
         if (!isset($record['duration'])) {
@@ -47,12 +42,7 @@ class repository_s3bucket_generator extends testing_repository_generator {
         return $record;
     }
 
-    /**
-     * Fill in record defaults.
-     *
-     * @param array $record Record
-     * @return array Prepared record
-     */
+    #[\Override]
     protected function prepare_record(array $record) {
         $record = parent::prepare_type_record($record);
         $arr = [
@@ -73,6 +63,7 @@ class repository_s3bucket_generator extends testing_repository_generator {
      */
     public function create_s3bucket($record) {
         global $DB;
+        $userid = 2;
         switch ($record['contextlevel']) {
             case 'Course':
                 // We do not have access to $COURSE, so we use the last created course.
@@ -81,16 +72,19 @@ class repository_s3bucket_generator extends testing_repository_generator {
             case 'User':
                 // We do not have access to $USER, so we fall back to role name.
                 $who = str_replace('bucket', '', ($record['name']));
-                $id = $DB->get_field('user', 'id', ['username' => $who]);
-                $context = \context_user::instance($id);
+                $userid = $DB->get_field('user', 'id', ['username' => $who]);
+                $context = \context_user::instance($userid);
                 break;
             default:
                 $context = \context_system::instance();
         }
 
-        $id = \repository_s3bucket::create('s3bucket', 1, $context, $record);
-        $repo = new \repository_s3bucket($id, $context, $record);
-        $record['type'] = $repo->get_typename();
+        $id = $DB->get_field('repository', 'id', ['type' => 's3bucket']);
+        if (!$id) {
+            $plugintype = new repository_type('s3bucket', []);
+            $id = $plugintype->create(false);
+        }
+        repository_s3bucket::create('s3bucket', $userid, $context, $record);
         return $record;
     }
 }

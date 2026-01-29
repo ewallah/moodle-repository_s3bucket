@@ -36,11 +36,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
  */
 #[CoversClass(\repository_s3bucket::class)]
 final class form_test extends \advanced_testcase {
-    /** @var int repo */
+    /** @var s3repository repo */
     protected $repo;
-
-    /** @var array data */
-    protected $data;
 
     /**
      * Create type and instance.
@@ -51,31 +48,33 @@ final class form_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/repository/lib.php');
         require_once($CFG->dirroot . '/repository/s3bucket/lib.php');
         parent::setUp();
-        $this->resetAfterTest(true);
-        set_config('s3mock', true);
-        $this->getDataGenerator()->create_repository_type('s3bucket');
-        $this->repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
-        $this->data = [
-            'endpoint' => 'eu-west-2',
-            'secret_key' => 'secret',
-            'bucket_name' => 'test',
-            'access_key' => 'abc',
-        ];
-        $this->SetAdminUser();
-    }
 
-    /**
-     * Test tearDown.
-     */
-    public function tearDown(): void {
-        set_config('s3mock', false);
-        parent::tearDown();
+        if (\repository_s3bucket::no_localstack()) {
+            $this->markTestSkipped('Skipping as localstack is not installed.');
+        }
+
+        $this->resetAfterTest(true);
+        $this->getDataGenerator()->create_repository_type('s3bucket');
+        $repoid = $this->getDataGenerator()->create_repository('s3bucket')->id;
+        $context = \context_system::instance();
+
+        $repository = new \repository_s3bucket($repoid, $context);
+        $repository->set_option(['endpoint' => 'http://localhost:4566']);
+        $repository->set_option(['region' => 'HTTP://localhost:4566']);
+        $repository->set_option(['secret_key' => 'test']);
+        $repository->set_option(['bucket_name' => 'testbucket']);
+        $repository->set_option(['access_key' => 'test']);
+
+        $this->repo = $repository;
+        $this->SetAdminUser();
     }
 
     /**
      * Test type config form.
      */
     public function test_type_config_form(): void {
+        set_config('duration', 30, 'repository_s3bucket');
+        $this->assertEquals(get_config('repository_s3bucket', 'duration'), 30);
         $context = \context_system::instance();
         $para = [
             'plugin' => 's3bucket',
@@ -86,8 +85,24 @@ final class form_test extends \advanced_testcase {
         $this->assertEquals([], \repository_s3bucket::type_form_validation($mform, null, []));
         ob_start();
         $mform->display();
-        $out = ob_get_clean();
-        $this->assertStringContainsString('(in minutes)', $out);
+        $html = ob_get_clean();
+        $cleaned = preg_replace('/\s+/', '', $html);
+        $strs = [
+            '<inputname="repos"type="hidden"value="s3bucket"/>',
+            'Pre-SignedURLexpirationtime(inminutes)',
+            '<optionvalue="1">1',
+            '<optionvalue="2">2',
+            '<optionvalue="3">10',
+            '<optionvalue="4">15',
+            '<optionvalue="5"selected>30',
+            '<optionvalue="6">60',
+            '<inputtype="checkbox"name="enablecourseinstances"class="form-check-input"value="1"id="id_enablecourseinstances">',
+            '<inputtype="checkbox"name="enableuserinstances"class="form-check-input"value="1"id="id_enableuserinstances">',
+
+        ];
+        foreach ($strs as $str) {
+            $this->assertStringContainsString($str, $cleaned);
+        }
     }
 
     /**
@@ -95,44 +110,55 @@ final class form_test extends \advanced_testcase {
      */
     public function test_instance_form(): void {
         global $USER;
+
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
+        $data = ['endpoint' => 'eu-west-2', 'secret_key' => 'secret', 'bucket_name' => 'test', 'access_key' => 'abc'];
+
         $mform = new \repository_instance_form('', $para);
-        $this->data['endpoint'] = 'us-west-2';
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $errors = \repository_s3bucket::instance_form_validation($mform, $data, []);
+        $this->assertEquals([], $errors);
         ob_start();
         $mform->display();
-        $out = ob_get_clean();
-        $this->assertStringContainsString('Required', $out);
+        $html = ob_get_clean();
+        $cleaned = preg_replace('/\s+/', '', $html);
+        $strs = [
+            '<divclass="text-danger"title="Required"aria-hidden="true">',
+            '<inputname="contextid"type="hidden"value="5"/>',
+            '<inputtype="text"class="form-control"name="name"id="id_name"value=""size="30"aria-required="true"maxlength="100">',
+            '<divclass="form-control-feedbackinvalid-feedback"id="id_error_name"></div>',
+            '"data-fieldtype="passwordunmask"><divdata-passwordunmask="wrapper"data-passwordunmaskid="id_access_key">',
+            '<inputtype="password"name="access_key"id="id_access_key"value=""',
+            'class="form-controld-none"data-size="50"aria-required="true"maxlength="255"autocomplete="new-password"',
+            '<optionvalue="us-east-1"selected>USEast(N.Virginia)</option>',
+            'data-fieldtype="autocomplete"><selectclass="form-select"name="endpoint"',
+            '<divclass="form-control-feedbackinvalid-feedback"id="id_error_endpoint">',
+            '<divclass="form-control-feedbackinvalid-feedback"id="id_error_secret_key">',
+            '<divclass="form-control-feedbackinvalid-feedback"id="id_error_access_key">',
+        ];
+        foreach ($strs as $str) {
+            $this->assertStringContainsString($str, $cleaned);
+        }
     }
 
     /**
      * Test instance form error.
      */
     public function test_instance_form2(): void {
-        global $USER;
-        $context = \context_user::instance($USER->id);
-        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => null, 'contextid' => $context->id];
+        // TODO: review tests.
+        $context = \context_system::instance();
+        $region = 'HTTP://localhost:4566';
+        $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => $this->repo->id, 'contextid' => $context->id];
+
         $mform = new \repository_instance_form('', $para);
-        $this->data['bucket_name'] = '';
-        $x = 0;
-        try {
-            \repository_s3bucket::instance_form_validation($mform, $this->data, []);
-        } catch (InvalidArgumentException) {
-            // No Localstack installed.
-            $x++;
-        }
+        $this->assertCount(4, \repository_s3bucket::instance_form_validation($mform, [], []));
 
-        $this->data['bucket_name'] = 'test';
-        $this->data['endpoint'] = 'aws_instance_wrong';
-        try {
-            \repository_s3bucket::instance_form_validation($mform, $this->data, []);
-        } catch (Aws\Exception\InvalidRegionException) {
-            // No Localstack installed.
-            $x++;
-        }
-
-        $this->assertNotEquals(5, $x);
+        $data = ['endpoint' => 'a', 'secret_key' => 'b', 'bucket_name' => 'c', 'access_key' => 'd'];
+        $this->assertCount(0, \repository_s3bucket::instance_form_validation($mform, $data, []));
+        $data = ['secret_key' => 'test', 'bucket_name' => 'testbucket', 'access_key' => 'test'];
+        $this->assertCount(1, \repository_s3bucket::instance_form_validation($mform, $data, []));
+        $data = ['region' => $region, 'secret_key' => 'none', 'bucket_name' => 'none', 'access_key' => 'none'];
+        $this->assertCount(1, \repository_s3bucket::instance_form_validation($mform, $data, []));
     }
 
 
@@ -143,8 +169,9 @@ final class form_test extends \advanced_testcase {
         global $USER;
         $context = \context_user::instance($USER->id);
         $para = ['plugin' => 's3bucket', 'typeid' => null, 'instance' => null, 'contextid' => $context->id];
+        $data = ['endpoint' => 'eu-west-2', 'secret_key' => 'secret', 'bucket_name' => 'test', 'access_key' => 'abc'];
         $mform = new \repository_instance_form('', $para);
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $data, []));
         ob_start();
         $mform->display();
         $out = ob_get_clean();
@@ -156,6 +183,8 @@ final class form_test extends \advanced_testcase {
      */
     public function test_form(): void {
         global $USER;
+        $data = ['endpoint' => 'eu-west-2', 'secret_key' => 'secret', 'bucket_name' => 'test', 'access_key' => 'abc'];
+
         $context = \context_user::instance($USER->id);
         $page = new \moodle_page();
         $page->set_context($context);
@@ -171,17 +200,15 @@ final class form_test extends \advanced_testcase {
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('Required', $out);
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
+        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $data, []));
         ob_start();
         $mform->display();
         $fromform = $mform->get_data();
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('value="us-east-1" selected', $out);
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
-        $this->assertEquals([], \repository_s3bucket::instance_form_validation($mform, $this->data, []));
-        set_config('s3mock', false);
+        $data = ['endpoint' => 'eu-west-2', 'access_key' => 'abc'];
+        $this->assertCount(2, \repository_s3bucket::instance_form_validation($mform, $data, []));
         $mform = new \repository_instance_form('', $para);
         $repo = new \repository_s3bucket($USER->id, $context);
         $para = ['plugin' => 's3bucket', 'typeid' => '', 'instance' => $repo, 'contextid' => $context->id];
@@ -192,6 +219,5 @@ final class form_test extends \advanced_testcase {
         $out = ob_get_clean();
         $this->assertEquals('', $fromform);
         $this->assertStringContainsString('<option value="us-east-1" >US East (N. Virginia)</option>', $out);
-        $this->assertCount(0, \repository_s3bucket::instance_form_validation($mform, $this->data, []));
     }
 }

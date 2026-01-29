@@ -43,24 +43,16 @@ class repository_s3bucket extends repository {
     /** @var s3client s3 client object */
     private $s3client;
 
-    /**
-     * Get S3 file list
-     *
-     * @param string $path this parameter can a folder name, or a identification of folder
-     * @param string $page the page number of file list
-     * @return array the list of files, including some meta infomation
-     */
+    #[\Override]
     public function get_listing($path = '.', $page = 1) {
         global $OUTPUT;
-        $diricon = $OUTPUT->image_url(file_folder_icon())->out(false);
+        $diricon = $OUTPUT->image_url(file_folder_icon())->out();
         $bucket = $this->get_option('bucket_name');
         $place = [['name' => $bucket, 'path' => $path]];
         $epath = ($path === '') ? '.' : $path . '/';
         $options = [
             'Bucket' => $bucket,
-            'FetchOwner' => false,
             'Prefix' => $path,
-            'MaxKeys' => 1000,
             'EncodingType' => 'url',
             'Delimiter' => '/', ];
         $results = [];
@@ -68,8 +60,8 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (\Exception $exception) {
             // @codeCoverageIgnoreStart
+        } catch (\Exception $exception) {
             $this->throw_error($exception->getMessage());
             // @codeCoverageIgnoreEnd
         }
@@ -78,7 +70,7 @@ class repository_s3bucket extends repository {
         if ($items) {
             foreach ($items as $item) {
                 $files[] = [
-                      'title' => basename((string) $item['Prefix']),
+                      'title' => basename($item['Prefix']),
                       'children' => [],
                       'thumbnail' => $diricon,
                       'thumbnail_height' => 64,
@@ -86,16 +78,10 @@ class repository_s3bucket extends repository {
                       'path' => $item['Prefix'], ];
             }
         }
-
-        $filesearch = "Contents[?StorageClass != 'DEEP_ARCHIVE'";
-        $filesearch .= " && StorageClass != 'GLACIER'";
-        $filesearch .= " && starts_with(Key, '{$path}')]";
-        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
-
-        $items = $results->search($filesearch);
+        $items = $results->search($this->filesearch(''));
         if ($items) {
             foreach ($items as $item) {
-                $pathinfo = pathinfo((string)$item['Key']);
+                $pathinfo = pathinfo($item['Key']);
                 if ($pathinfo['dirname'] == $epath || $pathinfo['dirname'] . '//' === $epath) {
                     $files[] = [
                        'title' => $pathinfo['basename'],
@@ -105,7 +91,7 @@ class repository_s3bucket extends repository {
                        'thumbnail_height' => 64,
                        'thumbnail_width' => 64,
                        'source' => $item['Key'],
-                       'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false), ];
+                       'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(), ];
                 }
             }
         }
@@ -119,21 +105,13 @@ class repository_s3bucket extends repository {
            'nosearch' => false, ];
     }
 
-    /**
-     * Search through all the files.
-     *
-     * @param  String  $q    The query string.
-     * @param  integer $page The page number.
-     * @return array of results.
-     */
+    #[\Override]
     public function search($q, $page = 1) {
         global $OUTPUT;
-        $diricon = $OUTPUT->image_url(file_folder_icon())->out(false);
+        $diricon = $OUTPUT->image_url(file_folder_icon())->out();
         $bucket = $this->get_option('bucket_name');
         $options = [
             'Bucket' => $bucket,
-            'FetchOwner' => false,
-            'MaxKeys' => 1000,
             'EncodingType' => 'url',
             'Delimiter' => '/', ];
         $results = [];
@@ -141,35 +119,31 @@ class repository_s3bucket extends repository {
         $s3 = $this->create_s3();
         try {
             $results = $s3->listObjectsV2($options);
-        } catch (\Exception $exception) {
             // @codeCoverageIgnoreStart
+        } catch (\Exception $exception) {
             $this->throw_error($exception->getMessage());
             // @codeCoverageIgnoreEnd
         }
 
-        $dirsearch = "CommonPrefixes[?contains(Prefix, '{$q}')].{Prefix: Prefix}";
+        $dirsearch = sprintf("CommonPrefixes[?contains(Prefix, '%s')].{Prefix: Prefix}", $q);
         $items = $results->search($dirsearch);
         if ($items) {
             foreach ($items as $item) {
                 $files[] = [
-                    'title' => basename((string)$item['Prefix']),
+                    'title' => basename($item['Prefix']),
                     'children' => [],
                     'thumbnail' => $diricon,
                     'thumbnail_height' => 64,
                     'thumbnail_width' => 64,
-                    'path' => $item['Prefix'], ];
+                    'path' => $item['Prefix'],
+                ];
             }
         }
 
-        $filesearch = "Contents[?StorageClass != 'DEEP_ARCHIVE'";
-        $filesearch .= " && StorageClass != 'GLACIER'";
-        $filesearch .= " && contains(Key, '{$q}')]";
-        $filesearch .= '.{Key: Key, Size: Size, LastModified: LastModified}';
-
-        $items = $results->search($filesearch);
+        $items = $results->search($this->filesearch($q));
         if ($items) {
-            foreach ($results->search($filesearch) as $item) {
-                $pathinfo = pathinfo((string)$item['Key']);
+            foreach ($items as $item) {
+                $pathinfo = pathinfo($item['Key']);
                 $files[] = [
                    'title' => $pathinfo['basename'],
                    'size' => $item['Size'],
@@ -178,7 +152,7 @@ class repository_s3bucket extends repository {
                    'thumbnail_height' => 64,
                    'thumbnail_width' => 64,
                    'source' => $item['Key'],
-                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(false),
+                   'thumbnail' => $OUTPUT->image_url(file_extension_icon($pathinfo['basename']))->out(),
                 ];
             }
         }
@@ -187,17 +161,23 @@ class repository_s3bucket extends repository {
     }
 
     /**
-     * Repository method to serve the referenced file
+     * Repository method to serve the out file
      *
-     * @param stored_file $storedfile the file that contains the reference
-     * @param int $lifetime Number of seconds before the file should expire from caches (null means $CFG->filelifetime)
-     * @param int $filter 0 (default)=no filtering, 1=all files, 2=html files only
-     * @param bool $forcedownload If true (default true), forces download of file rather than view in browser/plugin
-     * @param array|null $options additional options affecting the file serving
+     * @param string $search The text to search for
+     * @return string The code we use to search for files
      */
+    private function filesearch(string $search): string {
+        $s = "Contents[";
+        $s .= "?StorageClass != 'DEEP_ARCHIVE'";
+        $s .= " && StorageClass != 'GLACIER' ";
+        $s .= " && contains(Key, '" . $search . "')]";
+        return $s . ".{Key: Key, Size: Size, LastModified: LastModified}";
+    }
+
+    #[\Override]
     public function send_file($storedfile, $lifetime = null, $filter = 0, $forcedownload = true, ?array $options = null): void {
         $duration = get_config('s3bucket', 'duration');
-        $this->send_otherfile($storedfile->get_reference(), "+{$duration} minutes");
+        $this->send_otherfile($storedfile->get_reference(), sprintf('+%s minutes', $duration));
     }
 
     /**
@@ -223,14 +203,13 @@ class repository_s3bucket extends repository {
             }
 
             $uri = $req->getUri()->__toString();
-            $mimetype = get_mimetype_description(['filename' => $reference]);
             if (!PHPUNIT_TEST) {
                 // @codeCoverageIgnoreStart
                 header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
                 header('Pragma: no-cache');
-                header("Content-Type: {$mimetype}");
-                header("Content-Disposition: attachment; filename=\"{$reference}\"");
-                header("Location: {$uri}");
+                header('Content-Type: ' . get_mimetype_description(['filename' => $reference]));
+                header(sprintf('Content-Disposition: attachment; filename="%s"', $reference));
+                header('Location: ' . $uri);
                 die;
                 // @codeCoverageIgnoreEnd
             }
@@ -244,31 +223,22 @@ class repository_s3bucket extends repository {
      *
      * @param string $message Optional message
      */
-    public function throw_error(string $message = ''): void {
+    private function throw_error(string $message = ''): void {
         throw new moodle_exception('errorwhilecommunicatingwith', 'repository', '', $this->get_name(), $message);
     }
 
-    /**
-     * This method creates a download link from the repository.
-     *
-     * @param string $url relative path to the chosen file
-     * @return string the generated download link.
-     */
+    #[\Override]
     public function get_link($url) {
         $cid = $this->context->id;
         $path = pathinfo($url);
         $file = $path['basename'];
         $directory = $path['dirname'];
         $directory = $directory == '.' ? '/' : '/' . $directory . '/';
+
         return \moodle_url::make_pluginfile_url($cid, 'repository_s3bucket', 's3', $this->id, $directory, $file)->out();
     }
 
-    /**
-     * Get human readable file info from a the reference.
-     *
-     * @param string $reference
-     * @param int $filestatus 0 - ok, 666 - source missing
-     */
+    #[\Override]
     public function get_reference_details($reference, $filestatus = 0) {
         if ($this->disabled) {
             throw new \repository_exception('cannotdownload', 'repository');
@@ -281,15 +251,7 @@ class repository_s3bucket extends repository {
         return $this->get_file_source_info($reference);
     }
 
-    /**
-     * Download S3 files to moodle
-     *
-     * @param string $filepath
-     * @param string $file The file path in moodle
-     * @return array with elements:
-     *   path: internal location of the file
-     *   url: URL to the source (from parameters)
-     */
+    #[\Override]
     public function get_file($filepath, $file = '') {
         $path = $this->prepare_file($file);
         $s3 = $this->create_s3();
@@ -308,57 +270,37 @@ class repository_s3bucket extends repository {
         return ['path' => $path, 'url' => $filepath];
     }
 
-    /**
-     * Return the source information
-     *
-     * @param stdClass $filepath
-     * @return string
-     */
+    #[\Override]
     public function get_file_source_info($filepath) {
-        if (empty($filepath) || $filepath == '') {
+        if (empty($filepath)) {
             return get_string('unknownsource', 'repository');
         }
 
         return $this->get_short_filename('s3://' . $this->get_option('bucket_name') . '/' . $filepath, 50);
     }
 
-    /**
-     * Return names of the general options.
-     *
-     * @return array
-     */
+    #[\Override]
     public static function get_type_option_names() {
         return ['duration'];
     }
 
-    /**
-     * Edit/Create Admin Settings Moodle form
-     *
-     * @param moodleform $mform Moodle form (passed by reference)
-     * @param string $classname repository class name
-     */
+    #[\Override]
     public static function type_config_form($mform, $classname = 'repository'): void {
-        $duration = get_config('s3bucket', 'duration') ?? 2;
-        $choices = ['1' => 1, '2' => 2, '10' => 10, '15' => 15, '30' => 30, '60' => 60];
-        $mform->addElement('select', 'duration', get_string('duration', $classname), $choices, $duration);
+        $duration = get_config('s3bucket', 'duration') ?? '2';
+        $duration = intval($duration);
+
+        $choices = [1 => 1, 2 => 2, 3 => 10, 4 => 15, 5 => 30, 6 => 60];
+        $mform->addElement('select', 'duration', get_string('duration', $classname), $choices);
         $mform->setType('duration', PARAM_INT);
+        $mform->setDefault('duration', $duration);
     }
 
-    /**
-     * Return names of the instance options.
-     * By default: no instance option name
-     *
-     * @return array
-     */
+    #[\Override]
     public static function get_instance_option_names() {
         return ['access_key', 'secret_key', 'endpoint', 'bucket_name'];
     }
 
-    /**
-     * Edit/Create Instance Settings Moodle form
-     *
-     * @param moodleform $mform Moodle form (passed by reference)
-     */
+    #[\Override]
     public static function instance_config_form($mform): void {
         global $CFG;
         parent::instance_config_form($mform);
@@ -387,46 +329,34 @@ class repository_s3bucket extends repository {
         $mform->addRule('bucket_name', $strrequired, 'required', null, 'client');
     }
 
-    /**
-     * Validate repository plugin instance form
-     *
-     * @param moodleform $mform moodle form
-     * @param array $data form data
-     * @param array $errors errors
-     * @return array errors
-     */
+    #[\Override]
     public static function instance_form_validation($mform, $data, $errors) {
-        if (isset($data['access_key']) && isset($data['secret_key']) && isset($data['bucket_name'])) {
-            $params = [];
-            $params['credentials'] = ['key' => $data['access_key'], 'secret' => $data['secret_key']];
-            $params['region'] = $data['endpoint'] ?? 'us-east-1';
-            $arr = self::addproxy($params);
-            try {
-                $s3 = \Aws\S3\S3Client::factory($arr);
-                // Check if the bucket exists.
-                $s3->getCommand('HeadBucket', ['Bucket' => $data['bucket_name']]);
-            } catch (\Aws\Exception\InvalidRegionException | \Exception) {
-                $errors[] = get_string('errorwhilecommunicatingwith', 'repository');
-            }
+        if (!isset($data['access_key'])) {
+            $errors[] = get_string('missingparam', 'error', get_string('access_key', 'repository_s3'));
         }
 
+        if (!isset($data['secret_key'])) {
+            $errors[] = get_string('missingparam', 'error', get_string('secret_key', 'repository_s3'));
+        }
+
+        if (!isset($data['bucket_name'])) {
+            $errors[] = get_string('missingparam', 'error', get_string('bucketname', 'repository_s3bucket'));
+        }
+
+        if (!isset($data['endpoint'])) {
+            $errors[] = get_string('missingparam', 'error', get_string('endpoint', 'repository_s3'));
+        }
+
+        // TODO: Check if the bucket exists.
         return $errors;
     }
 
-    /**
-     * Which return type should be selected by default.
-     *
-     * @return int
-     */
+    #[\Override]
     public function default_returntype() {
         return FILE_REFERENCE;
     }
 
-    /**
-     * S3 plugins does support return links of files
-     *
-     * @return int
-     */
+    #[\Override]
     public function supported_returntypes() {
         return FILE_INTERNAL | FILE_REFERENCE | FILE_EXTERNAL;
     }
@@ -443,7 +373,7 @@ class repository_s3bucket extends repository {
                 throw new moodle_exception('needaccesskey', 'repository_s3');
             }
 
-            $arr = self::addproxy([
+            $arr = $this->addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
                 'use_path_style_endpoint' => true,
                 'region' => $this->get_option('endpoint'), ]);
@@ -459,8 +389,7 @@ class repository_s3bucket extends repository {
      * @param array $settings Settings
      * @return array Array of settings
      */
-    private static function addproxy(array $settings): array {
-        global $CFG;
+    private function addproxy(array $settings): array {
         $settings['version'] = 'latest';
         $settings['signature_version'] = 'v4';
 
@@ -470,35 +399,25 @@ class repository_s3bucket extends repository {
             $settings['region'] = 'us-east-1';
         }
 
-        if (!empty($CFG->proxyhost) && !empty($CFG->proxytype) && $CFG->proxytype != 'SOCKS5') {
-            $host = (empty($CFG->proxyport)) ? $CFG->proxyhost : $CFG->proxyhost . ':' . $CFG->proxyport;
-            $type = (empty($CFG->proxytype)) ? 'http://' : $CFG->proxytype;
-            $cond = (!empty($CFG->proxyuser) && !empty($CFG->proxypassword));
-            $user = $cond ? $CFG->proxyuser . '.' . $CFG->proxypassword . '@' : '';
-            $settings['request.options'] = ['proxy' => "{$type}{$user}{$host}"];
-        }
-
-        if (get_config('core', 's3mock')) {
-            $mock = new \Aws\MockHandler();
-            $day = new DateTime();
-            $result = new \Aws\Result([
-                'CommonPrefixes' => [['Prefix' => '2020_dir']],
-                'Contents' => [['Key' => '2020_f.jpg', 'Size' => 15, 'StorageClass' => 'STANDARD', 'LastModified' => $day]], ]);
-            $mock->append($result, $result);
-            $settings['handler'] = $mock;
-        }
-
         return $settings;
     }
 
-    /**
-     * Is this repository accessing private data?
-     *
-     * This function should return false to give access to private repository data.
-     * @return boolean True when the repository accesses private external data.
-     */
+    #[\Override]
     public function contains_private_data() {
         return ($this->context->contextlevel === CONTEXT_USER);
+    }
+
+    /**
+     * Do we have localstack available?
+     *
+     * @return bool True if no localstack installed.
+     */
+    public static function no_localstack(): bool {
+        $curl = new \curl();
+        $curl->head('http://localhost:4566/testbucket/testfile.jpg');
+        $info = $curl->get_info();
+        $installed = !empty($info['http_code']) && $info['http_code'] == 200;
+        return !$installed;
     }
 }
 
@@ -534,7 +453,7 @@ function repository_s3bucket_pluginfile($course, $cm, $context, $filearea, $args
         $itemid = array_shift($args);
         $reference = implode('/', $args);
         $repo = repository::get_repository_by_id($itemid, $context);
-        $repo->send_otherfile($reference, "+{$duration} minutes");
+        $repo->send_otherfile($reference, sprintf('+%s minutes', $duration));
     }
 
     return false;
