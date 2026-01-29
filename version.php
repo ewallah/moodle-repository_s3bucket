@@ -29,6 +29,6 @@ $plugin->component = 'repository_s3bucket';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = ['repository_s3' => ANY_VERSION];
 $plugin->release = 'v5.1.1';
-$plugin->version = 2025100900;
+$plugin->version = 2026012900;
 $plugin->requires = 2025041400;
 $plugin->supported = [500, 501];
