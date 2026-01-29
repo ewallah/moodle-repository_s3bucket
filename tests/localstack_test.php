@@ -43,6 +43,10 @@ final class localstack_test extends \advanced_testcase {
      * Test mock exception s3.
      */
     public function test_localstack(): void {
+        if (\repository_s3bucket::no_localstack()) {
+            $this->markTestSkipped('Skipping as localstack is not installed.');
+        }
+
         $this->resetAfterTest(true);
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;

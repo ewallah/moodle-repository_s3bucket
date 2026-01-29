@@ -85,3 +85,29 @@ jobs:
         run: moodle-plugin-ci coveralls-upload
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: firefox
+        id: behat
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci --ansi behat
+
+      - name: faildump
+        if: ${{ failure() && steps.behat.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox faildump (${{ join(matrix.*, ', ') }})
+          path: ${{ github.workspace }}/moodledata/behat_dump
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: chrome
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci --ansi behat --profile chrome
+
+      - name: firefox classic
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci --ansi behat --suite classic
+      
+      - name: chrome classic
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci --ansi behat --suite classic --profile=chrome
