@@ -202,19 +202,30 @@ class repository_s3bucket extends repository {
                 // @codeCoverageIgnoreEnd
             }
 
-            $uri = $req->getUri()->__toString();
-            if (!PHPUNIT_TEST) {
+            $headers = [];
+            $headers[] = 'Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0';
+            $headers[] = 'Pragma: no-cache';
+            $headers[] = 'Content-Type: ' . get_mimetype_description(['filename' => $reference]);
+            $headers[] = sprintf('Content-Disposition: attachment; filename="%s"', $reference);
+            $headers[] = 'Location: ' . $req->getUri()->__toString();
+
+            foreach ($headers as $header) {
+                if (PHPUNIT_TEST) {
+                    echo $header;
+                    // @codeCoverageIgnoreStart
+                } else {
+                    header($header);
+                    // @codeCoverageIgnoreEnd
+                }
+            }
+            if (PHPUNIT_TEST) {
+                return;
                 // @codeCoverageIgnoreStart
-                header('Cache-Control: private, must-revalidate, pre-check=0, post-check=0, max-age=0');
-                header('Pragma: no-cache');
-                header('Content-Type: ' . get_mimetype_description(['filename' => $reference]));
-                header(sprintf('Content-Disposition: attachment; filename="%s"', $reference));
-                header('Location: ' . $uri);
+            } else {
                 die;
                 // @codeCoverageIgnoreEnd
             }
         }
-
         throw new \repository_exception('cannotdownload', 'repository');
     }
 
@@ -410,14 +421,17 @@ class repository_s3bucket extends repository {
     /**
      * Do we have localstack available?
      *
+     * @param string $url Url to be checked.
      * @return bool True if no localstack installed.
      */
-    public static function no_localstack(): bool {
-        $curl = new \curl();
-        $curl->head('http://localhost:4566/testbucket/testfile.jpg');
-        $info = $curl->get_info();
-        $installed = !empty($info['http_code']) && $info['http_code'] == 200;
-        return !$installed;
+    public static function no_localstack(string $url = 'http://localhost:4566/testbucket/testfile.jpg'): bool {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $code != 200;
     }
 }
 

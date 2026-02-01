@@ -84,6 +84,7 @@ class repository_s3bucket_generator extends testing_repository_generator {
             $plugintype = new repository_type('s3bucket', []);
             $id = $plugintype->create(false);
         }
+
         repository_s3bucket::create('s3bucket', $userid, $context, $record);
         return $record;
     }

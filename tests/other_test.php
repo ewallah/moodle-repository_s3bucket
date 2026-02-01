@@ -286,6 +286,17 @@ final class other_test extends advanced_testcase {
     }
 
     /**
+     * Tests localstack.
+     */
+    public function test_localstack_available(): void {
+        $this->assertFalse(\repository_s3bucket::no_localstack());
+        $s = 'http://localhost:4567/testbucket/testfile.jpg';
+        $this->assertTrue(\repository_s3bucket::no_localstack($s));
+        $s = 'http://localhost/testbucket/testfile.jpg';
+        $this->assertTrue(\repository_s3bucket::no_localstack($s));
+    }
+
+    /**
      * Create localstack repository.
      * @param context $context Context
      */

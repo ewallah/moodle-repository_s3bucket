@@ -135,6 +135,9 @@ final class form_test extends \advanced_testcase {
             '<divclass="form-control-feedbackinvalid-feedback"id="id_error_endpoint">',
             '<divclass="form-control-feedbackinvalid-feedback"id="id_error_secret_key">',
             '<divclass="form-control-feedbackinvalid-feedback"id="id_error_access_key">',
+            '<script>varskipClientValidation=false;</script>',
+            '<inputtype="submit"class="btnbtn-secondary"name="cancel"',
+            '<inputtype="submit"class="btnbtn-primary"name="submitbutton"id="id_submitbutton"value="Save">',
         ];
         foreach ($strs as $str) {
             $this->assertStringContainsString($str, $cleaned);

@@ -55,6 +55,9 @@ final class localstack_test extends \advanced_testcase {
         $s3bucket = new \repository_s3bucket($repo);
         $s3bucket->set_option(['endpoint' => 'http://localhost:4566']);
         $s3bucket->set_option(['region' => 'http://localhost:4566']);
+        $s3bucket->set_option(['secret_key' => 'test']);
+        $s3bucket->set_option(['bucket_name' => 'testbucket']);
+        $s3bucket->set_option(['access_key' => 'test']);
 
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
@@ -62,7 +65,7 @@ final class localstack_test extends \advanced_testcase {
         $this->assertInstanceOf('Aws\S3\S3Client', $client);
         $this->assertInstanceOf('Aws\Command', $client->getCommand('HeadBucket', ['Bucket' => 'testbucket']));
         $this->assertInstanceOf('Aws\ResultPaginator', $client->getPaginator('ListObjects', []));
-        $arr = ['Bucket' => 'testbucket', 'Key' => 'testfile', 'ResponseContentDisposition' => 'attachment'];
+        $arr = ['Bucket' => 'testbucket', 'Key' => 'testfile.jpg', 'ResponseContentDisposition' => 'attachment'];
         $result = $client->getCommand('GetObject', $arr);
         $this->assertInstanceOf('Aws\Command', $result);
         $this->assertNotEmpty($client->createPresignedRequest($result, 2));
@@ -71,7 +74,32 @@ final class localstack_test extends \advanced_testcase {
         $result = $s3bucket->get_link('testfile.jpg');
         $this->assertStringStartsWith('https://www.example.com/moodle/pluginfile.php/1/repository_s3bucket/s3/', $result);
         $this->assertStringEndsWith('/testfile.jpg', $result);
-        $this->expectExceptionMessage('Cannot download this file');
+
+        ob_start();
         $s3bucket->send_otherfile('testfile.jpg', 30);
+        $out = ob_get_clean();
+        $strs = [
+            'Cache-Control: private, must-revalidate, pre-check=0, post-check=0',
+            'max-age=0',
+            'Pragma: no-cache',
+            'Content-Type: Image (JPEG)',
+            'Content-Disposition: attachment;',
+            'filename="testfile.jpg"',
+            'Location: http://localhost:4566/testbucket/testfile.jpg',
+            'response-content-disposition=attachment',
+            'X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&',
+            'X-Amz-Algorithm=AWS4-HMAC-SHA256&',
+            'X-Amz-Credential=test',
+            'us-east-1',
+            'Faws4_request',
+            'X-Amz-Date=',
+            'X-Amz-SignedHeaders=host&',
+            'X-Amz-Expires=-',
+            '&X-Amz-Signature=',
+        ];
+
+        foreach ($strs as $str) {
+            $this->assertStringContainsString($str, $out);
+        }
     }
 }
