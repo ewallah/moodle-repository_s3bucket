@@ -24,12 +24,10 @@
  */
 use core\exception\moodle_exception;
 
-// @codeCoverageIgnoreStart
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/repository/lib.php');
-// @codeCoverageIgnoreEnd
 
 /**
  * This is a repository class used to browse a Amazon S3 bucket.

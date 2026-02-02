@@ -59,6 +59,10 @@ jobs:
            echo 'require(__DIR__ . "/../public/lib/phpunit/bootstrap.php");' >> vendor/autoloadmoodle.php
            echo 'require("autoload.php");' >> vendor/autoloadmoodle.php
 
+      - name: warm phpunit
+        if: ${{ !cancelled() }}
+        run: moodle-plugin-ci --ansi phpunit --testdox
+
       - name: infection
         run: infection -s --configuration=public/repository/s3bucket/.infection.json5
         working-directory: moodle

@@ -46,7 +46,7 @@ Feature: S3 bucket behavour in popups
     When I am on the "Course 1" "course" page logged in as "student"
     And I follow "ResourceA"
     And I should see "JPG"
-    
+
     Examples:
       | display |
       | 0       |
