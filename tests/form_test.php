@@ -58,13 +58,7 @@ final class form_test extends \advanced_testcase {
         $repoid = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $context = \context_system::instance();
 
-        $repository = new \repository_s3bucket($repoid, $context);
-        $repository->set_option(['endpoint' => 'http://localhost:4566']);
-        $repository->set_option(['region' => 'HTTP://localhost:4566']);
-        $repository->set_option(['secret_key' => 'test']);
-        $repository->set_option(['bucket_name' => 'testbucket']);
-        $repository->set_option(['access_key' => 'test']);
-
+        $repository = new \repository_s3bucket($repoid, $context, ['region' => 'HTTP://localhost:4566']);
         $this->repo = $repository;
         $this->SetAdminUser();
     }

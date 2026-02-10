@@ -121,7 +121,7 @@ final class other_test extends advanced_testcase {
     public function test_empty(): void {
         $courseid = $this->getDataGenerator()->create_course()->id;
         $repo = $this->create_repo(context_course::instance($courseid));
-        $result = $repo->get_listing('');
+        $result = $repo->get_listing('', 3);
         $path = ['name' => 'testbucket', 'path' => ''];
         $this->assertCount(1, $result['path']);
         $this->assertEquals($path, $result['path'][0]);
@@ -156,7 +156,7 @@ final class other_test extends advanced_testcase {
         $this->assertTrue($result['nologin']);
         $this->assertFalse($result['nosearch']);
 
-        $result = $repo->get_listing('testdirectory');
+        $result = $repo->get_listing('testdirectory', 1);
         $this->assertCount(6, $result);
         $path = ['name' => 'testbucket', 'path' => 'testdirectory'];
         $this->assertEquals($path, $result['path'][0]);
@@ -174,7 +174,7 @@ final class other_test extends advanced_testcase {
         $this->assertTrue($result['nologin']);
         $this->assertFalse($result['nosearch']);
 
-        $result = $repo->get_listing('testdirectory/');
+        $result = $repo->get_listing('testdirectory/', 0);
         $path = ['name' => 'testbucket', 'path' => 'testdirectory/'];
         $this->assertEquals($path, $result['path'][0]);
         $this->assertEquals($result['list'][0]['title'], 'testfile.jpg');
@@ -271,8 +271,15 @@ final class other_test extends advanced_testcase {
 
         $context = context_system::instance();
         $repo = $this->create_repo($context);
+        $repo->set_option(['endpoint' => 'http://localhost:4566']);
+        $repo->set_option(['region' => 'hTTp://localhost:4566']);
+
         $url = $repo->get_link('testfile.jpg');
         $this->assertStringStartsWith('https://www.example.com/moodle/pluginfile.php/1/repository_s3bucket/s3/', $url);
+        $this->assertStringEndsWith('/testfile.jpg', $url);
+
+        $repo->set_option(['endpoint' => 'https://localhost:4566']);
+        $url = $repo->get_link('testfile.jpg');
         $this->assertStringEndsWith('/testfile.jpg', $url);
     }
 
@@ -302,11 +309,6 @@ final class other_test extends advanced_testcase {
      */
     private function create_repo($context): \repository_s3bucket {
         $repository = new \repository_s3bucket($this->repo, $context);
-        $repository->set_option(['endpoint' => 'http://localhost:4566']);
-        $repository->set_option(['region' => 'HTTp://localhost:4566']);
-        $repository->set_option(['secret_key' => 'test']);
-        $repository->set_option(['bucket_name' => 'testbucket']);
-        $repository->set_option(['access_key' => 'test']);
         return $repository;
     }
 }

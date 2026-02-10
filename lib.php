@@ -48,6 +48,7 @@ class repository_s3bucket extends repository {
         $bucket = $this->get_option('bucket_name');
         $place = [['name' => $bucket, 'path' => $path]];
         $epath = ($path === '') ? '.' : $path . '/';
+
         $options = [
             'Bucket' => $bucket,
             'Prefix' => $path,
@@ -76,7 +77,7 @@ class repository_s3bucket extends repository {
                       'path' => $item['Prefix'], ];
             }
         }
-        $items = $results->search($this->filesearch(''));
+        $items = $results->search($this->filesearch());
         if ($items) {
             foreach ($items as $item) {
                 $pathinfo = pathinfo($item['Key']);
@@ -164,12 +165,13 @@ class repository_s3bucket extends repository {
      * @param string $search The text to search for
      * @return string The code we use to search for files
      */
-    private function filesearch(string $search): string {
+    private function filesearch(string $search = ''): string {
         $s = "Contents[";
         $s .= "?StorageClass != 'DEEP_ARCHIVE'";
         $s .= " && StorageClass != 'GLACIER' ";
+        $s .= " && StorageClass != 'GLACIER_IR' ";
         $s .= " && contains(Key, '" . $search . "')]";
-        return $s . ".{Key: Key, Size: Size, LastModified: LastModified}";
+        return $s;
     }
 
     #[\Override]
@@ -384,7 +386,6 @@ class repository_s3bucket extends repository {
 
             $arr = $this->addproxy([
                 'credentials' => ['key' => $accesskey, 'secret' => $this->get_option('secret_key')],
-                'use_path_style_endpoint' => true,
                 'region' => $this->get_option('endpoint'), ]);
             $this->s3client = \Aws\S3\S3Client::factory($arr);
         }
@@ -406,6 +407,9 @@ class repository_s3bucket extends repository {
         if (str_starts_with(strtolower($region), 'http')) {
             $settings['endpoint'] = $region;
             $settings['region'] = 'us-east-1';
+            $settings['use_path_style_endpoint'] = true;
+        } else {
+            $settings['use_path_style_endpoint'] = false;
         }
 
         return $settings;

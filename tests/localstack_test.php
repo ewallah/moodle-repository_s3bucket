@@ -25,9 +25,12 @@
 
 namespace repository_s3bucket;
 
+use advanced_testcase;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use PHPUnit\Framework\Attributes\CoversClass;
+use repository_s3bucket;
+use stdClass;
 
 /**
  * Localstack tests.
@@ -38,7 +41,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(\repository_s3bucket::class)]
-final class localstack_test extends \advanced_testcase {
+final class localstack_test extends advanced_testcase {
     /**
      * Test mock exception s3.
      */
@@ -48,17 +51,12 @@ final class localstack_test extends \advanced_testcase {
         }
 
         $this->resetAfterTest(true);
+
         $this->getDataGenerator()->create_repository_type('s3bucket');
         $repo = $this->getDataGenerator()->create_repository('s3bucket')->id;
         $this->SetAdminUser();
 
         $s3bucket = new \repository_s3bucket($repo);
-        $s3bucket->set_option(['endpoint' => 'http://localhost:4566']);
-        $s3bucket->set_option(['region' => 'http://localhost:4566']);
-        $s3bucket->set_option(['secret_key' => 'test']);
-        $s3bucket->set_option(['bucket_name' => 'testbucket']);
-        $s3bucket->set_option(['access_key' => 'test']);
-
         $reflection = new \ReflectionClass($s3bucket);
         $method = $reflection->getMethod('create_s3');
         $client = $method->invoke($s3bucket);

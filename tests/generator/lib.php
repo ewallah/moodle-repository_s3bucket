@@ -45,13 +45,25 @@ class repository_s3bucket_generator extends testing_repository_generator {
     #[\Override]
     protected function prepare_record(array $record) {
         $record = parent::prepare_type_record($record);
-        $arr = [
-            'contextid' => \context_system::instance()->id,
-            'name' => 'S3 bucket',
-            'access_key' => 'access',
-            'secret_key' => 'secret',
-            'endpoint' => 'us-east-1',
-            'bucket_name' => 'testbucket', ];
+        if (\repository_s3bucket::no_localstack()) {
+            $arr = [
+                'contextid' => \context_system::instance()->id,
+                'name' => 'S3 bucket',
+                'access_key' => 'access',
+                'secret_key' => 'secret',
+                'endpoint' => 'us-east-1',
+                'region' => 'us-east-1',
+                'bucket_name' => 'testbucket', ];
+        } else {
+            $arr = [
+                'contextid' => \context_system::instance()->id,
+                'name' => 'S3 bucket',
+                'access_key' => 'test',
+                'secret_key' => 'test',
+                'endpoint' => 'http://localhost:4566',
+                'region' => 'hTtp://localhost:4566',
+                'bucket_name' => 'testbucket', ];
+        }
         return array_merge($arr, $record);
     }
 

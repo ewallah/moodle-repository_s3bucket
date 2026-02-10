@@ -73,6 +73,7 @@ jobs:
         run: |
             aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 mb s3://testbucket
             aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testbucket/testfile.jpg
+            aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp moodle/public/lib/tests/fixtures/1.jpg s3://testbucket/glacier.jpg  --storage-class=GLACIER
             aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp moodle/public/course/tests/fixtures/image.jpg s3://testbucket/fakedirectory/image.jpg
             aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp moodle/public/course/tests/fixtures/image.jpg s3://testbucket/testdirectory/testfile.jpg
 
