@@ -22,12 +22,19 @@
  * @author     Renaat Debleu <info@eWallah.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use core\di;
 use core\exception\moodle_exception;
+use core\http_client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
 
 defined('MOODLE_INTERNAL') || die;
 
+// @codeCoverageIgnoreStart
 global $CFG;
 require_once($CFG->dirroot . '/repository/lib.php');
+// @codeCoverageIgnoreEnd
 
 /**
  * This is a repository class used to browse a Amazon S3 bucket.
@@ -427,13 +434,12 @@ class repository_s3bucket extends repository {
      * @return bool True if no localstack installed.
      */
     public static function no_localstack(string $url = 'http://localhost:4566/testbucket/testfile.jpg'): bool {
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        return $code != 200;
+        try {
+            $response = di::get(http_client::class)->send(new Request('HEAD', $url));
+        } catch (GuzzleException $e) {
+            return true;
+        }
+        return $response->getStatusCode() !== 200;
     }
 }
 
