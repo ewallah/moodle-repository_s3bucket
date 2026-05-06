@@ -31,4 +31,4 @@ $plugin->dependencies = ['repository_s3' => ANY_VERSION];
 $plugin->release = 'v5.1.2';
 $plugin->version = 2026012900;
 $plugin->requires = 2025041400;
-$plugin->supported = [500, 501];
+$plugin->supported = [501, 502];
