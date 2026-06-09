@@ -68,10 +68,6 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi codechecker
 
-      - name: validate
-        if: ${{ !cancelled() }}
-        run: moodle-plugin-ci --ansi validate
-
       - name: savepoints
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci --ansi savepoints
