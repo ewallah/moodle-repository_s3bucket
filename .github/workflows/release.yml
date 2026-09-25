@@ -19,7 +19,7 @@ jobs:
   release-at-moodle-org:
     runs-on: ubuntu-latest
     env:
-      PLUGIN: repository_s3bucket
+      PLUGIN: availability_coursecompleted
       CURL: curl -s
       ENDPOINT: https://moodle.org/webservice/rest/server.php
       TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
