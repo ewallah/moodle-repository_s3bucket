@@ -11,9 +11,13 @@ to your S3 root folder, but read and write permissions to your S3 bucket.
 * This plugin is 100% open source and has NOT been tested in Moodle Workplace, Totara, or any other proprietary software system. As long as the latter do not reward plugin developers, you can use this plugin only in 100% open source environments.
 * Encrypted files or buckets are not supported.
 
+## Other compatible storage support
+
+This plugin was tested using localstack.
+
 ## Theme support
 
-This plugin is developed and tested on Moodle Core's Boost theme and Boost child themes, including Moodle Core's Classic theme.
+This plugin is developed and tested on Moodle Core's Boost theme and Boost child themes.
 
 ## Database support
 
