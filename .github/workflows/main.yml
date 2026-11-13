@@ -77,11 +77,11 @@ jobs:
       - name: prepare localstack
         working-directory: moodle
         run: |
-          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 mb s3://testbucket
-          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/testfile.jpg
-          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/glacier.jpg  --storage-class=GLACIER
-          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/fakedirectory/image.jpg
-          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/testdirectory/testfile.jpg
+          lstk aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 mb s3://testbucket
+          lstk aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/testfile.jpg
+          lstk aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/glacier.jpg  --storage-class=GLACIER
+          lstk aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/fakedirectory/image.jpg
+          lstk aws --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/testdirectory/testfile.jpg
 
       - name: phplint
         if: ${{ !cancelled() }}
