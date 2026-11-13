@@ -44,7 +44,7 @@ jobs:
         with:
           path: this-plugin
 
-      - name:
+      - name: aws emulator
         uses: actions/checkout@v7
         uses: xSAVIKx/run-aws-emulator@v1
         run: aws sts get-caller-identity   # "Account": "000000000000"
