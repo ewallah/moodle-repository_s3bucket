@@ -45,10 +45,10 @@ jobs:
           path: this-plugin
 
       - name: localstack
-        uses: LocalStack/setup-localstack@v0.3.2
-        with:
-          image-tag: 'latest'
-          install-awslocal: 'true'
+        run: |
+           npm install -g @localstack/lstk
+           lstk setup aws
+           lstk start
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
@@ -67,6 +67,7 @@ jobs:
            echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
            sudo locale-gen en_AU.UTF-8
            echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
+           npm install -g @localstack/lstk
 
       - name: install Moodle
         run: moodle-plugin-ci --ansi install --db-host=127.0.0.1 --plugin this-plugin
