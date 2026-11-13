@@ -1,0 +1,13 @@
+name: Repository s3bucket
+summary: Give users access to aws buckets only.
+description: |
+  Instead of giving all users access to your complete S3 account, this plugin makes it possible to give teachers and managers access to a specific S3 folder (bucket).
+
+  Multiple instances are supported, you only have to create a IAM user who has read access to your S3 root folder, but read and write permissions to your S3 bucket.
+labels:
+  - fully-free
+category: repository
+links:
+  docs: https://github.com/ewallah/moodle-repository_s3bucket/README.md
+  issues: https://github.com/ewallah/moodle-repository_s3bucket/issues
+

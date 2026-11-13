@@ -13,7 +13,7 @@ to your S3 root folder, but read and write permissions to your S3 bucket.
 
 ## Other compatible storage support
 
-This plugin was tested using localstack.
+This plugin was tested using localstack and AWS.
 
 ## Theme support
 
