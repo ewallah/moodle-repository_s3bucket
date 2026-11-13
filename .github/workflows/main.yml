@@ -44,6 +44,14 @@ jobs:
         with:
           path: this-plugin
 
+      - name: localstack
+        uses: LocalStack/setup-localstack@v0.3.2
+        with:
+          image-tag: 'latest'
+          install-awslocal: 'true'
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+
       - name: setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -60,12 +68,20 @@ jobs:
            sudo locale-gen en_AU.UTF-8
            echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
-
       - name: install Moodle
         run: moodle-plugin-ci --ansi install --db-host=127.0.0.1 --plugin this-plugin
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: prepare localstack
+        working-directory: moodle
+        run: |
+          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 mb s3://testbucket
+          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/testfile.jpg
+          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp lib/tests/fixtures/1.jpg s3://testbucket/glacier.jpg  --storage-class=GLACIER
+          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/fakedirectory/image.jpg
+          awslocal --endpoint-url http://localhost:4566 --no-verify-ssl s3 cp course/tests/fixtures/image.jpg s3://testbucket/testdirectory/testfile.jpg
 
       - name: phplint
         if: ${{ !cancelled() }}
